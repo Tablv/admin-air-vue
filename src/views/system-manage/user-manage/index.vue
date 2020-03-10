@@ -142,16 +142,10 @@ export default {
     },
     // 翻页
     pageSizeChangeHandle(val) {
-      console.log(`每页 ${val} 条`)
-      const that = this
-      that.pagination.page_size = val
-      that.getTableData(this.pagination.current_page, val)
+      this.getTableData(this.pagination.current_page, val)
     },
     pageChangeHandle(val) {
-      console.log(`当前页: ${val}`)
-      const that = this
-      that.pagination.current_page = val
-      that.getTableData(val, this.pagination.page_size)
+      this.getTableData(val, this.pagination.page_size)
     },
     // 新增按钮事件
     createBtnHandle() {
@@ -188,7 +182,7 @@ export default {
           this.$refs[formName].resetFields()
           this.formDialogVisible = false
         } else {
-          console.log('error submit!!')
+          console.error('error submit!!')
           return false
         }
       })
