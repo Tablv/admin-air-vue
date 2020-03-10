@@ -60,7 +60,7 @@ export default {
     Hamburger,
     ErrorLog,
     Screenfull,
-    SizeSelect,
+    SizeSelect
     // Search
   },
   computed: {
