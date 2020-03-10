@@ -7,7 +7,7 @@ Vue.use(Router)
 import Layout from '@/layout'
 
 /* Router Modules */
-// import tableRouter from './modules/table'
+import SystemManageRouter from './modules/SystemManage'
 // import nestedRouter from './modules/nested'
 
 /**
@@ -171,7 +171,7 @@ export const asyncRoutes = [
 
   /** when your routing map is too long, you can split it into small modules **/
   // nestedRouter,
-  // tableRouter,
+  SystemManageRouter,
 
   // {
   //   path: '/example',
