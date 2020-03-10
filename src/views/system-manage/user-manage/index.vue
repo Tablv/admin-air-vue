@@ -1,9 +1,9 @@
 <template>
   <div class="user-manage">
     <div class="top">
-      <div class="left title">{{ title }}</div>
+      <div class="left title">{{ topTitle }}</div>
       <div class="right">
-        <el-button type="primary" icon="el-icon-plus" @click="handleBtnClick">新增</el-button>
+        <el-button type="primary" icon="el-icon-plus" @click="createBtnHandle">新增</el-button>
       </div>
     </div>
     <div class="content">
@@ -13,13 +13,13 @@
         <el-table-column prop="state" label="状态" width />
         <el-table-column prop="operation" label="操作" width>
           <template slot-scope="scope">
-            <el-button type="text" @click="handleEdit(scope.$index, scope.row)">
+            <el-button type="text" @click="editBtnHandle(scope.$index, scope.row)">
               <i class="el-icon-edit" />
             </el-button>
-            <el-button type="text" @click.native.prevent="deleteRow(scope.$index, tableData)">
+            <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
               <i class="el-icon-delete" />
             </el-button>
-            <el-button type="text" @click.native.prevent="deleteRow(scope.$index, tableData)">
+            <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
               <svg-icon icon-class="modifyPassword" />
             </el-button>
           </template>
@@ -34,34 +34,34 @@
         :page-size="pagination.page_size"
         layout="total, sizes, prev, pager, next, jumper"
         :total="pagination.total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
+        @size-change="pageSizeChangeHandle"
+        @current-change="pageChangeHandle"
       />
     </div>
     <!-- 弹窗 -->
-    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+    <el-dialog :title="(isEdit ? '修改' : '新增') + '用户基础信息'" :visible.sync="formDialogVisible">
       <el-form
-        ref="ruleForm"
-        :model="ruleForm"
+        ref="mainForm"
+        :model="formData"
         :rules="rules"
         label-width="100px"
-        class="demo-ruleForm"
+        class="demo-formData"
       >
         <el-form-item label="姓名：" prop="Name">
-          <el-input v-model="ruleForm.Name" />
+          <el-input v-model="formData.Name" />
         </el-form-item>
         <el-form-item label="用户名：" prop="UserName">
-          <el-input v-model="ruleForm.UserName" />
+          <el-input v-model="formData.UserName" />
         </el-form-item>
         <el-form-item label="角色：" prop="state">
-          <el-input v-model="ruleForm.state" />
+          <el-input v-model="formData.state" />
         </el-form-item>
         <el-form-item label="备注：">
-          <el-input v-model="ruleForm.desc" type="textarea" :rows="5" />
+          <el-input v-model="formData.desc" type="textarea" :rows="5" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm('ruleForm')">保存</el-button>
-          <el-button @click="resetForm('ruleForm')">重置</el-button>
+          <el-button type="primary" @click="submitForm('formData')">保 存</el-button>
+          <el-button @click="cancelForm">取 消</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -70,24 +70,16 @@
 
 <script>
 import _ from 'lodash'
-function resetForm() {
-  return {
-    Name: '',
-    UserName: '',
-    state: '',
-    desc: ''
-  }
-}
 export default {
   name: 'Index',
   components: {},
   data() {
     return {
-      dialogFormVisible: false, // 弹窗
-      title: '新增数据表单',
+      topTitle: "用户管理",
+      isEdit: false,
+      formDialogVisible: false, // 弹窗
       disabled: false,
-      resetFlag: false,
-      ruleForm: resetForm(),
+      formData: this.getInitForm(),
       rules: {
         Name: [
           { required: true, message: '请输入姓名', trigger: 'blur' }
@@ -139,29 +131,42 @@ export default {
   },
   created() {},
   methods: {
+    // 初始化表单数据
+    getInitForm() {
+      return {
+        Name: '',
+        UserName: '',
+        state: '',
+        desc: ''
+      }
+    },
     // 翻页
-    handleSizeChange(val) {
+    pageSizeChangeHandle(val) {
       console.log(`每页 ${val} 条`)
       const that = this
       that.pagination.page_size = val
       that.getTableData(this.pagination.current_page, val)
     },
-    handleCurrentChange(val) {
+    pageChangeHandle(val) {
       console.log(`当前页: ${val}`)
       const that = this
       that.pagination.current_page = val
       that.getTableData(val, this.pagination.page_size)
     },
-    // 修改
-    handleEdit(index, row) {
-      this.dialogFormVisible = true
-      this.ruleForm = _.cloneDeep(row)
-      this.title = '修改'
-      // this.disabled = false;
-      // this.resetFlag = true;
+    // 新增按钮事件
+    createBtnHandle() {
+      this.formDialogVisible = true
+      this.disabled = false
+      this.resetFlag && this.$refs['formData'].resetFields()
     },
-    // 删除
-    deleteRow(index, rows) {
+    // 修改按钮事件
+    editBtnHandle(index, row) {
+      this.formDialogVisible = true
+      this.formData = _.cloneDeep(row)
+      // this.disabled = false;
+    },
+    // 删除按钮事件
+    delBtnHandle(index, rows) {
       this.$confirm('此操作将永久删除该条信息, 是否继续?', '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -170,33 +175,28 @@ export default {
         rows.splice(index, 1)
       })
     },
-    // 修改密码
-    password(index, rows) {},
-    // 新增
-    handleBtnClick() {
-      this.dialogFormVisible = true
-      this.title = '新增用户基础信息'
-      this.disabled = false
-      this.resetFlag && this.$refs['ruleForm'].resetFields()
-    },
+    // 修改密码按钮事件
+    pwdBtnHandle(index, rows) {},
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
           this.tableData.unshift({
-            Name: this.ruleForm.Name,
-            UserName: this.ruleForm.UserName,
-            state: this.ruleForm.state
+            Name: this.formData.Name,
+            UserName: this.formData.UserName,
+            state: this.formData.state
           })
           this.$refs[formName].resetFields()
-          this.dialogFormVisible = false
+          this.formDialogVisible = false
         } else {
           console.log('error submit!!')
           return false
         }
       })
     },
-    resetForm(formName) {
-      this.$refs[formName].resetFields()
+    cancelForm() {
+      this.formData = this.getInitForm();
+      this.$refs['mainForm']?.resetFields();
+      this.formDialogVisible = false;
     }
   }
 }
@@ -204,11 +204,11 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
-  .el-table--medium th,
-  .el-table--medium td {
+  .el-table th,
+  .el-table td {
     padding: 5px 0px;
   }
-  .el-form-item--medium .el-form-item__label {
+  .el-form-item__label {
     font-weight: normal;
   }
   .el-icon-edit,
