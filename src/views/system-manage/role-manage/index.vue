@@ -1,5 +1,5 @@
 <template>
-  <div class="user-manage">
+  <div class="role-manage">
     <div class="top">
       <div class="left title">{{ topTitle }}</div>
       <div class="right">
@@ -81,7 +81,7 @@ export default {
   components: {},
   data() {
     return {
-      topTitle: "角色管理",
+      topTitle: "用户管理",
       isEdit: false,
       formDialogVisible: false, // 主要弹窗
       pwdDialogVisible: false, // 修改密码弹窗下标
@@ -242,7 +242,7 @@ export default {
 .clear {
   clear: both;
 }
-.user-manage {
+.role-manage {
   padding: 30px;
   .top {
     overflow: hidden;

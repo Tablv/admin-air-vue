@@ -23,6 +23,12 @@ const tableRouter = {
       component: () => import('@/views/system-manage/menu-manage/index'),
       name: 'menuManage',
       meta: { title: '菜单管理', icon: 'table' }
+    },
+    {
+      path: 'roleManage',
+      component: () => import('@/views/system-manage/role-manage/index'),
+      name: 'roleManage',
+      meta: { title: '角色管理', icon: 'table' }
     }
   ]
 }
