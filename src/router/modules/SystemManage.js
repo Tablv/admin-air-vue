@@ -16,19 +16,19 @@ const tableRouter = {
       path: 'userManage',
       component: () => import('@/views/system-manage/user-manage/index'),
       name: 'userManage',
-      meta: { title: '用户管理', icon: 'table' }
+      meta: { title: '用户管理', icon: 'user-manage' }
     },
     {
       path: 'menuManage',
       component: () => import('@/views/system-manage/menu-manage/index'),
       name: 'menuManage',
-      meta: { title: '菜单管理', icon: 'table' }
+      meta: { title: '菜单管理', icon: 'menu-manage' }
     },
     {
       path: 'roleManage',
       component: () => import('@/views/system-manage/role-manage/index'),
       name: 'roleManage',
-      meta: { title: '角色管理', icon: 'table' }
+      meta: { title: '角色管理', icon: 'role-manage' }
     }
   ]
 }

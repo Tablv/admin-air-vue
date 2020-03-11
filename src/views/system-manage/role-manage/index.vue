@@ -1,5 +1,5 @@
 <template>
-  <div class="role-manage">
+  <div class="user-manage">
     <div class="top">
       <div class="left title">{{ topTitle }}</div>
       <div class="right">
@@ -8,20 +8,40 @@
     </div>
     <div class="content">
       <el-table :data="tableData" border style="width: 100%;">
-        <el-table-column prop="name" label="姓名" width />
-        <el-table-column prop="UserName" label="用户名" width />
-        <el-table-column prop="state" label="状态" width />
+        <el-table-column prop="designation" label="名称" width />
+        <el-table-column prop="userName" label="编码" width />
+        <el-table-column label="状态">
+          <template slot-scope="scope">
+            <el-switch
+              v-model="scope.row.status"
+              active-color="#ff4949"
+              inactive-color="#13ce66"
+              active-text="关闭"
+              inactive-text="启用"
+              active-value="0"
+              inactive-value="1"
+              @change="active_text($event, scope.row)"
+            ></el-switch>
+          </template>
+        </el-table-column>
+        <el-table-column prop="desc" label="备注" width />
         <el-table-column prop="operation" label="操作" width>
           <template slot-scope="scope">
-            <el-button type="text" @click="editBtnHandle(scope.$index, scope.row)">
-              <i class="el-icon-edit" />
-            </el-button>
-            <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
-              <i class="el-icon-delete" />
-            </el-button>
-            <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
-              <svg-icon icon-class="modifyPassword" />
-            </el-button>
+            <el-tooltip class="item" effect="dark" content="编辑" placement="top">
+              <el-button type="text" @click="editBtnHandle(scope.$index, scope.row)">
+                <i class="el-icon-edit" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="删除" placement="top">
+              <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
+                <i class="el-icon-delete" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="修改密码" placement="top">
+              <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
+                <svg-icon icon-class="modifyPassword" />
+              </el-button>
+            </el-tooltip>
           </template>
         </el-table-column>
       </el-table>
@@ -41,14 +61,26 @@
     <!-- 主要弹窗 -->
     <el-dialog :title="(isEdit ? '修改' : '新增') + '用户基础信息'" :visible.sync="formDialogVisible">
       <el-form ref="mainForm" :model="formData" :rules="rules" label-width="100px" class="formData">
-        <el-form-item label="姓名：" prop="name">
-          <el-input v-model="formData.name" />
+        <el-form-item label="姓名：" prop="designation">
+          <el-input v-model="formData.designation" />
         </el-form-item>
-        <el-form-item label="用户名：" prop="UserName">
-          <el-input v-model="formData.UserName" />
+        <el-form-item label="用户名：" prop="userName">
+          <el-input v-model="formData.userName" />
         </el-form-item>
-        <el-form-item label="角色：" prop="state">
-          <el-input v-model="formData.state" />
+        <el-form-item label="角色：" prop="role">
+          <el-input v-model="formData.role" />
+        </el-form-item>
+        <el-form-item label="状态：">
+          <el-switch
+            v-model="formData.status"
+            active-color="#ff4949"
+            inactive-color="#13ce66"
+            active-text="关闭"
+            inactive-text="启用"
+            active-value="0"
+            inactive-value="1"
+            @change="active_text($event, formData)"
+          ></el-switch>
         </el-form-item>
         <el-form-item label="备注：">
           <el-input v-model="formData.desc" type="textarea" :rows="5" />
@@ -59,18 +91,8 @@
         </el-form-item>
       </el-form>
     </el-dialog>
-    <!-- 修改密码弹窗 -->
-    <el-dialog title="修改密码" :visible.sync="pwdDialogVisible">
-      <el-form ref="pwdForm" :model="pwdData" label-width="100px" class="pwdData">
-        <el-form-item label="新密码：" prop="pwd">
-          <el-input v-model="pwdData" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="submitPwd">保 存</el-button>
-          <el-button @click="cancelPwd">取 消</el-button>
-        </el-form-item>
-      </el-form>
-    </el-dialog>
+    <!-- 设置菜单弹窗 -->
+    <el-dialog title="设置角色菜单" :visible.sync="setMenuDialogVisible"></el-dialog>
   </div>
 </template>
 
@@ -81,52 +103,57 @@ export default {
   components: {},
   data() {
     return {
-      topTitle: "用户管理",
+      topTitle: "角色管理", // 主要弹窗title
       isEdit: false,
       formDialogVisible: false, // 主要弹窗
-      pwdDialogVisible: false, // 修改密码弹窗下标
+      setMenuDialogVisible: false, // 设置菜单弹窗
       disabled: false,
       formData: this.getInitForm(),
       pwdData: "",
       rules: {
-        name: [
+        designation: [
           { required: true, message: "请输入姓名", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ],
-        UserName: [
+        userName: [
           { required: true, message: "请输入用户名", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ],
-        state: [
+        role: [
           { required: true, message: "请输入角色", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
       },
       tableData: [
         {
-          name: "张三",
-          UserName: "admin",
-          state: "启用"
+          designation: "张三",
+          userName: "admin",
+          status: "1",
+          desc: "备注备注"
         },
         {
-          name: "张三",
-          UserName: "admin",
-          state: "启用"
+          designation: "张三",
+          userName: "admin",
+          status: "1",
+          desc: "备注备注"
         },
         {
-          name: "张三",
-          UserName: "admin",
-          state: "启用"
+          designation: "张三",
+          userName: "admin",
+          status: "0",
+          desc: "备注备注"
         },
         {
-          name: "张三",
-          UserName: "admin",
-          state: "启用"
+          designation: "张三",
+          userName: "admin",
+          status: "0",
+          desc: "备注备注"
         },
         {
-          name: "张三",
-          UserName: "admin",
-          state: "启用"
+          designation: "张三",
+          userName: "admin",
+          status: "1",
+          desc: "备注备注"
         }
       ],
       pagination: {
@@ -143,8 +170,9 @@ export default {
     getInitForm() {
       return {
         name: "",
-        UserName: "",
-        state: "",
+        userName: "",
+        role: "",
+        status: "",
         desc: ""
       };
     },
@@ -155,9 +183,14 @@ export default {
     pageChangeHandle(val) {
       this.getTableData(val, this.pagination.page_size);
     },
+    // Table 状态开启和关闭
+    active_text(value, row) {
+      console.log(value, row);
+    },
     // 新增按钮事件
     createBtnHandle() {
       this.formDialogVisible = true;
+      this.isEdit = false;
       this.disabled = false;
       this.resetFlag && this.$refs["formData"].resetFields();
     },
@@ -165,6 +198,7 @@ export default {
     editBtnHandle(index, row) {
       this.formDialogVisible = true;
       this.formData = _.cloneDeep(row);
+      this.isEdit = true;
       // this.disabled = false;
     },
     // 删除按钮事件
@@ -177,19 +211,16 @@ export default {
         rows.splice(index, 1);
       });
     },
-    // 修改密码按钮事件
-    pwdBtnHandle(index, rows) {
-      this.pwdDialogVisible = true;
-    },
-    submitForm(formName) {
-      this.$refs[formName].validate(valid => {
+    submitForm(mainForm) {
+      this.$refs.mainForm.validate(valid => {
         if (valid) {
           this.tableData.unshift({
-            name: this.formData.name,
-            UserName: this.formData.UserName,
-            state: this.formData.state
+            designation: this.formData.designation,
+            userName: this.formData.userName,
+            role: this.formData.role,
+            status: this.formData.status
           });
-          this.$refs[formName].resetFields();
+          this.$refs.mainForm.resetFields();
           this.formDialogVisible = false;
         } else {
           console.error("error submit!!");
@@ -203,12 +234,19 @@ export default {
       this.formDialogVisible = false;
     },
 
-    //
+    // 修改密码按钮事件
+    pwdBtnHandle(index, rows) {
+      this.setMenuDialogVisible = true;
+    },
+    //  修改密码保存按钮
     submitPwd() {
       this.pwdData = "";
+      this.setMenuDialogVisible = false;
     },
+    //  修改密码取消按钮
     cancelPwd() {
       this.pwdData = "";
+      this.setMenuDialogVisible = false;
     }
   }
 };
@@ -216,17 +254,31 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  .el-dialog__body {
+    padding-top: 10px;
+    padding-bottom: 10px;
+  }
   .el-table th,
   .el-table td {
-    padding: 5px 0px;
+    padding: 0px 0px;
+  }
+  .el-table th.is-leaf {
+    padding: 10px 0px;
+  }
+  .el-table .cell {
+    line-height: 20px;
   }
   .el-form-item__label {
     font-weight: normal;
   }
   .el-icon-edit,
-  .el-icon-delete,
+  .el-icon-delete {
+    font-size: 19px;
+  }
   .svg-icon {
-    font-size: 18px;
+    font-size: 13px;
+    position: relative;
+    top: -2px;
   }
 }
 .y-pagination {
@@ -242,13 +294,14 @@ export default {
 .clear {
   clear: both;
 }
-.role-manage {
+.user-manage {
   padding: 30px;
   .top {
     overflow: hidden;
     margin-bottom: 20px;
     .title {
       line-height: 36px;
+      font-size: 18px;
     }
   }
   .content {
