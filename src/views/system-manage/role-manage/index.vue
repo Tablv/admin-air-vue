@@ -37,9 +37,20 @@
                 <i class="el-icon-delete" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="修改密码" placement="top">
-              <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
-                <svg-icon icon-class="modifyPassword" />
+            <el-tooltip class="item" effect="dark" content="设置菜单" placement="top">
+              <el-button
+                type="text"
+                @click.native.prevent="setMenuBtnHandle(scope.$index, tableData)"
+              >
+                <svg-icon icon-class="set-menu" />
+              </el-button>
+            </el-tooltip>
+            <el-tooltip class="item" effect="dark" content="分配人员" placement="top">
+              <el-button
+                type="text"
+                @click.native.prevent="assignBtnHandle(scope.$index, tableData)"
+              >
+                <svg-icon icon-class="allot-per" />
               </el-button>
             </el-tooltip>
           </template>
@@ -92,7 +103,32 @@
       </el-form>
     </el-dialog>
     <!-- 设置菜单弹窗 -->
-    <el-dialog title="设置角色菜单" :visible.sync="setMenuDialogVisible"></el-dialog>
+    <el-dialog title="设置角色菜单" :visible.sync="setMenuDialogVisible" class="setMenuDialog">
+      <el-scrollbar class="page-component__scroll">
+        <el-tree
+          :data="setMenuData"
+          show-checkbox
+          node-key="id"
+          :default-expanded-keys="[1, 2, 3]"
+          :default-checked-keys="[5]"
+          :props="defaultProps"
+        ></el-tree>
+      </el-scrollbar>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitPwd">保 存</el-button>
+        <el-button @click="cancelPwd">取 消</el-button>
+      </span>
+    </el-dialog>
+    <!-- 分配人员弹窗 -->
+    <el-dialog title="分配人员设置" :visible.sync="assignDialogVisible" class="setMenuDialog">
+      <el-scrollbar class="page-component__scroll">
+        <el-transfer v-model="value" :data="data"></el-transfer>
+      </el-scrollbar>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitAssign">保 存</el-button>
+        <el-button @click="cancelAssign">取 消</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -102,11 +138,23 @@ export default {
   name: "Index",
   components: {},
   data() {
+    const generateData = _ => {
+      const data = [];
+      for (let i = 1; i <= 15; i++) {
+        data.push({
+          key: i,
+          label: `备选项 ${i}`,
+          disabled: i % 4 === 0
+        });
+      }
+      return data;
+    };
     return {
       topTitle: "角色管理", // 主要弹窗title
       isEdit: false,
       formDialogVisible: false, // 主要弹窗
       setMenuDialogVisible: false, // 设置菜单弹窗
+      assignDialogVisible: false, // 分配人员弹窗
       disabled: false,
       formData: this.getInitForm(),
       pwdData: "",
@@ -161,7 +209,65 @@ export default {
         page_size: 10,
         current_page: 1,
         page_sizes: [10, 20, 30, 50]
-      }
+      },
+      // 分配菜单弹窗内容
+      setMenuData: [
+        {
+          id: 1,
+          label: "一级 1",
+          children: [
+            {
+              id: 4,
+              label: "二级 1-1",
+              children: [
+                {
+                  id: 9,
+                  label: "三级 1-1-1"
+                },
+                {
+                  id: 10,
+                  label: "三级 1-1-2"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          id: 2,
+          label: "一级 2",
+          children: [
+            {
+              id: 5,
+              label: "二级 2-1"
+            },
+            {
+              id: 6,
+              label: "二级 2-2"
+            }
+          ]
+        },
+        {
+          id: 3,
+          label: "一级 3",
+          children: [
+            {
+              id: 7,
+              label: "二级 3-1"
+            },
+            {
+              id: 8,
+              label: "二级 3-2"
+            }
+          ]
+        }
+      ],
+      defaultProps: {
+        children: "children",
+        label: "label"
+      },
+      // 分配人员
+      data: generateData(),
+      value: [1, 4]
     };
   },
   created() {},
@@ -218,7 +324,8 @@ export default {
             designation: this.formData.designation,
             userName: this.formData.userName,
             role: this.formData.role,
-            status: this.formData.status
+            status: this.formData.status,
+            desc: this.formData.desc
           });
           this.$refs.mainForm.resetFields();
           this.formDialogVisible = false;
@@ -234,19 +341,33 @@ export default {
       this.formDialogVisible = false;
     },
 
-    // 修改密码按钮事件
-    pwdBtnHandle(index, rows) {
+    // 设置菜单按钮事件
+    setMenuBtnHandle(index, rows) {
       this.setMenuDialogVisible = true;
     },
-    //  修改密码保存按钮
+    //  设置菜单保存按钮
     submitPwd() {
       this.pwdData = "";
       this.setMenuDialogVisible = false;
     },
-    //  修改密码取消按钮
+    //  设置菜单取消按钮
     cancelPwd() {
       this.pwdData = "";
       this.setMenuDialogVisible = false;
+    },
+    // 设置菜单按钮事件
+    assignBtnHandle(index, rows) {
+      this.assignDialogVisible = true;
+    },
+    //  设置菜单保存按钮
+    submitAssign() {
+      this.pwdData = "";
+      this.assignDialogVisible = false;
+    },
+    //  设置菜单取消按钮
+    cancelAssign() {
+      this.pwdData = "";
+      this.assignDialogVisible = false;
     }
   }
 };
@@ -254,6 +375,23 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  .setMenuDialog .el-dialog {
+    .el-dialog__body {
+      height: 60vh;
+    }
+    .el-dialog__footer {
+      position: relative;
+      right: 20px;
+      bottom: 0px;
+    }
+  }
+  .page-component__scroll {
+    height: 100%;
+  }
+  .page-component__scroll .el-scrollbar__wrap {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
   .el-dialog__body {
     padding-top: 10px;
     padding-bottom: 10px;
@@ -279,6 +417,20 @@ export default {
     font-size: 13px;
     position: relative;
     top: -2px;
+  }
+  // 穿梭框样式
+  .el-transfer-panel {
+    width: 41.2%;
+    height: 100%;
+  }
+  .el-transfer-panel__body,
+  .el-transfer {
+    height: 100%;
+  }
+  .el-transfer-panel__list {
+    // height: 100%;
+    height: 50vh;
+    overflow-y: auto;
   }
 }
 .y-pagination {
