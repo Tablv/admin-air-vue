@@ -7,7 +7,14 @@
       </div>
     </div>
     <div class="content">
-      <el-table :data="tableData" border style="width: 100%;">
+      <el-table
+        v-loading="loading"
+        element-loading-text="拼命加载中"
+        element-loading-spinner="el-icon-loading"
+        :data="tableData"
+        border
+        style="width: 100%;"
+      >
         <el-table-column prop="name" label="姓名" width />
         <el-table-column prop="userName" label="用户名" width />
         <!-- <el-table-column prop="state" label="状态" width /> -->
@@ -17,8 +24,6 @@
               v-model="scope.row.status"
               active-color="#ff4949"
               inactive-color="#13ce66"
-              active-text="关闭"
-              inactive-text="启用"
               active-value="0"
               inactive-value="1"
               @change="active_text($event, scope.row)"
@@ -27,17 +32,17 @@
         </el-table-column>
         <el-table-column prop="operation" label="操作" width>
           <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" content="编辑" placement="top">
+            <el-tooltip class="item" effect="light" content="编辑" placement="top">
               <el-button type="text" @click="editBtnHandle(scope.$index, scope.row)">
                 <i class="el-icon-edit" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="删除" placement="top">
+            <el-tooltip class="item" effect="light" content="删除" placement="top">
               <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
                 <i class="el-icon-delete" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="修改密码" placement="top">
+            <el-tooltip class="item" effect="light" content="修改密码" placement="top">
               <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
                 <svg-icon icon-class="modifyPassword" />
               </el-button>
@@ -59,7 +64,11 @@
       />
     </div>
     <!-- 主要弹窗 -->
-    <el-dialog :title="(isEdit ? '修改' : '新增') + '用户基础信息'" :visible.sync="formDialogVisible">
+    <el-dialog
+      :title="(isEdit ? '修改' : '新增') + '用户基础信息'"
+      :visible.sync="formDialogVisible"
+      class="formDialog"
+    >
       <el-form ref="mainForm" :model="formData" :rules="rules" label-width="100px" class="formData">
         <el-form-item label="姓名：" prop="name">
           <el-input v-model="formData.name" />
@@ -68,15 +77,21 @@
           <el-input v-model="formData.userName" />
         </el-form-item>
         <el-form-item label="角色：" prop="role">
-          <el-input v-model="formData.role" />
+          <!-- <el-input v-model="formData.role" /> -->
+          <el-select v-model="formData.role" placeholder="请选择">
+            <el-option
+              v-for="item in role"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            ></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="状态：">
           <el-switch
             v-model="formData.status"
             active-color="#ff4949"
             inactive-color="#13ce66"
-            active-text="关闭"
-            inactive-text="启用"
             active-value="0"
             inactive-value="1"
             @change="active_text($event, formData)"
@@ -161,12 +176,27 @@ export default {
           status: "1"
         }
       ],
+      loading: false,
       pagination: {
         total: 0,
         page_size: 10,
         current_page: 1,
         page_sizes: [10, 20, 30, 50]
-      }
+      },
+      role: [
+        {
+          value: "1",
+          label: "管理员1"
+        },
+        {
+          value: "2",
+          label: "管理员2"
+        },
+        {
+          value: "3",
+          label: "管理员3"
+        }
+      ]
     };
   },
   created() {},
@@ -176,7 +206,7 @@ export default {
       return {
         name: "",
         userName: "",
-        role: "",
+        role: [],
         status: "",
         desc: ""
       };
@@ -259,9 +289,12 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  .el-dialog {
+    width: 35%;
+  }
   .el-dialog__body {
     padding-top: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
   }
   .el-table th,
   .el-table td {
@@ -284,6 +317,9 @@ export default {
     font-size: 13px;
     position: relative;
     top: -2px;
+  }
+  .el-dialog__body {
+    padding-right: 50px;
   }
 }
 .y-pagination {

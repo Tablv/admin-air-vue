@@ -9,15 +9,13 @@
     <div class="content">
       <el-table :data="tableData" border style="width: 100%;">
         <el-table-column prop="designation" label="名称" width />
-        <el-table-column prop="userName" label="编码" width />
+        <el-table-column prop="serialNumber" label="编码" width />
         <el-table-column label="状态">
           <template slot-scope="scope">
             <el-switch
               v-model="scope.row.status"
               active-color="#ff4949"
               inactive-color="#13ce66"
-              active-text="关闭"
-              inactive-text="启用"
               active-value="0"
               inactive-value="1"
               @change="active_text($event, scope.row)"
@@ -27,17 +25,17 @@
         <el-table-column prop="desc" label="备注" width />
         <el-table-column prop="operation" label="操作" width>
           <template slot-scope="scope">
-            <el-tooltip class="item" effect="dark" content="编辑" placement="top">
+            <el-tooltip class="item" effect="light" content="编辑" placement="top">
               <el-button type="text" @click="editBtnHandle(scope.$index, scope.row)">
                 <i class="el-icon-edit" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="删除" placement="top">
+            <el-tooltip class="item" effect="light" content="删除" placement="top">
               <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
                 <i class="el-icon-delete" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="设置菜单" placement="top">
+            <el-tooltip class="item" effect="light" content="设置菜单" placement="top">
               <el-button
                 type="text"
                 @click.native.prevent="setMenuBtnHandle(scope.$index, tableData)"
@@ -45,7 +43,7 @@
                 <svg-icon icon-class="set-menu" />
               </el-button>
             </el-tooltip>
-            <el-tooltip class="item" effect="dark" content="分配人员" placement="top">
+            <el-tooltip class="item" effect="light" content="分配人员" placement="top">
               <el-button
                 type="text"
                 @click.native.prevent="assignBtnHandle(scope.$index, tableData)"
@@ -70,28 +68,17 @@
       />
     </div>
     <!-- 主要弹窗 -->
-    <el-dialog :title="(isEdit ? '修改' : '新增') + '用户基础信息'" :visible.sync="formDialogVisible">
+    <el-dialog
+      :title="(isEdit ? '修改' : '新增') + '角色基础信息'"
+      :visible.sync="formDialogVisible"
+      class="formDialog"
+    >
       <el-form ref="mainForm" :model="formData" :rules="rules" label-width="100px" class="formData">
-        <el-form-item label="姓名：" prop="designation">
+        <el-form-item label="名称：" prop="designation">
           <el-input v-model="formData.designation" />
         </el-form-item>
-        <el-form-item label="用户名：" prop="userName">
-          <el-input v-model="formData.userName" />
-        </el-form-item>
-        <el-form-item label="角色：" prop="role">
-          <el-input v-model="formData.role" />
-        </el-form-item>
-        <el-form-item label="状态：">
-          <el-switch
-            v-model="formData.status"
-            active-color="#ff4949"
-            inactive-color="#13ce66"
-            active-text="关闭"
-            inactive-text="启用"
-            active-value="0"
-            inactive-value="1"
-            @change="active_text($event, formData)"
-          ></el-switch>
+        <el-form-item label="编码：" prop="serialNumber">
+          <el-input v-model="formData.serialNumber" />
         </el-form-item>
         <el-form-item label="备注：">
           <el-input v-model="formData.desc" type="textarea" :rows="5" />
@@ -120,9 +107,16 @@
       </span>
     </el-dialog>
     <!-- 分配人员弹窗 -->
-    <el-dialog title="分配人员设置" :visible.sync="assignDialogVisible" class="setMenuDialog">
+    <el-dialog title="分配人员设置" :visible.sync="assignDialogVisible" class="assignDialog">
       <el-scrollbar class="page-component__scroll">
-        <el-transfer v-model="value" :data="data"></el-transfer>
+        <!-- <el-transfer v-model="value" :data="data"></el-transfer> -->
+        <el-transfer
+          filterable
+          :filter-method="filterMethod"
+          filter-placeholder="请输入城市拼音"
+          v-model="value"
+          :data="data"
+        ></el-transfer>
       </el-scrollbar>
       <span slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitAssign">保 存</el-button>
@@ -140,16 +134,31 @@ export default {
   data() {
     const generateData = _ => {
       const data = [];
-      for (let i = 1; i <= 15; i++) {
+      const cities = ["上海", "北京", "广州", "深圳", "南京", "西安", "成都"];
+      const pinyin = [
+        "shanghai",
+        "beijing",
+        "guangzhou",
+        "shenzhen",
+        "nanjing",
+        "xian",
+        "chengdu"
+      ];
+      cities.forEach((city, index) => {
         data.push({
-          key: i,
-          label: `备选项 ${i}`,
-          disabled: i % 4 === 0
+          label: city,
+          key: index,
+          pinyin: pinyin[index]
         });
-      }
+      });
       return data;
     };
     return {
+      data: generateData(),
+      value: [],
+      filterMethod(query, item) {
+        return item.pinyin.indexOf(query) > -1;
+      },
       topTitle: "角色管理", // 主要弹窗title
       isEdit: false,
       formDialogVisible: false, // 主要弹窗
@@ -163,43 +172,39 @@ export default {
           { required: true, message: "请输入姓名", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ],
-        userName: [
+        serialNumber: [
           { required: true, message: "请输入用户名", trigger: "blur" }
-          // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
-        ],
-        role: [
-          { required: true, message: "请输入角色", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
       },
       tableData: [
         {
           designation: "张三",
-          userName: "admin",
+          serialNumber: "11233",
           status: "1",
           desc: "备注备注"
         },
         {
           designation: "张三",
-          userName: "admin",
+          serialNumber: "11233",
           status: "1",
           desc: "备注备注"
         },
         {
           designation: "张三",
-          userName: "admin",
+          serialNumber: "11233",
           status: "0",
           desc: "备注备注"
         },
         {
           designation: "张三",
-          userName: "admin",
+          serialNumber: "11233",
           status: "0",
           desc: "备注备注"
         },
         {
           designation: "张三",
-          userName: "admin",
+          serialNumber: "11233",
           status: "1",
           desc: "备注备注"
         }
@@ -272,13 +277,12 @@ export default {
   },
   created() {},
   methods: {
+    // 穿梭框搜索
     // 初始化表单数据
     getInitForm() {
       return {
         name: "",
         userName: "",
-        role: "",
-        status: "",
         desc: ""
       };
     },
@@ -295,6 +299,7 @@ export default {
     },
     // 新增按钮事件
     createBtnHandle() {
+      this.formData = this.getInitForm();
       this.formDialogVisible = true;
       this.isEdit = false;
       this.disabled = false;
@@ -315,6 +320,11 @@ export default {
         type: "warning"
       }).then(() => {
         rows.splice(index, 1);
+        this.$message({
+          message: "恭喜你，这是一条成功消息",
+          type: "success",
+          duration: 2000
+        });
       });
     },
     submitForm(mainForm) {
@@ -323,8 +333,6 @@ export default {
           this.tableData.unshift({
             designation: this.formData.designation,
             userName: this.formData.userName,
-            role: this.formData.role,
-            status: this.formData.status,
             desc: this.formData.desc
           });
           this.$refs.mainForm.resetFields();
@@ -347,6 +355,11 @@ export default {
     },
     //  设置菜单保存按钮
     submitPwd() {
+      this.$message({
+        message: "恭喜你，这是一条成功消息",
+        type: "success",
+        duration: 2000
+      });
       this.pwdData = "";
       this.setMenuDialogVisible = false;
     },
@@ -355,16 +368,16 @@ export default {
       this.pwdData = "";
       this.setMenuDialogVisible = false;
     },
-    // 设置菜单按钮事件
+    // 设置分配人员按钮事件
     assignBtnHandle(index, rows) {
       this.assignDialogVisible = true;
     },
-    //  设置菜单保存按钮
+    //  设置分配人员保存按钮
     submitAssign() {
       this.pwdData = "";
       this.assignDialogVisible = false;
     },
-    //  设置菜单取消按钮
+    //  设置分配人员取消按钮
     cancelAssign() {
       this.pwdData = "";
       this.assignDialogVisible = false;
@@ -375,7 +388,27 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  // 设置菜单
   .setMenuDialog .el-dialog {
+    .el-dialog {
+      width: 35%;
+    }
+    .el-transfer-panel__body,
+    .el-transfer {
+      height: 100%;
+    }
+    .el-transfer-panel__list {
+      height: 50vh;
+      overflow-y: auto;
+    }
+    .page-component__scroll {
+      height: 100%;
+      overflow-x: hidden;
+    }
+    .el-scrollbar__wrap {
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
     .el-dialog__body {
       height: 60vh;
     }
@@ -385,16 +418,22 @@ export default {
       bottom: 0px;
     }
   }
-  .page-component__scroll {
-    height: 100%;
-  }
-  .page-component__scroll .el-scrollbar__wrap {
-    overflow-y: auto;
-    overflow-x: hidden;
+  // 分配人员
+  .assignDialog {
+    .el-transfer {
+      height: 50vh;
+    }
+    .el-dialog__body {
+      padding-right: 20px;
+    }
+    .el-transfer-panel {
+      width: 41.2%;
+      height: 100%;
+    }
   }
   .el-dialog__body {
     padding-top: 10px;
-    padding-bottom: 10px;
+    padding-bottom: 15px;
   }
   .el-table th,
   .el-table td {
@@ -418,19 +457,8 @@ export default {
     position: relative;
     top: -2px;
   }
-  // 穿梭框样式
-  .el-transfer-panel {
-    width: 41.2%;
-    height: 100%;
-  }
-  .el-transfer-panel__body,
-  .el-transfer {
-    height: 100%;
-  }
-  .el-transfer-panel__list {
-    // height: 100%;
-    height: 50vh;
-    overflow-y: auto;
+  .el-dialog__body {
+    padding-right: 50px;
   }
 }
 .y-pagination {
