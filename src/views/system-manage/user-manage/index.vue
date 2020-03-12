@@ -10,7 +10,6 @@
       <el-table
         v-loading="loading"
         element-loading-text="拼命加载中"
-        element-loading-spinner="el-icon-loading"
         :data="tableData"
         border
         style="width: 100%;"
@@ -289,6 +288,18 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  /*elementui loading */
+  .el-loading-spinner .circular {
+    width: 80px;
+    height: 80px;
+  }
+  .el-loading-spinner {
+    top: 32%;
+    .el-loading-text {
+      font-size: 18px;
+      line-height: 40px;
+    }
+  }
   .el-dialog {
     width: 35%;
   }
