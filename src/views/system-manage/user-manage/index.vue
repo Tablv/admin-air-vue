@@ -107,7 +107,7 @@
     </el-dialog>
     <!-- 修改密码弹窗 -->
     <el-dialog title="修改密码" :visible.sync="pwdDialogVisible">
-      <el-form ref="pwdForm" :model="pwdData" label-width="100px" class="pwdData">
+      <el-form ref="pwdForm" label-width="100px" class="pwdData">
         <el-form-item label="新密码：" prop="pwd">
           <el-input v-model="pwdData" />
         </el-form-item>

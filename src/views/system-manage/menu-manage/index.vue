@@ -43,16 +43,16 @@
           <el-form-item label="菜单地址：" prop="MenuAddress">
             <el-input v-model="ruleForm.MenuAddress"></el-input>
           </el-form-item>
-          <el-form-item label="菜单图标：" prop="MenuAddress" class="position">
-            <el-input v-model="ruleForm.MenuAddress"></el-input>
+          <el-form-item label="菜单图标：" prop="MenuIcon" class="position">
+            <el-input v-model="ruleForm.MenuIcon"></el-input>
             <el-tooltip class="item" effect="light" content="菜单图标选择" placement="top">
               <el-button type="primary" class="select-icon" @click.native.prevent="fixIcon()">
                 <svg-icon icon-class="select-icon" />
               </el-button>
             </el-tooltip>
           </el-form-item>
-          <el-form-item label="权限：" prop="MenuAddress">
-            <el-input v-model="ruleForm.MenuAddress" disabled="disabled"></el-input>
+          <el-form-item label="权限：" prop="role">
+            <el-input v-model="ruleForm.role" disabled="disabled"></el-input>
           </el-form-item>
           <el-form-item label="菜单状态：" prop="resource">
             <el-radio-group v-model="ruleForm.resource">
@@ -70,25 +70,22 @@
 
     <!-- 菜单图标弹窗 -->
     <el-dialog
-      title="菜单图标选择"
+      title="菜单图标选择（双击选中）"
       :visible.sync="iconDialogVisible"
       width="50%"
-      :before-close="handleClose"
+      class="iconDialog"
     >
-      <el-scrollbar class="page-component__scroll"></el-scrollbar>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="iconDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="iconDialogVisible = false">确 定</el-button>
-      </span>
+      <selectIcon @select="currentClick"></selectIcon>
     </el-dialog>
   </div>
 </template>
 
 <script>
 import _ from "lodash";
+import selectIcon from "@/components/SelectIcon";
 export default {
   name: "MenuManager",
-  components: {},
+  components: { selectIcon },
   data() {
     return {
       iconDialogVisible: false,
@@ -201,6 +198,10 @@ export default {
     // 菜单图标选择按钮
     fixIcon() {
       this.iconDialogVisible = true;
+    },
+    currentClick(icon) {
+      this.ruleForm.MenuIcon = icon.class;
+      this.iconDialogVisible = false;
     }
   }
 };
@@ -208,6 +209,11 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  .iconDialog {
+    .dialog__body {
+      padding-top: 10px;
+    }
+  }
   .el-form-item.position {
     position: relative;
     .select-icon {
