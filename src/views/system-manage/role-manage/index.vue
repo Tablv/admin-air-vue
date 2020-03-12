@@ -388,6 +388,9 @@ export default {
 
 <style lang="scss" scoped>
 ::v-deep {
+  .el-dialog {
+    width: 35%;
+  }
   // 设置菜单
   .setMenuDialog .el-dialog {
     .el-dialog {
