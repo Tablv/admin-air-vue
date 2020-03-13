@@ -17,28 +17,32 @@ export default {
   data() {
     return {
       levelList: null
-    }
+    };
   },
   watch: {
     $route(route) {
       // if you go to the redirect page, do not update the breadcrumbs
-      if (route.path.startsWith('/redirect/')) {
-        return
+      if (route.path.startsWith("/redirect/")) {
+        return;
       }
-      this.getBreadcrumb()
+      this.getBreadcrumb();
     }
   },
   created() {
-    this.getBreadcrumb()
+    this.getBreadcrumb();
   },
   methods: {
     getBreadcrumb() {
       // only show routes with meta.title
-      const matched = this.$route.matched.filter(item => item.meta && item.meta.title)
-      this.levelList = matched.filter(item => item.meta && item.meta.title && item.meta.breadcrumb !== false)
+      const matched = this.$route.matched.filter(
+        item => item.meta && item.meta.title
+      );
+      this.levelList = matched.filter(
+        item => item.meta && item.meta.title && item.meta.breadcrumb !== false
+      );
     }
   }
-}
+};
 </script>
 
 <style lang="scss">

@@ -50,7 +50,7 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 .svg-icon {
   width: 1.5em;
   height: 1.5em;
@@ -58,7 +58,6 @@ export default {
   fill: currentColor;
   overflow: hidden;
 }
-
 .svg-external-icon {
   background-color: currentColor;
   mask-size: cover !important;
