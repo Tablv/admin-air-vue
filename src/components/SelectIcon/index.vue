@@ -5,7 +5,7 @@
     </el-col>-->
 
     <el-row :gutter="50">
-      <el-col :span="3" v-for="icon in todos" :key="icon.index" style="text-align:center">
+      <el-col :span="3" v-for="icon in iconLists" :key="icon.index" style="text-align:center">
         <el-button @dblclick.native="currentClick(icon)">
           <svg-icon :icon-class="icon.class"></svg-icon>
           <span class="block">{{icon.class}}</span>
@@ -19,7 +19,7 @@
 export default {
   data() {
     return {
-      todos: [
+      iconLists: [
         { class: "eye" },
         { class: "edit" },
         { class: "eye" },
@@ -30,7 +30,6 @@ export default {
   components: {},
   methods: {
     currentClick: function(icon) {
-      console.log(icon.class);
       this.$emit("select", icon);
     }
   }
