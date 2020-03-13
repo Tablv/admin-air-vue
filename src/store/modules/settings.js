@@ -5,10 +5,10 @@ const { showSettings, tagsView, fixedHeader, sidebarLogo } = defaultSettings
 
 const state = {
   theme: variables.theme,
-  showSettings: showSettings,
-  tagsView: tagsView,
-  fixedHeader: fixedHeader,
-  sidebarLogo: sidebarLogo
+  showSettings,
+  tagsView,
+  fixedHeader,
+  sidebarLogo
 }
 
 const mutations = {

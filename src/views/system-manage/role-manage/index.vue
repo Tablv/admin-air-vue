@@ -430,7 +430,7 @@ export default {
       padding-right: 20px;
     }
     .el-transfer-panel {
-      width: 41.2%;
+      width: 36%;
       height: 100%;
     }
   }

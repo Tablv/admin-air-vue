@@ -218,8 +218,8 @@ export default {
       this.getTableData(val, this.pagination.page_size);
     },
     // Table 状态开启和关闭
-    active_text(value, row) {
-      console.log(value, row);
+    active_text() {
+      // console.log(value, row);
     },
     // 新增按钮事件
     createBtnHandle() {
@@ -245,7 +245,7 @@ export default {
         rows.splice(index, 1);
       });
     },
-    submitForm(mainForm) {
+    submitForm() {
       this.$refs.mainForm.validate(valid => {
         if (valid) {
           this.tableData.unshift({
@@ -269,7 +269,7 @@ export default {
     },
 
     // 修改密码按钮事件
-    pwdBtnHandle(index, rows) {
+    pwdBtnHandle() {
       this.pwdDialogVisible = true;
     },
     //  修改密码保存按钮
