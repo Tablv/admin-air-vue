@@ -7,3 +7,11 @@ export function userList() {
         method: 'get'
     })
 }
+
+// 新增
+export function userListAdd() {
+    return request({
+        url: '/admin/system/user/add',
+        method: 'post',
+    })
+}

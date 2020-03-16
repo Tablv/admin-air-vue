@@ -15,7 +15,7 @@
             style="text-align:center"
           >
             <!-- <theme-previewer></theme-previewer> -->
-            <div class="padding">
+            <div class="theme-sel">
               <el-button class="previewer-btn" @dblclick.native="themesClick(themes)">
                 <div class="previewer">
                   <div class="previewer-top" :style="{background:''+themes.topBg+''}"></div>
@@ -75,8 +75,8 @@ export default {
     right: 0px;
     bottom: 0px;
   }
-  .padding {
-    padding: 20px;
+  .theme-sel {
+    padding: 6px;
   }
   .previewer-btn {
     width: 100%;

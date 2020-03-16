@@ -21,8 +21,8 @@
           <template slot-scope="scope">
             <el-switch
               v-model="scope.row.status"
-              active-color="#ff4949"
-              inactive-color="#13ce66"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
               :active-value="0"
               :inactive-value="1"
               @change="activeStatus(scope.$index, status)"
@@ -68,7 +68,7 @@
       :visible.sync="formDialogVisible"
       class="formDialog"
     >
-      <el-form ref="mainForm" :model="formData" :rules="rules" label-width="100px" class="formData">
+      <el-form ref="formData" :model="formData" :rules="rules" label-width="100px" class="formData">
         <el-form-item label="姓名：" prop="name">
           <el-input v-model="formData.name" />
         </el-form-item>
@@ -91,16 +91,16 @@
             v-model="formData.status"
             active-color="#ff4949"
             inactive-color="#13ce66"
-            active-value="0"
-            inactive-value="1"
-            @change="active_text($event, formData)"
+            :active-value="0"
+            :inactive-value="1"
+            @change="activeDialogStatus($event, formData)"
           ></el-switch>
         </el-form-item>
         <el-form-item label="备注：">
           <el-input v-model="formData.desc" type="textarea" :rows="5" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitForm('formData')">保 存</el-button>
+          <el-button type="primary" @click="dialogStatus==='create'?createData():updateData()">保 存</el-button>
           <el-button @click="cancelForm">取 消</el-button>
         </el-form-item>
       </el-form>
@@ -122,7 +122,7 @@
 
 <script>
 import _ from "lodash";
-import { userList } from "@/api/system-manage/user-manage";
+import { userList, userListAdd } from "@/api/system-manage/user-manage";
 export default {
   name: "Index",
   components: {},
@@ -135,6 +135,7 @@ export default {
       pwdDialogVisible: false, // 修改密码弹窗下标
       disabled: false,
       formData: this.getInitForm(),
+      dialogStatus: "",
       pwdData: "",
       rules: {
         name: [
@@ -175,15 +176,22 @@ export default {
   },
   created() {
     // 初始化用户管理tableData数据
-    userList()
-      .then(res => {
-        this.tableData = res.result.list;
-        this.loading = false;
-        this.pagination.total = parseInt(res.result.size);
-      })
-      .catch(err => {});
+    this.loadData();
   },
   methods: {
+    loadData() {
+      userList()
+        .then(res => {
+          this.tableData = res.result.list;
+          this.loading = false;
+          this.pagination.total = parseInt(res.result.size);
+        })
+        .catch(err => {
+          console.error("error submit!!");
+          this.$message.error("这是一条错误的用户信息，请稍后重试");
+          return false;
+        });
+    },
     // 初始化表单数据
     getInitForm() {
       return {
@@ -205,11 +213,16 @@ export default {
     activeStatus() {
       //console.log(status);
     },
+    // Dialog状态开启和关闭
+    activeDialogStatus() {
+      //console.log(status);
+    },
     // 新增按钮事件
     createBtnHandle() {
       this.formDialogVisible = true;
       this.isEdit = false;
       this.disabled = false;
+      this.dialogStatus = "create";
       this.resetFlag && this.$refs["formData"].resetFields();
     },
     // 修改按钮事件
@@ -229,26 +242,21 @@ export default {
         rows.splice(index, 1);
       });
     },
-    submitForm() {
-      this.$refs.mainForm.validate(valid => {
-        if (valid) {
-          this.tableData.unshift({
-            name: this.formData.name,
-            username: this.formData.username,
-            role: this.formData.role,
-            status: this.formData.status
-          });
-          this.$refs.mainForm.resetFields();
-          this.formDialogVisible = false;
-        } else {
+    createData() {
+      userListAdd(this.formData)
+        .then(res => {
+          this.formData;
+          this.loadData();
+        })
+        .catch(err => {
           console.error("error submit!!");
+          this.$message.error("这是一条错误的用户信息，请稍后重试");
           return false;
-        }
-      });
+        });
     },
     cancelForm() {
       this.formData = this.getInitForm();
-      this.$refs["mainForm"]?.resetFields();
+      this.$refs["formData"]?.resetFields();
       this.formDialogVisible = false;
     },
     // 修改密码按钮事件

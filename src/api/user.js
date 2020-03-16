@@ -1,21 +1,26 @@
 import request from '@/utils/request'
+import qs from 'qs'
 
 export function login(data) {
-  // return request({
-  //   url: '/user/login',
-  //   method: 'post',
-  //   data
-  // })
-
-  return new Promise(resolve => {
-
-    resolve({
-      data: {
-        code: 20000,
-        token: "admin-token"
-      }
-    })
+  return request({
+    url: '/admin/doLogin',
+    method: 'post',
+    data: qs.stringify(data),
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
   })
+
+
+  // return new Promise(resolve => {
+
+  //   resolve({
+  //     data: {
+  //       code: 20000,
+  //       token: "admin-token"
+  //     }
+  //   })
+  // })
 }
 
 export function getInfo(token) {
