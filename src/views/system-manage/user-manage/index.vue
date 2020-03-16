@@ -15,7 +15,7 @@
         style="width: 100%;"
       >
         <el-table-column prop="name" label="姓名" width />
-        <el-table-column prop="userName" label="用户名" width />
+        <el-table-column prop="username" label="用户名" width />
         <!-- <el-table-column prop="state" label="状态" width /> -->
         <el-table-column label="状态">
           <template slot-scope="scope">
@@ -23,9 +23,9 @@
               v-model="scope.row.status"
               active-color="#ff4949"
               inactive-color="#13ce66"
-              active-value="0"
-              inactive-value="1"
-              @change="active_text($event, scope.row)"
+              :active-value="0"
+              :inactive-value="1"
+              @change="activeStatus(scope.$index, status)"
             ></el-switch>
           </template>
         </el-table-column>
@@ -72,8 +72,8 @@
         <el-form-item label="姓名：" prop="name">
           <el-input v-model="formData.name" />
         </el-form-item>
-        <el-form-item label="用户名：" prop="userName">
-          <el-input v-model="formData.userName" />
+        <el-form-item label="用户名：" prop="username">
+          <el-input v-model="formData.username" />
         </el-form-item>
         <el-form-item label="角色：" prop="role">
           <!-- <el-input v-model="formData.role" /> -->
@@ -122,6 +122,7 @@
 
 <script>
 import _ from "lodash";
+import { userList } from "@/api/system-manage/user-manage";
 export default {
   name: "Index",
   components: {},
@@ -129,6 +130,7 @@ export default {
     return {
       topTitle: "用户管理", // 主要弹窗title
       isEdit: false,
+      loading: true,
       formDialogVisible: false, // 主要弹窗
       pwdDialogVisible: false, // 修改密码弹窗下标
       disabled: false,
@@ -139,7 +141,7 @@ export default {
           { required: true, message: "请输入姓名", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ],
-        userName: [
+        username: [
           { required: true, message: "请输入用户名", trigger: "blur" }
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ],
@@ -148,34 +150,7 @@ export default {
           // { min: 3, max: 5, message: "长度在 3 到 5 个字符", trigger: "blur" }
         ]
       },
-      tableData: [
-        {
-          name: "张三",
-          userName: "admin",
-          status: "1"
-        },
-        {
-          name: "张三",
-          userName: "admin",
-          status: "1"
-        },
-        {
-          name: "张三",
-          userName: "admin",
-          status: "0"
-        },
-        {
-          name: "张三",
-          userName: "admin",
-          status: "0"
-        },
-        {
-          name: "张三",
-          userName: "admin",
-          status: "1"
-        }
-      ],
-      loading: false,
+      tableData: [],
       pagination: {
         total: 0,
         page_size: 10,
@@ -198,13 +173,22 @@ export default {
       ]
     };
   },
-  created() {},
+  created() {
+    // 初始化用户管理tableData数据
+    userList()
+      .then(res => {
+        this.tableData = res.result.list;
+        this.loading = false;
+        this.pagination.total = parseInt(res.result.size);
+      })
+      .catch(err => {});
+  },
   methods: {
     // 初始化表单数据
     getInitForm() {
       return {
         name: "",
-        userName: "",
+        username: "",
         role: [],
         status: "",
         desc: ""
@@ -218,8 +202,8 @@ export default {
       this.getTableData(val, this.pagination.page_size);
     },
     // Table 状态开启和关闭
-    active_text() {
-      // console.log(value, row);
+    activeStatus() {
+      //console.log(status);
     },
     // 新增按钮事件
     createBtnHandle() {
@@ -250,7 +234,7 @@ export default {
         if (valid) {
           this.tableData.unshift({
             name: this.formData.name,
-            userName: this.formData.userName,
+            username: this.formData.username,
             role: this.formData.role,
             status: this.formData.status
           });
@@ -267,7 +251,6 @@ export default {
       this.$refs["mainForm"]?.resetFields();
       this.formDialogVisible = false;
     },
-
     // 修改密码按钮事件
     pwdBtnHandle() {
       this.pwdDialogVisible = true;
