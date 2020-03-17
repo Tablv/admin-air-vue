@@ -130,7 +130,7 @@ export default {
     return {
       topTitle: "用户管理", // 主要弹窗title
       isEdit: false,
-      loading: true,
+      loading: false,
       formDialogVisible: false, // 主要弹窗
       pwdDialogVisible: false, // 修改密码弹窗下标
       disabled: false,
@@ -187,7 +187,7 @@ export default {
           this.pagination.total = parseInt(res.result.size);
         })
         .catch(err => {
-          console.error("error submit!!");
+          console.error(err);
           this.$message.error("这是一条错误的用户信息，请稍后重试");
           return false;
         });

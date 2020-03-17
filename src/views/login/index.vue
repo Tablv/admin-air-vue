@@ -285,8 +285,8 @@ $light_gray: #eee;
 .login-container {
   min-height: 100%;
   width: 100%;
-  // background-color: $bg;
-  background: url(http://192.168.1.208:8080/admin/image/login-bg.jpg) no-repeat;
+  background-color: $bg;
+  // background: url(http://192.168.1.208:8080/admin/image/login-bg.jpg) no-repeat;
   overflow: hidden;
 
   .login-form {
