@@ -37,12 +37,12 @@
               </el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="light" content="删除" placement="top">
-              <el-button type="text" @click.native.prevent="delBtnHandle(scope.$index, tableData)">
+              <el-button type="text" @click.native.prevent="delBtnHandle(scope.row.id)">
                 <i class="el-icon-delete" />
               </el-button>
             </el-tooltip>
             <el-tooltip class="item" effect="light" content="修改密码" placement="top">
-              <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, tableData)">
+              <el-button type="text" @click.native.prevent="pwdBtnHandle(scope.$index, scope.row)">
                 <svg-icon icon-class="modifyPassword" />
               </el-button>
             </el-tooltip>
@@ -89,8 +89,8 @@
         <el-form-item label="状态：">
           <el-switch
             v-model="formData.status"
-            active-color="#ff4949"
-            inactive-color="#13ce66"
+            active-color="#13ce66"
+            inactive-color="#ff4949"
             :active-value="0"
             :inactive-value="1"
             @change="activeDialogStatus($event, formData)"
@@ -112,7 +112,7 @@
           <el-input v-model="pwdData" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="submitPwd">保 存</el-button>
+          <el-button type="primary" @click="submitPwd('tableData')">保 存</el-button>
           <el-button @click="cancelPwd">取 消</el-button>
         </el-form-item>
       </el-form>
@@ -122,7 +122,14 @@
 
 <script>
 import _ from "lodash";
-import { userList, userListAdd } from "@/api/system-manage/user-manage";
+import { getToken } from "@/utils/auth";
+import {
+  userList,
+  userListAdd,
+  deleteUser,
+  update,
+  resetPwd
+} from "@/api/system-manage/user-manage";
 export default {
   name: "Index",
   components: {},
@@ -130,7 +137,7 @@ export default {
     return {
       topTitle: "用户管理", // 主要弹窗title
       isEdit: false,
-      loading: false,
+      loading: true,
       formDialogVisible: false, // 主要弹窗
       pwdDialogVisible: false, // 修改密码弹窗下标
       disabled: false,
@@ -180,11 +187,14 @@ export default {
   },
   methods: {
     loadData() {
-      userList()
+      userList({
+        current: this.pagination.current_page,
+        limit: this.pagination.page_size
+      })
         .then(res => {
           this.tableData = res.result.list;
           this.loading = false;
-          this.pagination.total = parseInt(res.result.size);
+          this.pagination.total = parseInt(res.result.total);
         })
         .catch(err => {
           console.error(err);
@@ -198,16 +208,18 @@ export default {
         name: "",
         username: "",
         role: [],
-        status: "",
+        status: 0,
         desc: ""
       };
     },
     // 翻页
     pageSizeChangeHandle(val) {
-      this.getTableData(this.pagination.current_page, val);
+      this.pagination.current_page = val;
+      this.loadData(this.pagination.current_page, val);
     },
     pageChangeHandle(val) {
-      this.getTableData(val, this.pagination.page_size);
+      this.pagination.page_size = val;
+      this.loadData(val, this.pagination.page_size);
     },
     // Table 状态开启和关闭
     activeStatus() {
@@ -219,34 +231,57 @@ export default {
     },
     // 新增按钮事件
     createBtnHandle() {
+      this.$refs["formData"]?.resetFields();
       this.formDialogVisible = true;
       this.isEdit = false;
       this.disabled = false;
       this.dialogStatus = "create";
-      this.resetFlag && this.$refs["formData"].resetFields();
     },
-    // 修改按钮事件
+    // 编辑按钮事件
     editBtnHandle(index, row) {
+      this.create = false;
       this.formDialogVisible = true;
       this.formData = _.cloneDeep(row);
       this.isEdit = true;
-      // this.disabled = false;
+      this.resetFlag && this.$refs["formData"].resetFields();
     },
     // 删除按钮事件
-    delBtnHandle(index, rows) {
-      this.$confirm("此操作将永久删除该条信息, 是否继续?", "提示", {
+    delBtnHandle(id) {
+      deleteUser({
+        id,
+        authorization: getToken()
+      });
+      this.$confirm("确定删除多条数据吗", "提示", {
         confirmButtonText: "确定",
         cancelButtonText: "取消",
         type: "warning"
-      }).then(() => {
-        rows.splice(index, 1);
-      });
+      })
+        .then(res => {
+          this.loadData();
+        })
+        .catch(err => {
+          console.error(err);
+          this.$message.error("这是一条错误的用户信息，请稍后重试");
+          return false;
+        });
     },
     createData() {
       userListAdd(this.formData)
         .then(res => {
-          this.formData;
           this.loadData();
+          this.formDialogVisible = false;
+        })
+        .catch(err => {
+          console.error("error submit!!");
+          this.$message.error("这是一条错误的用户信息，请稍后重试");
+          return false;
+        });
+    },
+    updateData() {
+      update(this.formData)
+        .then(res => {
+          this.loadData();
+          this.formDialogVisible = false;
         })
         .catch(err => {
           console.error("error submit!!");
@@ -260,13 +295,27 @@ export default {
       this.formDialogVisible = false;
     },
     // 修改密码按钮事件
-    pwdBtnHandle() {
+    pwdBtnHandle(id) {
+      console.log(id);
       this.pwdDialogVisible = true;
     },
     //  修改密码保存按钮
-    submitPwd() {
-      this.pwdData = "";
-      this.pwdDialogVisible = false;
+    submitPwd(index, row) {
+      resetPwd({
+        row: this.row.id,
+        userId: this.pwdData,
+        authorization: getToken()
+      })
+        .then(res => {
+          console.log(id);
+          this.pwdDialogVisible = false;
+          debugger;
+        })
+        .catch(err => {
+          console.error("error submit!!");
+          this.$message.error("这是一条错误的用户信息，请稍后重试");
+          return false;
+        });
     },
     //  修改密码取消按钮
     cancelPwd() {
