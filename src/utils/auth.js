@@ -1,6 +1,6 @@
 import Cookies from 'js-cookie'
 
-const TokenKey = 'Glaway_air_admin_token'
+const TokenKey = 'accessToken'
 
 export function getToken() {
   return Cookies.get(TokenKey)
