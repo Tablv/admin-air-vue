@@ -1,0 +1,12 @@
+.header {
+  height: 40px;
+  .header-left {
+    float: left;
+    .header-title {
+      font-size: 18px;
+    }
+  }
+  .header-right {
+    float: right;
+  }
+}
