@@ -1,10 +1,11 @@
 import request from '@/utils/request'
+import qs from 'qs'
 
 export function login(data) {
   return request({
-    url: '/vue-admin-template/user/login',
+    url: '/doLogin',
     method: 'post',
-    data
+    data: qs.stringify(data)
   })
 }
 

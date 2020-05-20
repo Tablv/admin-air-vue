@@ -1,9 +1,9 @@
 import Vue from 'vue'
 import '@/styles/base.scss'
 import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en' // lang i18n
 
+import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss' // global css
 
 import App from './App'
@@ -11,7 +11,7 @@ import store from './store'
 import router from './router'
 
 import '@/icons' // icon
-import '@/permission' // permission control
+import '@/permission'
 
 /**
  * If you don't want to use mock-server
@@ -21,10 +21,10 @@ import '@/permission' // permission control
  * Currently MockJs will be used in the production environment,
  * please remove it before going online ! ! !
  */
-if (process.env.NODE_ENV === 'production') {
-  const { mockXHR } = require('../mock')
-  mockXHR()
-}
+// if (process.env.NODE_ENV === 'production') {
+//   const { mockXHR } = require('../mock')
+//   mockXHR()
+// }
 
 // set ElementUI lang to EN
 Vue.use(ElementUI, { locale })
