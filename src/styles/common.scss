@@ -10,3 +10,28 @@
     float: right;
   }
 }
+.header-cell {
+  background-color :#e7e7e7 !important;
+  vertical-align: top !important;
+}
+.table-header-title {
+  display: block;
+  margin-bottom: 8px;
+}
+.caret-wrapper {
+  position: absolute !important;
+  top: -3px;
+  right: 3px;
+}
+.pagination {
+  margin-top: 10px;
+  .el-pagination {
+    padding: 2px 0;
+    .el-select .el-input{
+      margin: 0 5px 0 0;
+    }
+    .btn-prev, .btn-next, .el-pager {
+      float: right;
+    }
+  }
+}
