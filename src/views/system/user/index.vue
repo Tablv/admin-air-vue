@@ -5,7 +5,7 @@
         <div class="header-title">用户管理</div>
       </div>
       <div class="header-right">
-        <el-button type="primary" size="mini" icon="el-icon-plus">新增</el-button>
+        <el-button type="primary" size="mini" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
         <el-button size="mini" icon="el-icon-refresh"></el-button>
         <el-dropdown trigger="click">
           <el-button size="mini" icon="el-icon-upload2"><i class="el-icon-arrow-down el-icon--right"></i>
@@ -106,6 +106,26 @@
         </el-pagination>
       </div>
     </article>
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+      <div slot="title" class="dialog-title">
+        <span>新增</span>
+      </div>
+      <!-- <el-form :model="form">
+        <el-form-item label="活动名称" :label-width="formLabelWidth">
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="活动区域" :label-width="formLabelWidth">
+          <el-select v-model="form.region" placeholder="请选择活动区域">
+            <el-option label="区域一" value="shanghai"></el-option>
+            <el-option label="区域二" value="beijing"></el-option>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div> -->
+    </el-dialog>
   </div>
 </template>
 
@@ -139,7 +159,8 @@ export default {
         pageSize: 10,
         pageNum: 1,
         total: 0
-      }
+      },
+      addVisible: false
     }
   },
   created() {
@@ -158,6 +179,14 @@ export default {
       getUserList(params).then(res => {
         console.log(res)
       })
+    },
+    // 打开新增弹窗
+    handleOpenAdd() {
+      this.addVisible = true
+    },
+    // 关闭新增弹窗
+    handleCloseAdd() {
+      this.addVisible = false
     },
     // 表格配置
     changeCheckbox(value) {

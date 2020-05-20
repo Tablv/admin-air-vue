@@ -30,12 +30,15 @@ export const constantRoutes = [
   {
     path: '/system',
     component: Layout,
+    redirect: '/system/user',
+    meta: { title: '系统管理', icon: 'dashboard' },
+    alwaysShow: true,
     children: [
       {
-        path: 'system',
-        name: 'system',
-        component: () => import('@/views/system/index'),
-        meta: { title: '系统设置', icon: 'dashboard' }
+        path: 'user',
+        name: 'user',
+        component: () => import('@/views/system/user/index'),
+        meta: { title: '用户管理' }
       }
     ]
   },
