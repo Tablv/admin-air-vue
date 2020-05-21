@@ -64,7 +64,7 @@ service.interceptors.response.use(
 
 const request = {
 
-  get: (url, params, isJson) => {
+  get: (url, params, isJson = false) => {
     const config = {
       method: 'GET',
       url,
@@ -73,7 +73,7 @@ const request = {
     return service(config)
   },
 
-  post: (url, data, isJson) => {
+  post: (url, data, isJson = false) => {
     const config = {
       method: 'POST',
       url,
