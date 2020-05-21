@@ -1,0 +1,58 @@
+.header {
+  height: 40px;
+  .header-left {
+    float: left;
+    .header-title {
+      font-size: 18px;
+    }
+  }
+  .header-right {
+    float: right;
+  }
+}
+.header-cell {
+  background-color :#e7e7e7 !important;
+  vertical-align: top !important;
+}
+.table-header-title {
+  display: block;
+  margin-bottom: 8px;
+}
+.caret-wrapper {
+  position: absolute !important;
+  top: -3px;
+  right: 3px;
+}
+.pagination {
+  margin-top: 10px;
+  .el-pagination {
+    padding: 2px 0;
+    .el-select .el-input{
+      margin: 0 5px 0 0;
+    }
+    .btn-prev, .btn-next, .el-pager {
+      float: right;
+    }
+  }
+}
+.el-dialog__wrapper{
+  position: absolute;
+  .el-dialog {
+    margin-top: 0 !important;
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    .el-dialog__header{
+      background-color: #f8f8f8;
+      padding: 15px 20px;
+      .el-dialog__headerbtn {
+        top: 15px;
+      }
+    }
+  }
+}
+.v-modal {
+  position: absolute;
+}
+

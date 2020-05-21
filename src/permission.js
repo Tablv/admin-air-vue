@@ -20,6 +20,8 @@ router.beforeEach(async(to, from, next) => {
 
   // 存在token
   if (hasToken) {
+    console.log(to.path );
+
     // 如果是登录 直接重定向到首页
     if (to.path === '/login') {
       next({ path: '/' })
