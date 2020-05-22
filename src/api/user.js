@@ -5,9 +5,9 @@ export function login(data) {
 }
 
 export function getInfo(token) {
-  return request.get('/vue-admin-template/user/info', token)
+  return request.get('/userinfo', token, false)
 }
 
 export function logout() {
-  return request.post('/vue-admin-template/user/logout')
+  return request('logout')
 }
