@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import '@/styles/base.scss'
 import ElementUI from 'element-ui'
-import locale from 'element-ui/lib/locale/lang/en' // lang i18n
+import locale from 'element-ui/lib/locale/lang/zh-CN' // lang i18n
 
 import 'element-ui/lib/theme-chalk/index.css'
 import '@/styles/index.scss' // global css
@@ -13,6 +13,11 @@ import router from './router'
 
 import '@/icons' // icon
 import '@/permission'
+
+import { Splitpanes, Pane } from 'splitpanes'
+import 'splitpanes/dist/splitpanes.css'
+Vue.component('splitpanes', Splitpanes)
+Vue.component('pane', Pane)
 
 /**
  * If you don't want to use mock-server
@@ -30,7 +35,7 @@ import '@/permission'
 // set ElementUI lang to EN
 // Vue.use(ElementUI, { locale })
 // 如果想要中文版 element-ui，按如下方式声明
-Vue.use(ElementUI)
+Vue.use(ElementUI, { size: 'mini' })
 
 Vue.config.productionTip = false
 

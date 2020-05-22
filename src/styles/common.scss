@@ -1,3 +1,7 @@
+.container {
+  padding: 10px;
+}
+// 页面头部
 .header {
   height: 40px;
   .header-left {
@@ -10,6 +14,7 @@
     float: right;
   }
 }
+// 表格头部
 .header-cell {
   background-color :#e7e7e7 !important;
   vertical-align: top !important;
@@ -23,6 +28,7 @@
   top: -3px;
   right: 3px;
 }
+// 分页
 .pagination {
   margin-top: 10px;
   .el-pagination {
@@ -35,6 +41,7 @@
     }
   }
 }
+// 弹窗
 .el-dialog__wrapper{
   position: absolute;
   .el-dialog {
@@ -50,9 +57,36 @@
         top: 15px;
       }
     }
+    .el-dialog__body {
+      padding: 30px;
+    }
   }
 }
+// 弹窗遮罩
 .v-modal {
   position: absolute;
 }
-
+// 实例化弹窗
+.el-message-box__wrapper {
+  position: absolute;
+  .el-message-box__content {
+    padding: 30px;
+  }
+  .messageBoxCancelButton {
+    float: right;
+    margin-left: 10px;
+  }
+}
+// 选择框
+.el-select {
+  width: 100%;
+}
+// 拆分窗格
+.splitpanes__pane {
+  border: 1px solid #d3d3d3;
+}
+.splitpanes__splitter {
+  width: 5px;
+  background-color: #efefef;
+  cursor: e-resize !important;
+}
