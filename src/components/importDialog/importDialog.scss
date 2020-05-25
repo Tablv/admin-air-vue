@@ -2,28 +2,5 @@
   .el-dialog__body{
     padding: 0 !important;
     height: 350px;
-    .split-line {
-      width: 5px;
-      height: 100%;
-      background-color: #efefef;
-      cursor: e-resize;
-    }
-    .pane-header {
-      font-size: 16px;
-      padding: 13px 5px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid #dfdfdf;
-      .pane-headerR {
-        font-size: 14px;
-      }
-    }
-    .pane-main {
-      padding: 10px 30px;
-      .import-cell {
-        color: #000000 !important;
-      }
-    }
   }
 }

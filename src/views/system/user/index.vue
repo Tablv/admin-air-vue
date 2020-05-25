@@ -50,7 +50,6 @@
             <div @click.stop>
               <el-input
                 v-model="filter.nameFilter"
-              
                 placeholder="姓名"
                 @change="tableFilter($event, 'name')"/>
             </div>
@@ -62,7 +61,6 @@
             <div @click.stop>
               <el-input
                 v-model="filter.userNameFilter"
-              
                 placeholder="用户名"
                 @change="tableFilter($event, 'userName')"/>
             </div>
@@ -132,7 +130,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="addForm.role" multiple placeholder="请选择" @change="selectRole">
+          <el-select v-model="addForm.role" multiple filterable placeholder="请选择" @change="selectRole">
             <el-option
               v-for="item in roleOptions"
               :key="item.value"
@@ -142,7 +140,7 @@
           </el-select>
         </el-form-item>
         <el-form-item label="组织">
-          <el-select v-model="addForm.organization" multiple placeholder="请选择" @change="selectOgn">
+          <el-select v-model="addForm.organization" multiple filterable placeholder="请选择" @change="selectOgn">
             <el-option
               v-for="item in ognOptions"
               :key="item.value"
@@ -267,11 +265,11 @@ export default {
         console.log(res)
       })
     },
-    // 打开新增弹窗
+    // 新增弹窗-打开
     handleOpenAdd() {
       this.addVisible = true
     },
-    // 关闭新增弹窗
+    // 新增弹窗-关闭
     handleCloseAdd() {
       this.addVisible = false
       this.addForm.showStatus = false
@@ -292,29 +290,29 @@ export default {
       this.addForm.showStatus = true
       this.addVisible = true
     },
-    // 弹窗选择角色
+    // 弹窗-选择角色
     selectRole(val) {
       console.log(val)
     },
-    // 弹窗选择组织
+    // 弹窗-选择组织
     selectOgn(val) {
       console.log(val)
     },
-    // 打开导入弹窗
+    // 导入弹窗-打开
     handleOpenImportDialog(command) {
       if (command === 'import') {
         this.importVisible = true
       }
     },
-    // 关闭导入弹窗
+    // 导入弹窗-关闭
     handleCloseImportDialog(msg) {
       this.importVisible = msg
     },
-    // 表格配置
+    // 表格-配置
     changeCheckbox(value) {
       this.checkList = value
     },
-    // 表格空数据格式化
+    // 表格-空数据格式化
     formatter(row, column) {
       if (row[column.property] === '') {
         return '-'
@@ -322,11 +320,11 @@ export default {
         return row[column.property]
       }
     },
-    // 表格远程排序
+    // 表格-远程排序
     sortChange(column) {
       console.log(column)
     },
-    // 表格筛选
+    // 表格-筛选
     tableFilter(value, type) {
       if (type === 'name') {
         this.filter.nameFilter = value
@@ -367,11 +365,11 @@ export default {
         }
       }).catch(() => {})
     },
-    // 改变每页数量
+    // 分页-改变每页数量
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },
-    // 改变页码
+    // 分页-改变页码
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`)
     }

@@ -81,9 +81,30 @@
 .el-select {
   width: 100%;
 }
+// 日期选择器
+.el-date-editor {
+  width: 100% !important;
+}
 // 拆分窗格
 .splitpanes__pane {
   border: 1px solid #d3d3d3;
+  .pane-header {
+    font-size: 16px;
+    padding: 13px 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dfdfdf;
+    .pane-headerR {
+      font-size: 14px;
+    }
+  }
+  .pane-main {
+    padding: 10px 30px;
+    .import-cell {
+      color: #000000 !important;
+    }
+  }
 }
 .splitpanes__splitter {
   width: 5px;
