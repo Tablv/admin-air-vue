@@ -139,16 +139,24 @@
         <el-button @click="handleClose">关闭</el-button>
       </div>
     </el-dialog>
+    <!-- 分配用户 -->
+    <assign-user :assignUserVisible="assignUserVisible" @closeDialog="handleCloseAssignUserDialog"></assign-user>
+    <!-- 分配菜单 -->
+    <assign-menu :drawer="drawer" @closeDrawer="handleCloseDrawer"></assign-menu>
     <!-- 导入 -->
-    <importDialog :importVisible="importVisible" templateNum="SYS_ROLE" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></importDialog>
+    <import-dialog :importVisible="importVisible" templateNum="SYS_ROLE" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
   </div>
 </template>
 
 <script>
+import assignUser from './assignUserDialog'
+import assignMenu from './assignMenuDrawer'
 import importDialog from '@/components/importDialog'
 export default {
   name: 'role',
   components: {
+    assignUser,
+    assignMenu,
     importDialog
   },
   data() {
@@ -187,6 +195,10 @@ export default {
       },
       // 新增弹窗
       addVisible: false,
+      // 分配用户弹窗
+      assignUserVisible: false,
+      // 分配菜单抽屉
+      drawer: true,
       // 导入弹窗
       importVisible: false,
       // 弹窗表单
@@ -302,11 +314,19 @@ export default {
     },
     // 表格操作-分配用户
     handleAssignUser(index, row) {
-
+      this.assignUserVisible = true
+    },
+    // 分配用户弹窗-关闭
+    handleCloseAssignUserDialog(msg) {
+      this.assignUserVisible = msg
     },
     // 表格操作-分配菜单
     handleAssignMenu(index, row) {
-
+      this.drawer = true
+    },
+    // 分配菜单抽屉-关闭
+    handleCloseDrawer(msg) {
+      this.drawer = msg
     },
     // 分页-改变每页数量
     handleSizeChange(val) {
