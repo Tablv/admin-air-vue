@@ -44,7 +44,9 @@
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
         <el-form-item label="上级名称">
-          <el-input v-model="addForm.preName"></el-input>
+          <el-input v-model="addForm.preName" disabled class="input-with-select">
+            <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+          </el-input>
         </el-form-item>
         <el-form-item label="类型" prop="type">
           <el-radio-group v-model="addForm.type">
@@ -73,13 +75,18 @@
         <el-button @click="handleClose">关闭</el-button>
       </div>
     </el-dialog>
+    <!-- 上级名称弹窗 -->
+    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
   </div>
 </template>
 
 <script>
+import treeDialog from '@/components/treeDialog'
 export default {
   name: 'dict',
-  components: {},
+  components: {
+    treeDialog
+  },
   data() {
     return {
       // 表格数据
@@ -90,6 +97,8 @@ export default {
       ],
       // 新增弹窗
       addVisible: false,
+      // 上级菜单弹窗
+      treeVisible: false,
       // 弹窗表单
       addForm: {
         preName: '',
@@ -137,6 +146,18 @@ export default {
     handleClose() {
       this.addVisible = false
       this.isEdit = false
+    },
+    // 上级菜单弹窗-打开
+    handleOpenTreeDialog() {
+      this.treeVisible = true
+    },
+    // 上级名称弹窗-关闭
+    handleCloseTreeDialog(msg) {
+      this.treeVisible = msg
+    },
+    // 获取选择的上级名称
+    getCurrentMenu(data) {
+      this.addForm.preName = data.label
     },
     // 表格-树数据
     loadData(row, treeNode, resolve) {

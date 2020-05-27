@@ -312,6 +312,7 @@ export default {
     .el-tabs__content {
       padding: 0 10px 10px;
       .dept-left {
+        height: 333px;
         border: 1px solid #EBEEF5;
       }
       .center-button {

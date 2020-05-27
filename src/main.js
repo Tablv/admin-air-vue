@@ -19,6 +19,8 @@ import 'splitpanes/dist/splitpanes.css'
 Vue.component('splitpanes', Splitpanes)
 Vue.component('pane', Pane)
 
+import ElTreeSelect from 'el-tree-select'
+Vue.use(ElTreeSelect)
 /**
  * If you don't want to use mock-server
  * you want to use MockJs for mock api

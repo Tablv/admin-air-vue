@@ -130,7 +130,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="addForm.role" multiple filterable placeholder="请选择" @change="selectRole">
+          <el-select v-model="addForm.role" multiple filterable placeholder="请选择"@change="selectRole" clearable>
             <el-option
               v-for="item in roleOptions"
               :key="item.value"
@@ -140,14 +140,12 @@
           </el-select>
         </el-form-item>
         <el-form-item label="组织">
-          <el-select v-model="addForm.organization" multiple filterable placeholder="请选择" @change="selectOgn">
-            <el-option
-              v-for="item in ognOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
+          <el-tree-select
+            v-model="selectedData"
+            :selectParams="selectParams"
+            :treeParams="treeParams"
+            @searchFun="handleTreeSelectFilter"
+            ref="treeSelect"/>
         </el-form-item>
         <el-form-item label="备注">
           <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
@@ -235,10 +233,25 @@ export default {
         { value: '2', label: '超级管理员' }
       ],
       // 组织选择框
-      ognOptions: [
-        { value: '1', label: 'XXX公司' },
-        { value: '2', label: '人力资源部' }
-      ],
+      selectedData: [],
+      selectParams: {
+        multiple: true,
+        clearable: true,
+        placeholder: '请选择'
+      },
+      treeParams: {
+        clickParent: false,
+        filterable: true,
+        'check-strictly': true,
+        'default-expand-all': true,
+        'expand-on-click-node': false,
+        data: [],
+        props: {
+          children: 'child',
+          label: 'name',
+          value: 'testId'
+        }
+      },
       // 导入弹窗表格数据
       importTableData: [
         { name: '用户名', number: 2 },
@@ -251,7 +264,26 @@ export default {
   created() {
     // this.getInit()
   },
+  mounted() {
+    let data = [
+      {
+        testId: '1',
+        name: 'XXXX公司',
+        child: [
+          {
+            testId: '11',
+            name: '人力资源部'
+          }
+        ]
+      }
+    ]
+    this.treeParams.data = data
+  },
   methods: {
+    // 树过滤
+    handleTreeSelectFilter(value) {
+      this.$refs.treeSelect.filterFun(value)
+    },
     // 初始化
     getInit() {
       let params = {
@@ -276,6 +308,7 @@ export default {
     },
     // 弹窗-保存
     handleSave() {
+      console.log(this.selectedData)
       this.addVisible = false
       this.addForm.showStatus = false
     },

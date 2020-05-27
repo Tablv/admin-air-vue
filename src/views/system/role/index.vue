@@ -198,7 +198,7 @@ export default {
       // 分配用户弹窗
       assignUserVisible: false,
       // 分配菜单抽屉
-      drawer: true,
+      drawer: false,
       // 导入弹窗
       importVisible: false,
       // 弹窗表单

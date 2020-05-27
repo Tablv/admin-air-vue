@@ -81,6 +81,18 @@
 .el-select {
   width: 100%;
 }
+.el-input-group__append {
+  background-color: #409EFF;
+  .el-button.is-disabled {
+    background-color: #a0cfff;
+    &:hover {
+      border-color: #a0cfff;;
+    }
+  }
+  .el-icon-search {
+    color: #fff;
+  }
+}
 // 日期选择器
 .el-date-editor {
   width: 100% !important;

@@ -48,7 +48,9 @@
         <el-row>
           <el-col :span="11">
             <el-form-item label="上级组织">
-              <el-input v-model="addForm.preOga"></el-input>
+              <el-input v-model="addForm.preOga" disabled class="input-with-select">
+                <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+              </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
@@ -91,13 +93,18 @@
         <el-button @click="handleClose">关闭</el-button>
       </div>
     </el-dialog>
+    <!-- 上级组织弹窗 -->
+    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
   </div>
 </template>
 
 <script>
+import treeDialog from '@/components/treeDialog'
 export default {
   name: 'dept',
-  components: {},
+  components: {
+    treeDialog
+  },
   data() {
     return {
       // 表格数据
@@ -106,6 +113,8 @@ export default {
       ],
       // 新增弹窗
       addVisible: false,
+      // 上级菜单弹窗
+      treeVisible: false,
       // 弹窗表单
       addForm: {
         preOga: '',
@@ -151,6 +160,18 @@ export default {
     handleClose() {
       this.addVisible = false
       this.isEdit = false
+    },
+    // 上级菜单弹窗-打开
+    handleOpenTreeDialog() {
+      this.treeVisible = true
+    },
+    // 上级组织弹窗-关闭
+    handleCloseTreeDialog(msg) {
+      this.treeVisible = msg
+    },
+    // 获取选择的上级组织
+    getCurrentMenu(data) {
+      this.addForm.preOga = data.label
     },
     // 表格-树数据
     loadData(row, treeNode, resolve) {

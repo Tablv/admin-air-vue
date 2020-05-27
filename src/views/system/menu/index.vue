@@ -54,7 +54,9 @@
         <el-row>
           <el-col :span="11">
             <el-form-item label="上级菜单">
-              <el-input v-model="addForm.preMenu" disabled></el-input>
+              <el-input v-model="addForm.preMenu" disabled class="input-with-select">
+                <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+              </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
@@ -71,7 +73,9 @@
           </el-col>
           <el-col :span="11" :offset="2">
             <el-form-item label="菜单图标">
-              <el-input v-model="addForm.menuIcon"></el-input>
+              <el-input v-model="addForm.menuIcon" class="input-with-select">
+                <el-button slot="append" icon="el-icon-search" @click="handleOpenIconDialog"></el-button>
+              </el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -105,13 +109,27 @@
         <el-button @click="handleClose">关闭</el-button>
       </div>
     </el-dialog>
+    <!-- 菜单图标弹窗 -->
+    <el-dialog title="图标选择（双击选中）" :visible.sync="iconVisible" width="60%" class="icon-dialog" :modal-append-to-body="false" :destroy-on-close="true">
+      <div class="icon-container" v-for="(item, index) in iconData" :key="index">
+        <div class="icon-item" @dblclick="handleSelectIcon(item)">
+          <i class="el-icon-edit"></i>
+          <span class="icon-name">{{item}}</span>
+        </div>
+      </div>
+    </el-dialog>
+    <!-- 上级菜单弹窗 -->
+    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
   </div>
 </template>
 
 <script>
+import treeDialog from '@/components/treeDialog'
 export default {
   name: 'menuM',
-  components: {},
+  components: {
+    treeDialog
+  },
   data() {
     return {
       // 平台选择框
@@ -128,6 +146,24 @@ export default {
       ],
       // 新增弹窗
       addVisible: false,
+      // 上级菜单弹窗
+      treeVisible: false,
+      // 菜单图标弹窗
+      iconVisible: false,
+      // 图标数据
+      iconData: [
+        'gw-icon gw-icon-qiehuandaochaxunmoshi',
+        'gw-icon gw-icon-jixianguanli',
+        'gw-icon gw-icon-renwucaiji',
+        'gw-icon gw-icon-shujuanquan',
+        'gw-icon gw-icon-shujuku',
+        'gw-icon gw-icon-sanjishijian',
+        'gw-icon gw-icon-suoxiao',
+        'gw-icon gw-icon-xitong',
+        'gw-icon gw-icon-tongyijiancha',
+        'gw-icon gw-icon-xitonganquan',
+        'gw-icon gw-icon-anquanjianbaotongzhiguanli'
+      ],
       // 弹窗表单
       addForm: {
         preMenu: '',
@@ -171,6 +207,27 @@ export default {
     handleClose() {
       this.addVisible = false
       this.isEdit = false
+    },
+    // 上级菜单弹窗-打开
+    handleOpenTreeDialog() {
+      this.treeVisible = true
+    },
+    // 上级菜单弹窗-关闭
+    handleCloseTreeDialog(msg) {
+      this.treeVisible = msg
+    },
+    // 获取选择的上级菜单
+    getCurrentMenu(data) {
+      this.addForm.preMenu = data.label
+    },
+    // 菜单图标弹窗-打开
+    handleOpenIconDialog() {
+      this.iconVisible = true
+    },
+    // 双击选择图标
+    handleSelectIcon(val) {
+      this.addForm.menuIcon = val
+      this.iconVisible = false
     },
     // 表格-树数据
     loadData(row, treeNode, resolve) {
@@ -217,5 +274,34 @@ export default {
 <style lang="scss" scoped>
 .el-select {
   width: 120px;
+}
+.icon-dialog {
+  /deep/ .el-dialog__body {
+    height: 289px;
+    padding: 10px;
+    overflow-y: auto;
+    .icon-container {
+      width: 25%;
+      padding: 10px;
+      float: left;
+      font-size: 14px;
+      .icon-item {
+        padding: 4px 12px;
+        line-height: 22px;
+        background-color: #f4f4f4;
+        color: #444;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        &:hover {
+          background-color: #e7e7e7;
+          border: 1px solid #adadad;
+          cursor: pointer;
+        }
+      }
+    }
+  }
 }
 </style>
