@@ -49,7 +49,7 @@ service.interceptors.response.use(
       // })
       return Promise.reject(new Error('网络异常'))
     } else {
-      return data
+      return Promise.resolve(data)
     }
   },
   error => {
