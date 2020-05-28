@@ -2,7 +2,7 @@
   <div class="container">
     <header class="header">
       <div class="header-left">
-        <div class="header-title">用户管理</div>
+        <div class="header-title">角色管理</div>
       </div>
       <div class="header-right">
         <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
@@ -44,25 +44,25 @@
         @sort-change="sortChange"
         style="width: 100%"
         header-cell-class-name="header-cell">
-        <el-table-column prop="name" label="姓名" v-if="checkList.includes('name')" sortable="custom">
+        <el-table-column prop="name" label="名称" v-if="checkList.includes('name')" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">姓名</span>
+            <span class="table-header-title">名称</span>
             <div @click.stop>
               <el-input
                 v-model="filter.nameFilter"
-                placeholder="姓名"
+                placeholder="名称"
                 @change="tableFilter($event, 'name')"/>
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="username" label="用户名" v-if="checkList.includes('username')" :formatter="formatter" sortable="custom">
+        <el-table-column prop="code" label="编码" v-if="checkList.includes('code')" :formatter="formatter" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">用户名</span>
+            <span class="table-header-title">编码</span>
             <div @click.stop>
               <el-input
-                v-model="filter.userNameFilter"
-                placeholder="用户名"
-                @change="tableFilter($event, 'userName')"/>
+                v-model="filter.codeFilter"
+                placeholder="编码"
+                @change="tableFilter($event, 'code')"/>
             </div>
           </template>
         </el-table-column>
@@ -86,9 +86,10 @@
         </el-table-column>
         <el-table-column prop="operation" label="操作" v-if="checkList.includes('operation')">
           <template slot-scope="scope">
-            <el-button type="warning" icon="el-icon-key" circle @click="handleResetPassword(scope.$index, scope.row)" />
             <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
             <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
+            <el-button type="success" icon="el-icon-s-custom" circle @click="handleAssignUser(scope.$index, scope.row)" />
+            <el-button type="info" icon="el-icon-s-tools" circle @click="handleAssignMenu(scope.$index, scope.row)" />
           </template>
         </el-table-column>
       </el-table>
@@ -113,13 +114,13 @@
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px">
         <el-row>
           <el-col :span="11">
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入姓名"></el-input>
+            <el-form-item label="名称" prop="name">
+              <el-input v-model="addForm.name" placeholder="请输入名称"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="用户名" prop="userName">
-              <el-input v-model="addForm.userName" placeholder="请输入用户名"></el-input>
+            <el-form-item label="编码" prop="code">
+              <el-input v-model="addForm.code" placeholder="请输入编码"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -128,24 +129,6 @@
             <el-radio :label="1">启用</el-radio>
             <el-radio :label="0">禁用</el-radio>
           </el-radio-group>
-        </el-form-item>
-        <el-form-item label="角色">
-          <el-select v-model="addForm.role" multiple filterable placeholder="请选择"@change="selectRole" clearable>
-            <el-option
-              v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-        </el-form-item>
-        <el-form-item label="组织">
-          <el-tree-select
-            v-model="selectedData"
-            :selectParams="selectParams"
-            :treeParams="treeParams"
-            @searchFun="handleTreeSelectFilter"
-            ref="treeSelect"/>
         </el-form-item>
         <el-form-item label="备注">
           <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
@@ -156,41 +139,47 @@
         <el-button @click="handleClose">关闭</el-button>
       </div>
     </el-dialog>
+    <!-- 分配用户 -->
+    <assign-user :assignUserVisible="assignUserVisible" @closeDialog="handleCloseAssignUserDialog"></assign-user>
+    <!-- 分配菜单 -->
+    <assign-menu :drawer="drawer" @closeDrawer="handleCloseDrawer"></assign-menu>
     <!-- 导入 -->
-    <importDialog :importVisible="importVisible" templateNum="SYS_USER" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></importDialog>
+    <import-dialog :importVisible="importVisible" templateNum="SYS_ROLE" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
   </div>
 </template>
 
 <script>
+import assignUser from './assignUserDialog'
+import assignMenu from './assignMenuDrawer'
 import importDialog from '@/components/importDialog'
-import { getUserList } from '@/api/system'
 export default {
-  name: 'user',
+  name: 'role',
   components: {
+    assignUser,
+    assignMenu,
     importDialog
   },
   data() {
     return {
       // 表格数据
       tableData: [
-        { name: '系统管理员', username: 'admin', status: 1, remark: '123' },
-        { name: '系统管理员', username: '', status: 0, remark: '' },
-        { name: '系统管理员', username: 'admin', status: 1, remark: '' }
+        { name: '访客', code: 'GUEST', status: 1, remark: '' },
+        { name: '超级管理员', code: 'SUPERADMIN', status: 1, remark: '' }
       ],
       // 表格配置
       headerList: [
-        { prop: 'name', label: '姓名' },
-        { prop: 'username', label: '用户名' },
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
         { prop: 'status', label: '状态' },
         { prop: 'remark', label: '备注' },
         { prop: 'operation', label: '操作' }
       ],
       // 表格配置选中
-      checkList: ['name', 'username', 'status', 'remark', 'operation'],
+      checkList: ['name', 'code', 'status', 'remark', 'operation'],
       // 表格过滤
       filter: {
         nameFilter: '',
-        userNameFilter: '',
+        codeFilter: '',
         statusFilter: '2',
         statusOptions: [
           { value: '2', label: ' ' },
@@ -206,14 +195,16 @@ export default {
       },
       // 新增弹窗
       addVisible: false,
+      // 分配用户弹窗
+      assignUserVisible: false,
+      // 分配菜单抽屉
+      drawer: false,
       // 导入弹窗
       importVisible: false,
       // 弹窗表单
       addForm: {
         name: '',
-        userName: '',
-        role: [],
-        organization: [],
+        code: '',
         remark: '',
         showStatus: false,
         status: 0
@@ -221,82 +212,21 @@ export default {
       // 弹窗表单必填项校验规则
       addRules: {
         name: [
-          { required: true, message: '请输入姓名', trigger: 'blur' }
+          { required: true, message: '请输入名称', trigger: 'blur' }
         ],
-        userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+        code: [
+          { required: true, message: '请输入编码', trigger: 'blur' }
         ]
-      },
-      // 角色选择框
-      roleOptions: [
-        { value: '1', label: '访客' },
-        { value: '2', label: '超级管理员' }
-      ],
-      // 组织选择框
-      selectedData: [],
-      selectParams: {
-        multiple: true,
-        clearable: true,
-        placeholder: '请选择'
-      },
-      treeParams: {
-        clickParent: false,
-        filterable: true,
-        'check-strictly': true,
-        'default-expand-all': true,
-        'expand-on-click-node': false,
-        data: [],
-        props: {
-          children: 'child',
-          label: 'name',
-          value: 'testId'
-        }
       },
       // 导入弹窗表格数据
       importTableData: [
-        { name: '用户名', number: 2 },
-        { name: '姓名', number: 3 },
-        { name: '状态', number: 4 },
-        { name: '密码', number: 5 }
+        { name: '状态', number: 3 },
+        { name: '编码', number: 2 },
+        { name: '名称', number: 1 }
       ]
     }
   },
-  created() {
-    // this.getInit()
-  },
-  mounted() {
-    let data = [
-      {
-        testId: '1',
-        name: 'XXXX公司',
-        child: [
-          {
-            testId: '11',
-            name: '人力资源部'
-          }
-        ]
-      }
-    ]
-    this.treeParams.data = data
-  },
   methods: {
-    // 树过滤
-    handleTreeSelectFilter(value) {
-      this.$refs.treeSelect.filterFun(value)
-    },
-    // 初始化
-    getInit() {
-      let params = {
-        r: 0.552986322181209,
-        order: 'asc',
-        offset: 0,
-        limit: 10,
-        _: 1589939099167
-      }
-      getUserList(params).then(res => {
-        console.log(res)
-      })
-    },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.addVisible = true
@@ -308,7 +238,6 @@ export default {
     },
     // 弹窗-保存
     handleSave() {
-      console.log(this.selectedData)
       this.addVisible = false
       this.addForm.showStatus = false
     },
@@ -361,27 +290,12 @@ export default {
     tableFilter(value, type) {
       if (type === 'name') {
         this.filter.nameFilter = value
-      } else if (type === 'userName') {
-        this.filter.userNameFilter = value
+      } else if (type === 'code') {
+        this.filter.codeFilter = value
       } else {
         this.filter.statusFilter = value
       }
       console.log(value, type)
-    },
-    // 表格操作-重置密码
-    handleResetPassword(index, row) {
-      console.log(index, row)
-      this.$confirm('确认重置吗？重置后将恢复到系统默认设置的密码！', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        closeOnClickModal: false,
-        closeOnPressEscape: false,
-        cancelButtonClass: 'messageBoxCancelButton'
-      }).then(action => {
-        if (action === 'confirm') {
-          console.log('确定重置')
-        }
-      }).catch(() => {})
     },
     // 表格操作-删除
     handleDelete(index, row) {
@@ -398,6 +312,22 @@ export default {
         }
       }).catch(() => {})
     },
+    // 表格操作-分配用户
+    handleAssignUser(index, row) {
+      this.assignUserVisible = true
+    },
+    // 分配用户弹窗-关闭
+    handleCloseAssignUserDialog(msg) {
+      this.assignUserVisible = msg
+    },
+    // 表格操作-分配菜单
+    handleAssignMenu(index, row) {
+      this.drawer = true
+    },
+    // 分配菜单抽屉-关闭
+    handleCloseDrawer(msg) {
+      this.drawer = msg
+    },
     // 分页-改变每页数量
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
@@ -409,7 +339,5 @@ export default {
   }
 }
 </script>
-
 <style lang="scss" scoped>
-
 </style>
