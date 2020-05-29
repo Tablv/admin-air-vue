@@ -83,7 +83,7 @@
 <script>
 import treeDialog from '@/components/treeDialog'
 export default {
-  name: 'dict',
+  name: 'DICT',
   components: {
     treeDialog
   },

@@ -19,6 +19,11 @@ export function getIconList(params) {
   return request.get('/json/icon_admin.json', params)
 }
 
+// 新增菜单
+export function doAddMenu(data) {
+  return request.post('/system/menu/save', data, true)
+}
+
 // 删除菜单
 export function doDeleteMenu(data) {
   return request.post('/system/menu/remove', data, true)

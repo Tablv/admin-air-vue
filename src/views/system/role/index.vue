@@ -153,7 +153,7 @@ import assignUser from './assignUserDialog'
 import assignMenu from './assignMenuDrawer'
 import importDialog from '@/components/importDialog'
 export default {
-  name: 'role',
+  name: 'SYS_ROLE',
   components: {
     assignUser,
     assignMenu,

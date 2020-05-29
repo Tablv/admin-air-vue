@@ -167,7 +167,7 @@ import { getUserList, getRoleList, getDeptList, doAddUser, doEditUser, doGetUser
 import { validName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
 export default {
-  name: 'user',
+  name: 'SYS_USER',
   components: {
     importDialog
   },

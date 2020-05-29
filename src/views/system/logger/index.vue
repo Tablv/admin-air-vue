@@ -111,7 +111,7 @@
 
 <script>
 export default {
-  name: 'logger',
+  name: 'SYS_LOG',
   data() {
     return {
       // 表格数据

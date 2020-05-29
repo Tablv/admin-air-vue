@@ -101,7 +101,7 @@
 <script>
 import treeDialog from '@/components/treeDialog'
 export default {
-  name: 'dept',
+  name: 'SYS_DEPT',
   components: {
     treeDialog
   },

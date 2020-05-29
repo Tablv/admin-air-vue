@@ -133,7 +133,7 @@
 
 <script>
 export default {
-  name: 'terminal',
+  name: 'SYS_TERMINAL',
   components: {},
   data() {
     return {

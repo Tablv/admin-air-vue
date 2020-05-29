@@ -115,7 +115,7 @@
 
 <script>
 export default {
-  name: 'resource',
+  name: 'SYSTEM_RESOURCE',
   components: {},
   data() {
     return {

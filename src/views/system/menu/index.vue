@@ -125,11 +125,11 @@
 </template>
 
 <script>
-import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doDeleteMenu } from '@/api/system/menu'
+import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
 import treeDialog from '@/components/treeDialog'
 export default {
-  name: 'menuM',
+  name: 'SYS_MENU',
   components: {
     treeDialog
   },
@@ -281,15 +281,24 @@ export default {
         if (valid) {
           let addForm = {}
           addForm = JSON.parse(JSON.stringify(this.addForm))
-          if (Object.keys(this.preMenu).length !== 0) {
-            addForm.lvl = this.preMenu.lvl + 1
-            addForm.terminalId = this.platform
-            addForm.parentId = this.preMenu.id
-          }
+          addForm.lvl = this.preMenu.lvl ? this.preMenu.lvl + 1 : 0
+          addForm.terminalId = this.platform
+          addForm.parentId = this.preMenu.id ? this.preMenu.id : ''
           console.log(addForm)
-          // this.addVisible = false
-          // this.isEdit = 1
-          // this.$refs['addForm'].resetFields()
+          if (this.isEdit === 1) {
+            doAddMenu(addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '新增成功',
+                  type: 'success'
+                })
+                this.getTableData()
+              }
+            })
+          }
+          this.addVisible = false
+          this.isEdit = 1
+          this.$refs['addForm'].resetFields()
         }
       })
     },
@@ -373,6 +382,7 @@ export default {
     },
     // 获取表格数据
     getTableData() {
+      this.tableData = []
       this.listLoading = true
       getMenuList({ nodeid: this.platform }).then(res => {
         this.listLoading = false
