@@ -5,12 +5,12 @@
         <div class="header-title">菜单管理</div>
       </div>
       <div class="header-right">
-        <el-select v-model="platform" filterable placeholder="请选择">
+        <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
           <el-option
             v-for="item in platformOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item.id"
+            :label="item.name"
+            :value="item.id">
           </el-option>
         </el-select>
         <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
@@ -24,8 +24,9 @@
         border
         lazy
         :load="loadData"
+        v-loading="listLoading"
         header-cell-class-name="header-cell"
-        :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+        :tree-props="{children: 'children', hasChildren: 'isParent'}">
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="code" label="编码"></el-table-column>
         <el-table-column prop="path" label="链接地址"></el-table-column>
@@ -33,7 +34,7 @@
         <el-table-column prop="sortNum" label="排序号"></el-table-column>
         <el-table-column prop="status" label="状态">
           <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 1 ? '#80B762' : 'red')}">{{ scope.row.status === 1 ? '启用' : '禁用' }}</span>
+            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="operation" label="操作">
@@ -46,61 +47,61 @@
       </el-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
-        <span>{{ isEdit ? '修改' : '新增' }}</span>
+        <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
         <el-row>
           <el-col :span="11">
-            <el-form-item label="上级菜单">
-              <el-input v-model="addForm.preMenu" disabled class="input-with-select">
-                <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+            <el-form-item label="上级菜单" prop="parentName">
+              <el-input v-model="addForm.parentName" disabled class="input-with-select">
+                <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
               </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="菜单名称" prop="menuName">
-              <el-input v-model="addForm.menuName" placeholder="请输入菜单名称"></el-input>
+            <el-form-item label="菜单名称" prop="name">
+              <el-input v-model="addForm.name" placeholder="请输入菜单名称"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="菜单编码" prop="menuCode">
-              <el-input v-model="addForm.menuCode" placeholder="请输入菜单编码"></el-input>
+            <el-form-item label="菜单编码" prop="code">
+              <el-input v-model="addForm.code" placeholder="请输入菜单编码"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="菜单图标">
-              <el-input v-model="addForm.menuIcon" class="input-with-select">
+            <el-form-item label="菜单图标" prop="iconClass">
+              <el-input v-model="addForm.iconClass" class="input-with-select">
                 <el-button slot="append" icon="el-icon-search" @click="handleOpenIconDialog"></el-button>
               </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="菜单地址">
-          <el-input v-model="addForm.menuAddress"></el-input>
+        <el-form-item label="菜单地址" prop="path">
+          <el-input v-model="addForm.path"></el-input>
         </el-form-item>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="权限">
-              <el-input v-model="addForm.auth" disabled></el-input>
+            <el-form-item label="权限" prop="permission">
+              <el-input v-model="addForm.permission" disabled></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="打开方式">
-              <el-radio-group v-model="addForm.openWay">
-                <el-radio :label="1">标签页 </el-radio>
-                <el-radio :label="0">新窗口</el-radio>
+            <el-form-item label="打开方式" prop="popout">
+              <el-radio-group v-model="addForm.popout">
+                <el-radio label="L">标签页 </el-radio>
+                <el-radio label="W">新窗口</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="菜单状态">
-          <el-radio-group v-model="addForm.menuStatus">
-            <el-radio :label="1">启用 </el-radio>
-            <el-radio :label="0">禁用</el-radio>
+        <el-form-item label="菜单状态" prop="status">
+          <el-radio-group v-model="addForm.status">
+            <el-radio label="0">启用 </el-radio>
+            <el-radio label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -119,11 +120,13 @@
       </div>
     </el-dialog>
     <!-- 上级菜单弹窗 -->
-    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
+    <tree-dialog :treeVisible="treeVisible" :treeData="treeData" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
   </div>
 </template>
 
 <script>
+import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doDeleteMenu } from '@/api/system/menu'
+import { doCheckRepeat } from '@/api/system/user'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'menuM',
@@ -131,86 +134,180 @@ export default {
     treeDialog
   },
   data() {
+    var validName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_MENU',
+          columnName: 'NAME',
+          value: value,
+          name: value
+        }
+        if (this.isEdit === 3) data.oldval = value
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('菜单名称已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
+    var validCode = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_MENU',
+          columnName: 'CODE',
+          value: value,
+          code: value
+        }
+        if (this.isEdit === 3) data.oldval = value
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('菜单编码已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
     return {
       // 平台选择框
-      platform: 0,
-      platformOptions: [
-        { value: 0, label: '后台管理平台' },
-        { value: 1, label: '测试终端平台' }
-      ],
+      platform: null,
+      platformOptions: [],
       // 表格数据
-      tableData: [
-        { id: 1, name: '系统管理', code: 'SYS', path: '', lvl: 0, sortNum: 100, status: 1, hasChildren: true },
-        { id: 2, name: '开发运维', code: 'BAYMAX_OO', path: '', lvl: 0, sortNum: 5000, status: 1, hasChildren: true },
-        { id: 3, name: '数据源', code: 'STORAGE', path: '/storage', lvl: 0, sortNum: 5001, status: 0 }
-      ],
+      tableData: [],
+      // 表格loading
+      listLoading: false,
       // 新增弹窗
       addVisible: false,
       // 上级菜单弹窗
       treeVisible: false,
+      // 上级菜单弹窗数据
+      treeData: [],
+      // 上级菜单数据
+      preMenu: {},
       // 菜单图标弹窗
       iconVisible: false,
       // 图标数据
-      iconData: [
-        'gw-icon gw-icon-qiehuandaochaxunmoshi',
-        'gw-icon gw-icon-jixianguanli',
-        'gw-icon gw-icon-renwucaiji',
-        'gw-icon gw-icon-shujuanquan',
-        'gw-icon gw-icon-shujuku',
-        'gw-icon gw-icon-sanjishijian',
-        'gw-icon gw-icon-suoxiao',
-        'gw-icon gw-icon-xitong',
-        'gw-icon gw-icon-tongyijiancha',
-        'gw-icon gw-icon-xitonganquan',
-        'gw-icon gw-icon-anquanjianbaotongzhiguanli'
-      ],
+      iconData: [],
       // 弹窗表单
       addForm: {
-        preMenu: '',
-        menuName: '',
-        menuCode: '',
-        menuIcon: '',
-        menuAddress: '',
-        auth: '',
-        openWay: 1,
-        menuStatus: 1
+        parentName: '',
+        name: '',
+        code: '',
+        iconClass: '',
+        path: '',
+        permission: '',
+        popout: 'L',
+        status: '0'
       },
       // 弹窗表单必填项校验规则
       addRules: {
-        menuName: [
-          { required: true, message: '请输入菜单名称', trigger: 'blur' }
+        name: [
+          { required: true, validator: validName, trigger: 'blur' }
         ],
-        menuCode: [
-          { required: true, message: '请输入菜单编码', trigger: 'blur' }
+        code: [
+          { required: true, validator: validCode, trigger: 'blur' }
         ]
       },
       // 是否编辑弹窗
-      isEdit: false
+      isEdit: 1
     }
   },
+  watch: {
+    'addForm.code': {
+      handler: function() {
+        this.addForm.permission = this.addForm.code.toLowerCase()
+        this.addForm.code = this.addForm.code.toUpperCase()
+      }
+    }
+  },
+  created() {
+    this.getInit()
+  },
   methods: {
+    // 初始化
+    getInit() {
+      this.listLoading = true
+      // 获取全部终端数据
+      getAllTerminal().then(res => {
+        let { success, result } = res
+        // if (success === true) {}
+        this.platformOptions = result
+        this.platform = result[0].id
+        // 获取表格数据
+        getMenuList({ nodeid: this.platform }).then(res => {
+          this.listLoading = false
+          let { success, result } = res
+          if (success === true) {
+            this.tableData = result
+          }
+        })
+      })
+    },
+    // 表格-树数据
+    loadData(row, treeNode, resolve) {
+      getMenuList({ nodeid: row.id, parentid: row.parentId }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          resolve(result)
+        }
+      })
+    },
+    // 改变终端
+    handleChangeTerminal(val) {
+      this.platform = val
+      this.listLoading = true
+      getMenuList({ nodeid: val }).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.tableData = result
+        }
+      })
+    },
     // 新增弹窗-打开
     handleOpenAdd() {
+      this.isEdit = 1
       this.addVisible = true
-    },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.isEdit = false
     },
     // 弹窗-保存
     handleSave() {
-      this.addVisible = false
-      this.isEdit = false
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          let addForm = {}
+          addForm = JSON.parse(JSON.stringify(this.addForm))
+          if (Object.keys(this.preMenu).length !== 0) {
+            addForm.lvl = this.preMenu.lvl + 1
+            addForm.terminalId = this.platform
+            addForm.parentId = this.preMenu.id
+          }
+          console.log(addForm)
+          // this.addVisible = false
+          // this.isEdit = 1
+          // this.$refs['addForm'].resetFields()
+        }
+      })
     },
     // 弹窗-关闭
     handleClose() {
       this.addVisible = false
-      this.isEdit = false
+      this.isEdit = 1
+      this.$refs['addForm'].resetFields()
     },
     // 上级菜单弹窗-打开
     handleOpenTreeDialog() {
       this.treeVisible = true
+      getPreMenuList({ menuId: this.platform }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.treeData = result
+        }
+      })
     },
     // 上级菜单弹窗-关闭
     handleCloseTreeDialog(msg) {
@@ -218,55 +315,72 @@ export default {
     },
     // 获取选择的上级菜单
     getCurrentMenu(data) {
-      this.addForm.preMenu = data.label
+      console.log(data)
+      this.preMenu = data
+      this.addForm.parentName = data.name
     },
     // 菜单图标弹窗-打开
     handleOpenIconDialog() {
       this.iconVisible = true
+      getIconList().then(res => {
+        this.iconData = res
+      })
     },
     // 双击选择图标
     handleSelectIcon(val) {
-      this.addForm.menuIcon = val
+      this.addForm.iconClass = val
       this.iconVisible = false
-    },
-    // 表格-树数据
-    loadData(row, treeNode, resolve) {
-      let allData = [
-            { id: 11, parentId: 1, name: '用户管理', code: 'SYS_USER', path: '/system/user', lvl: 1, sortNum: 1, status: 1 },
-            { id: 21, parentId: 2, name: '代码生成', code: 'BAYMAX_CODE', path: '/baymax/coder', lvl: 1, sortNum: 0, status: 1 }
-      ]
-      let data = allData.filter(item => item.parentId === row.id)
-      setTimeout(() => {
-        resolve(data)
-      }, 1000)
     },
     // 表格操作-新增
     handleAdd(index, row) {
+      this.isEdit = 2
       this.addVisible = true
     },
     // 表格操作-编辑
     handleEdit(index, row) {
-      this.isEdit = true
+      this.isEdit = 3
       this.addVisible = true
     },
     // 表格操作-删除
     handleDelete(index, row) {
       console.log(index, row)
-      this.$message({
-        message: '存在子节点，请先删除子节点！',
-        type: 'warning'
-      })
-      this.$confirm('确认删除吗？', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        closeOnClickModal: false,
-        closeOnPressEscape: false,
-        cancelButtonClass: 'messageBoxCancelButton'
-      }).then(action => {
-        if (action === 'confirm') {
-          console.log('确定删除')
+      if (row.isParent) {
+        this.$message({
+          message: '存在子节点，请先删除子节点！',
+          type: 'warning'
+        })
+      } else {
+        this.$confirm('确认删除吗？', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          closeOnClickModal: false,
+          closeOnPressEscape: false,
+          cancelButtonClass: 'messageBoxCancelButton'
+        }).then(action => {
+          if (action === 'confirm') {
+            doDeleteMenu({ id: row.id }).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '删除成功',
+                  type: 'success'
+                })
+                this.getTableData()
+              }
+            })
+          }
+        }).catch(() => {})
+      }
+    },
+    // 获取表格数据
+    getTableData() {
+      this.listLoading = true
+      getMenuList({ nodeid: this.platform }).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.tableData = result
         }
-      }).catch(() => {})
+      })
     }
   }
 }

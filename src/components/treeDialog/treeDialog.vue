@@ -1,6 +1,6 @@
 <template>
   <div class="tree-dialog">
-    <el-dialog :modal-append-to-body="false" :visible.sync="treeVisible" :before-close="handleCloseTree" :destroy-on-close="true" width="30%">
+    <el-dialog :modal-append-to-body="false" :visible.sync="treeVisible" :before-close="handleClose" :destroy-on-close="true" width="30%">
       <div slot="title" class="dialog-title">
         <span>选择</span>
       </div>
@@ -33,6 +33,13 @@ export default {
     treeVisible: {
       type: Boolean,
       default: false
+    },
+    // 树数据
+    treeData: {
+      type: Array,
+      default: () => {
+        return []
+      }
     }
   },
   computed: {},
@@ -44,44 +51,17 @@ export default {
   data() {
     return {
       filterText: '',
-      treeData: [
-        {
-          label: '系统管理',
-          menuId: 1,
-          children: [{
-            label: '用户管理',
-            menuId: 11
-          }]
-        },
-        {
-          label: '开发运维',
-          menuId: 2,
-          children: [{
-            label: '代码生成',
-            menuId: 21
-          }]
-        },
-        {
-          label: '数据源',
-          menuId: 3
-        }
-      ],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'name'
       }
     }
   },
-  created() {},
-  mounted() {},
   methods: {
     // 筛选
     filterNode(value, data) {
       if (!value) return true
-      return data.label.indexOf(value) !== -1
-    },
-    handleCloseTree() {
-      this.$emit('closeDialog', false)
+      return data.name.indexOf(value) !== -1
     },
     handleSave() {
       this.$emit('getCurrentNode', this.$refs.tree.getCurrentNode())

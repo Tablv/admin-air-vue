@@ -120,7 +120,7 @@
           </el-col>
           <el-col :span="11" :offset="2">
             <el-form-item label="用户名" prop="username">
-              <el-input v-model="addForm.username" placeholder="请输入用户名"></el-input>
+              <el-input v-model="addForm.username" placeholder="请输入用户名" :disabled="showStatus"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
@@ -131,7 +131,7 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色" prop="roleIds">
-          <el-select v-model="addForm.roleIds" multiple filterable placeholder="请选择"@change="selectRole" clearable>
+          <el-select v-model="addForm.roleIds" multiple filterable placeholder="请选择" @change="selectRole" clearable>
             <el-option
               v-for="item in roleOptions"
               :key="item.id"
@@ -163,8 +163,8 @@
 </template>
 
 <script>
-import { getUserList, getRoleList, getDeptList, doAddUser, doGetUserInfo, doResetPwd, doDeleteUser } from '@/api/system'
-import { validName, validUserName } from '@/utils/validate'
+import { getUserList, getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
+import { validName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
 export default {
   name: 'user',
@@ -172,14 +172,34 @@ export default {
     importDialog
   },
   data() {
+    var validUserName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else if (!/^[a-zA-Z0-9]+$/.test(value)) {
+        callback(new Error('必须为英文或数字'))
+      } else {
+        let data = {
+          tableName: 'AD_USER',
+          columnName: 'USERNAME',
+          value: value,
+          username: value
+        }
+        if (this.showStatus) data.oldval = value
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('用户名已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
     return {
       // 初始化参数
       initParams: {
-        r: Math.random(),
         order: 'asc',
         offset: 0,
-        limit: 10,
-        _: new Date().getTime()
+        limit: 10
       },
       // 表格数据
       tableData: [],
@@ -230,10 +250,10 @@ export default {
       // 弹窗表单必填项校验规则
       addRules: {
         name: [
-          { required: true, validator: validName, trigger: ['blur', 'change'] }
+          { required: true, validator: validName, trigger: 'blur' }
         ],
         username: [
-          { required: true, validator: validUserName, trigger: ['blur', 'change'] }
+          { required: true, validator: validUserName, trigger: 'blur' }
         ]
       },
       // 角色选择框
@@ -289,13 +309,13 @@ export default {
     // 新增弹窗---打开
     handleOpenAdd() {
       this.addVisible = true
-      getRoleList({ r: Math.random(), _type: 'query' }).then(res => {
+      getRoleList().then(res => {
         let { success, result } = res
         if (success === true) {
           this.roleOptions = result
         }
       })
-      getDeptList({ deptId: 0, r: Math.random() }).then(res => {
+      getDeptList({ deptId: 0 }).then(res => {
         let { success, result } = res
         // if (success === true) {}
         this.$refs.treeSelect.treeDataUpdateFun(result)
@@ -305,19 +325,56 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          if (!this.showStatus) delete this.addForm.status
-          if (this.addForm.roleIds.length === 0) delete this.addForm.roleIds
-          if (this.addForm.depts.length === 0) delete this.addForm.depts
-          console.log(this.addForm)
-          // doAddUser().then(res => {
-          //   this.addVisible = false
-          //   this.showStatus = false
-          // })
-          // this.$message({
-          //   message: '操作成功',
-          //   type: 'success'
-          // })
-          // this.$refs['addForm'].resetFields()
+          let addForm = {}
+          addForm = JSON.parse(JSON.stringify(this.addForm))
+          if (!this.showStatus) delete addForm.status
+          if (addForm.roleIds && addForm.roleIds.length > 0) {
+            addForm.roleIds = addForm.roleIds.join(',')
+          } else {
+            delete addForm.roleIds
+          }
+          if (addForm.depts && addForm.depts.length > 0) {
+            addForm.depts = addForm.depts.join(',')
+          } else {
+            delete addForm.depts
+          }
+          if (!this.showStatus) {
+            doAddUser(addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          } else {
+            let editForm = {}
+            editForm = {
+              id: addForm.id,
+              name: addForm.name ? addForm.name : null,
+              username: addForm.username ? addForm.username : null,
+              status: this.showStatus ? addForm.status : null,
+              roleIds: addForm.roleIds ? addForm.roleIds : null,
+              depts: addForm.depts ? addForm.depts : null,
+              remark: addForm.remark ? addForm.remark : null
+            }
+            Object.keys(editForm).forEach(item => {
+              if (editForm[item] === null) delete editForm[item]
+            })
+            doEditUser(editForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          }
+          this.addVisible = false
+          this.showStatus = false
+          this.$refs['addForm'].resetFields()
         }
       })
     },
@@ -331,25 +388,23 @@ export default {
     handleEdit(index, row) {
       this.showStatus = true
       this.addVisible = true
-      getRoleList({ r: Math.random(), _type: 'query' }).then(res => {
+      getRoleList().then(res => {
         let { success, result } = res
         if (success === true) {
           this.roleOptions = result
         }
       })
-      getDeptList({ deptId: 0, r: Math.random() }).then(res => {
+      getDeptList({ deptId: 0 }).then(res => {
         let { success, result } = res
         // if (success === true) {}
         this.$refs.treeSelect.treeDataUpdateFun(result)
       })
-      doGetUserInfo({ id: row.id, r: Math.random() }).then(res => {
+      doGetUserInfo({ id: row.id }).then(res => {
         let { success, result } = res
         if (success === true) {
-          console.log(result)
           this.addForm = result
-          this.addForm.roleIds = result.roleIds.split(', ')
-          this.addForm.depts = result.depts.split(', ')
-          console.log(this.addForm)
+          result.roleIds !== '' ? this.addForm.roleIds = result.roleIds.split(', ') : this.addForm.roleIds = []
+          result.depts !== '' ? this.addForm.depts = result.depts.split(', ') :this.addForm.depts = []
         }
       })
     },
@@ -420,7 +475,7 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          doResetPwd({ userId: row.id, r: Math.random() }).then(res => {
+          doResetPwd({ userId: row.id }).then(res => {
             if (res.success === true) {
               this.$message({
                 message: '操作成功',
@@ -441,7 +496,7 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          doDeleteUser({ id: row.id, r: Math.random() }).then(res => {
+          doDeleteUser({ id: row.id }).then(res => {
             if (res.success === true) {
               this.$message({
                 message: '操作成功',
@@ -455,11 +510,15 @@ export default {
     },
     // 分页---改变每页数量
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      this.page.pageSize = val
+      this.initParams.limit = val
+      this.getInit()
     },
     // 分页---改变页码
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      this.page.pageNum = val
+      this.initParams.offset = (val - 1) * this.initParams.limit
+      this.getInit()
     }
   }
 }
