@@ -12,11 +12,6 @@ export const constantRoutes = [
     hidden: true
   },
   {
-    path: '/404',
-    component: () => import('@/views/404'),
-    hidden: true
-  },
-  {
     path: '/',
     component: Layout,
     hidden: true,
@@ -29,7 +24,16 @@ export const constantRoutes = [
     }]
   },
   {
+    path: '/404',
+    component: () => import('@/views/404'),
+    hidden: true
+  }
+]
+
+export const asyncRoutes = [
+  {
     path: '/system',
+    name: 'SYS',
     component: Layout,
     redirect: 'noRedirect',
     meta: { title: '系统管理', icon: 'dashboard' },
@@ -37,55 +41,60 @@ export const constantRoutes = [
     children: [
       {
         path: 'user',
-        name: 'user',
+        name: 'SYS_USER',
         component: () => import('@/views/system/user/index'),
         meta: { title: '用户管理' }
       },
       {
         path: 'menu',
-        name: 'menuM',
+        name: 'SYS_MENU',
         component: () => import('@/views/system/menu/index'),
         meta: { title: '菜单管理' }
       },
       {
         path: 'role',
-        name: 'role',
+        name: 'SYS_ROLE',
         component: () => import('@/views/system/role/index'),
         meta: { title: '角色管理' }
       },
       {
         path: 'logger',
-        name: 'logger',
+        name: 'SYS_LOG',
         component: () => import('@/views/system/logger/index'),
         meta: { title: '日志管理' }
       },
       {
         path: 'terminal',
-        name: 'terminal',
+        name: 'SYS_TERMINAL',
         component: () => import('@/views/system/terminal/index'),
         meta: { title: '终端管理' }
       },
       {
         path: 'dept',
-        name: 'dept',
+        name: 'SYS_DEPT',
         component: () => import('@/views/system/dept/index'),
         meta: { title: '组织管理' }
       },
       {
         path: 'resource',
-        name: 'resource',
+        name: 'SYSTEM_RESOURCE',
         component: () => import('@/views/system/resource/index'),
         meta: { title: '资源管理' }
       },
       {
         path: 'dict',
-        name: 'dict',
+        name: 'DICT',
         component: () => import('@/views/system/dict/index'),
         meta: { title: '数据维护' }
+      },
+      {
+        path: 'di2ct',
+        name: 'DI2CT',
+        component: () => import('@/views/system/dict/index'),
+        meta: { title: '数据2维护' }
       }
     ]
-  },
-  { path: '*', redirect: '/404', hidden: true }
+  }
 ]
 
 const createRouter = () => new Router({
@@ -98,7 +107,6 @@ const router = createRouter()
 
 export function resetRouter() {
   const newRouter = createRouter()
-  // reset router
   router.matcher = newRouter.matcher
 }
 
