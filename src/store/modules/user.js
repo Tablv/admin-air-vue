@@ -62,7 +62,6 @@ const actions = {
   getInfo({ commit }, appkey) {
     return new Promise((resolve, reject) => {
       loadMenu(appkey).then(response => {
-        debugger
         const { result } = response
         const routerList = handleRoute(result, asyncRoutes).concat(constantRoutes)
         commit('SET_ROUTER', routerList)
