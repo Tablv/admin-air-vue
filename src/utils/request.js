@@ -5,16 +5,17 @@ import store from '@/store'
 import { getToken } from '@/utils/auth'
 import qs from 'qs'
 
-// create an axios instance
 const baseURL = process.env.VUE_APP_BASE_API
 
 const axiosConfig = {
-  // url = base url + request url
   baseURL,
   timeout: 5000
 }
 const service = axios.create(axiosConfig)
-// request interceptor
+
+/**
+ * 请求拦截
+ */
 service.interceptors.request.use(
   config => {
     if (store.getters.token) {
@@ -23,12 +24,13 @@ service.interceptors.request.use(
     return config
   },
   error => {
-    console.error(error) // for debug
     return Promise.reject(error)
   }
 )
 
-// response interceptor
+/**
+ * 相应拦截
+ */
 service.interceptors.response.use(
   response => {
     const { data, status } = response
@@ -62,6 +64,7 @@ service.interceptors.response.use(
   }
 )
 
+// 导出request
 const request = {
 
   get: (url, params, isJson = false) => {
@@ -96,4 +99,5 @@ const request = {
     }
   }
 }
+
 export default request

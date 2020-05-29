@@ -9,5 +9,9 @@ export function getInfo(token) {
 }
 
 export function logout() {
-  return request('logout')
+  return request.post('/doLogout')
+}
+
+export function loadMenu(appKey) {
+  return request.get('/loadMenu', appKey)
 }

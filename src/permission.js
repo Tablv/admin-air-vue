@@ -1,12 +1,12 @@
 import router from './router'
-// import store from './store'
-// import { Message } from 'element-ui'
+import store from './store'
 import NProgress from 'nprogress' // progress bar
-import 'nprogress/nprogress.css' // progress bar style
 import { getToken } from '@/utils/auth' // get token from cookie
 import getPageTitle from '@/utils/get-page-title'
+import 'nprogress/nprogress.css' // progress bar style
 
-NProgress.configure({ showSpinner: false }) // NProgress Configuration
+// NProgress Configuration
+NProgress.configure({ showSpinner: false })
 
 router.beforeEach(async(to, from, next) => {
   // 进度条开始
@@ -20,33 +20,32 @@ router.beforeEach(async(to, from, next) => {
 
   // 存在token
   if (hasToken) {
-    console.log(to.path );
-
     // 如果是登录 直接重定向到首页
     if (to.path === '/login') {
-      next({ path: '/' })
+      next({ path: '/index' })
       NProgress.done()
     } else {
-      next()
-      // 用户信息
-      // const hasGetUserInfo = store.getters.name
-      // if (hasGetUserInfo) {
-      //   next()
-      // } else {
-      //   // 不存在用户信息，尝试去获取，不然就重新登录
-      //   try {
-      //     // get user info
-      //     await store.dispatch('user/getInfo')
-
-      //     next()
-      //   } catch (error) {
-      //     // remove token and go to login page to re-login
-      //     await store.dispatch('user/resetToken')
-      //     Message.error(error || 'Has Error')
-      //     next(`/login?redirect=${to.path}`)
-      //     NProgress.done()
-      //   }
-      // }
+      if (store.state.user.routerList.length) {
+        return next()
+      } else {
+        try {
+          store.dispatch('user/getInfo', { appKey: 'ynRhty3N' }).then(
+            routerList => {
+              router.addRoutes(routerList)
+              router.options.routes = routerList
+              // router.addRoutes([{ path: '*', redirect: '/404', hidden: true }])
+              next({ path: '/index' })
+              // next(to)
+            }
+          )
+        } catch (error) {
+          await store.dispatch('user/resetToken')
+          next({
+            path: '/login'
+          })
+          NProgress.done()
+        }
+      }
     }
   } else {
     /* 没有token */
@@ -64,6 +63,5 @@ router.beforeEach(async(to, from, next) => {
 })
 
 router.afterEach(() => {
-  // finish progress bar
   NProgress.done()
 })
