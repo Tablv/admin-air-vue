@@ -6,7 +6,7 @@
       </div>
       <div class="header-right">
         <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-        <el-button icon="el-icon-refresh"></el-button>
+        <el-button icon="el-icon-refresh" @click="getInit"></el-button>
         <el-dropdown trigger="click" @command="handleOpenImportDialog">
           <el-button icon="el-icon-download"><i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
@@ -14,7 +14,7 @@
             <el-dropdown-item command="import">导入 Excel</el-dropdown-item>
           </el-dropdown-menu>
         </el-dropdown>
-        <el-dropdown trigger="click" @command="">
+        <el-dropdown trigger="click">
           <el-button icon="el-icon-upload2">
             <i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
@@ -43,13 +43,14 @@
         size="medium"
         @sort-change="sortChange"
         style="width: 100%"
+        v-loading="listLoading"
         header-cell-class-name="header-cell">
         <el-table-column prop="name" label="姓名" v-if="checkList.includes('name')" sortable="custom">
           <template slot="header" slot-scope="scope">
             <span class="table-header-title">姓名</span>
             <div @click.stop>
               <el-input
-                v-model="filter.nameFilter"
+                v-model="filter.name"
                 placeholder="姓名"
                 @change="tableFilter($event, 'name')"/>
             </div>
@@ -60,18 +61,18 @@
             <span class="table-header-title">用户名</span>
             <div @click.stop>
               <el-input
-                v-model="filter.userNameFilter"
+                v-model="filter.username"
                 placeholder="用户名"
-                @change="tableFilter($event, 'userName')"/>
+                @change="tableFilter($event, 'username')"/>
             </div>
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" v-if="checkList.includes('status')" sortable="custom">
           <template slot="header" slot-scope="scope">
             <span class="table-header-title">状态</span>
-            <el-select v-model="filter.statusFilter" placeholder="" @change="tableFilter($event, 'status')">
+            <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
               <el-option
-                v-for="item in filter.statusOptions"
+                v-for="item in statusOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
@@ -79,7 +80,7 @@
             </el-select>
           </template>
           <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 1 ? '#80B762' : 'red')}">{{ scope.row.status === 1 ? '启用' : '禁用' }}</span>
+            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" v-if="checkList.includes('remark')" :formatter="formatter" sortable="custom">
@@ -97,7 +98,7 @@
           background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="[5, 10, 20, 50, 100]"
           :page-size="page.pageSize"
           :current-page="page.pageNum"
           layout="sizes, total, next, pager, prev"
@@ -106,9 +107,9 @@
       </div>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
-        <span>{{ addForm.showStatus ? '修改' : '新增' }}</span>
+        <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px">
         <el-row>
@@ -118,37 +119,37 @@
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="用户名" prop="userName">
-              <el-input v-model="addForm.userName" placeholder="请输入用户名"></el-input>
+            <el-form-item label="用户名" prop="username">
+              <el-input v-model="addForm.username" placeholder="请输入用户名"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="状态" v-if="addForm.showStatus">
+        <el-form-item label="状态" v-if="showStatus" prop="status">
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
+            <el-radio :label="0">启用</el-radio>
+            <el-radio :label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="角色">
-          <el-select v-model="addForm.role" multiple filterable placeholder="请选择"@change="selectRole" clearable>
+        <el-form-item label="角色" prop="roleIds">
+          <el-select v-model="addForm.roleIds" multiple filterable placeholder="请选择"@change="selectRole" clearable>
             <el-option
               v-for="item in roleOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
             </el-option>
           </el-select>
         </el-form-item>
-        <el-form-item label="组织">
+        <el-form-item label="组织" prop="depts">
           <el-tree-select
-            v-model="selectedData"
+            v-model="addForm.depts"
             :selectParams="selectParams"
             :treeParams="treeParams"
             @searchFun="handleTreeSelectFilter"
             ref="treeSelect"/>
         </el-form-item>
-        <el-form-item label="备注">
-          <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
+        <el-form-item label="备注" prop="remark">
+          <el-input type="textarea" :rows="5" v-model="addForm.remark"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -162,8 +163,9 @@
 </template>
 
 <script>
+import { getUserList, getRoleList, getDeptList, doAddUser, doGetUserInfo, doResetPwd, doDeleteUser } from '@/api/system'
+import { validName, validUserName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
-import { getUserList } from '@/api/system'
 export default {
   name: 'user',
   components: {
@@ -171,12 +173,18 @@ export default {
   },
   data() {
     return {
+      // 初始化参数
+      initParams: {
+        r: Math.random(),
+        order: 'asc',
+        offset: 0,
+        limit: 10,
+        _: new Date().getTime()
+      },
       // 表格数据
-      tableData: [
-        { name: '系统管理员', username: 'admin', status: 1, remark: '123' },
-        { name: '系统管理员', username: '', status: 0, remark: '' },
-        { name: '系统管理员', username: 'admin', status: 1, remark: '' }
-      ],
+      tableData: [],
+      // 表格loading
+      listLoading: false,
       // 表格配置
       headerList: [
         { prop: 'name', label: '姓名' },
@@ -189,15 +197,16 @@ export default {
       checkList: ['name', 'username', 'status', 'remark', 'operation'],
       // 表格过滤
       filter: {
-        nameFilter: '',
-        userNameFilter: '',
-        statusFilter: '2',
-        statusOptions: [
-          { value: '2', label: ' ' },
-          { value: '1', label: '启用' },
-          { value: '0', label: '禁用' }
-        ]
+        name: '',
+        username: '',
+        status: '2'
       },
+      statusOptions: [
+        { value: '2', label: ' ' },
+        { value: '0', label: '启用' },
+        { value: '1', label: '禁用' }
+      ],
+      filterParams: {},
       // 分页
       page: {
         pageSize: 10,
@@ -211,29 +220,24 @@ export default {
       // 弹窗表单
       addForm: {
         name: '',
-        userName: '',
-        role: [],
-        organization: [],
+        username: '',
+        roleIds: [],
+        depts: [],
         remark: '',
-        showStatus: false,
         status: 0
       },
+      showStatus: false,
       // 弹窗表单必填项校验规则
       addRules: {
         name: [
-          { required: true, message: '请输入姓名', trigger: 'blur' }
+          { required: true, validator: validName, trigger: ['blur', 'change'] }
         ],
-        userName: [
-          { required: true, message: '请输入用户名', trigger: 'blur' }
+        username: [
+          { required: true, validator: validUserName, trigger: ['blur', 'change'] }
         ]
       },
       // 角色选择框
-      roleOptions: [
-        { value: '1', label: '访客' },
-        { value: '2', label: '超级管理员' }
-      ],
-      // 组织选择框
-      selectedData: [],
+      roleOptions: [],
       selectParams: {
         multiple: true,
         clearable: true,
@@ -247,9 +251,9 @@ export default {
         'expand-on-click-node': false,
         data: [],
         props: {
-          children: 'child',
+          children: 'children',
           label: 'name',
-          value: 'testId'
+          value: 'id'
         }
       },
       // 导入弹窗表格数据
@@ -262,115 +266,152 @@ export default {
     }
   },
   created() {
-    // this.getInit()
+    this.getInit()
   },
-  mounted() {
-    let data = [
-      {
-        testId: '1',
-        name: 'XXXX公司',
-        child: [
-          {
-            testId: '11',
-            name: '人力资源部'
-          }
-        ]
-      }
-    ]
-    this.treeParams.data = data
-  },
+  mounted() {},
   methods: {
-    // 树过滤
+    // 初始化
+    getInit() {
+      this.listLoading = true
+      getUserList(this.initParams).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.tableData = result.list
+          this.page = {
+            pageSize: result.pageSize,
+            pageNum: result.pageNum,
+            total: result.total
+          }
+        }
+      })
+    },
+    // 新增弹窗---打开
+    handleOpenAdd() {
+      this.addVisible = true
+      getRoleList({ r: Math.random(), _type: 'query' }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.roleOptions = result
+        }
+      })
+      getDeptList({ deptId: 0, r: Math.random() }).then(res => {
+        let { success, result } = res
+        // if (success === true) {}
+        this.$refs.treeSelect.treeDataUpdateFun(result)
+      })
+    },
+    // 弹窗---保存
+    handleSave() {
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          if (!this.showStatus) delete this.addForm.status
+          if (this.addForm.roleIds.length === 0) delete this.addForm.roleIds
+          if (this.addForm.depts.length === 0) delete this.addForm.depts
+          console.log(this.addForm)
+          // doAddUser().then(res => {
+          //   this.addVisible = false
+          //   this.showStatus = false
+          // })
+          // this.$message({
+          //   message: '操作成功',
+          //   type: 'success'
+          // })
+          // this.$refs['addForm'].resetFields()
+        }
+      })
+    },
+    // 弹窗---关闭
+    handleClose() {
+      this.addVisible = false
+      this.showStatus = false
+      this.$refs['addForm'].resetFields()
+    },
+    // 表格操作---编辑
+    handleEdit(index, row) {
+      this.showStatus = true
+      this.addVisible = true
+      getRoleList({ r: Math.random(), _type: 'query' }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.roleOptions = result
+        }
+      })
+      getDeptList({ deptId: 0, r: Math.random() }).then(res => {
+        let { success, result } = res
+        // if (success === true) {}
+        this.$refs.treeSelect.treeDataUpdateFun(result)
+      })
+      doGetUserInfo({ id: row.id, r: Math.random() }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          console.log(result)
+          this.addForm = result
+          this.addForm.roleIds = result.roleIds.split(', ')
+          this.addForm.depts = result.depts.split(', ')
+          console.log(this.addForm)
+        }
+      })
+    },
+    // 弹窗---选择角色
+    selectRole(val) {
+      this.addForm.roleIds = val
+    },
+    // 弹窗---组织树过滤
     handleTreeSelectFilter(value) {
       this.$refs.treeSelect.filterFun(value)
     },
-    // 初始化
-    getInit() {
-      let params = {
-        r: 0.552986322181209,
-        order: 'asc',
-        offset: 0,
-        limit: 10,
-        _: 1589939099167
-      }
-      getUserList(params).then(res => {
-        console.log(res)
-      })
-    },
-    // 新增弹窗-打开
-    handleOpenAdd() {
-      this.addVisible = true
-    },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.addForm.showStatus = false
-    },
-    // 弹窗-保存
-    handleSave() {
-      console.log(this.selectedData)
-      this.addVisible = false
-      this.addForm.showStatus = false
-    },
-    // 弹窗-关闭
-    handleClose() {
-      this.addVisible = false
-      this.addForm.showStatus = false
-    },
-    // 表格操作-编辑
-    handleEdit(index, row) {
-      console.log(index, row)
-      this.addForm.showStatus = true
-      this.addVisible = true
-    },
-    // 弹窗-选择角色
-    selectRole(val) {
-      console.log(val)
-    },
-    // 弹窗-选择组织
-    selectOgn(val) {
-      console.log(val)
-    },
-    // 导入弹窗-打开
+    // 导入弹窗---打开
     handleOpenImportDialog(command) {
       if (command === 'import') {
         this.importVisible = true
       }
     },
-    // 导入弹窗-关闭
+    // 导入弹窗---关闭
     handleCloseImportDialog(msg) {
       this.importVisible = msg
     },
-    // 表格-配置
+    // 表格---配置
     changeCheckbox(value) {
       this.checkList = value
     },
-    // 表格-空数据格式化
+    // 表格---空数据格式化
     formatter(row, column) {
-      if (row[column.property] === '') {
+      if (row[column.property] === null) {
         return '-'
       } else {
         return row[column.property]
       }
     },
-    // 表格-远程排序
+    // 表格---远程排序
     sortChange(column) {
-      console.log(column)
-    },
-    // 表格-筛选
-    tableFilter(value, type) {
-      if (type === 'name') {
-        this.filter.nameFilter = value
-      } else if (type === 'userName') {
-        this.filter.userNameFilter = value
+      if (column.order) {
+        this.initParams.sort = column.prop
+        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
       } else {
-        this.filter.statusFilter = value
+        delete this.initParams.sort
+        this.initParams.order = 'asc'
       }
-      console.log(value, type)
+      this.getInit()
     },
-    // 表格操作-重置密码
+    // 表格---筛选
+    tableFilter(value, type) {
+      switch (type) {
+        case 'name':
+          value ? this.filterParams.name = value : delete this.filterParams.name
+          break
+        case 'username':
+          value ? this.filterParams.username = value : delete this.filterParams.username
+          break
+        case 'status':
+          value && value !== '2' ? this.filterParams.status = value : delete this.filterParams.status
+          break
+      }
+      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
+      this.getInit()
+    },
+    // 表格操作---重置密码
     handleResetPassword(index, row) {
-      console.log(index, row)
       this.$confirm('确认重置吗？重置后将恢复到系统默认设置的密码！', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -379,13 +420,19 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          console.log('确定重置')
+          doResetPwd({ userId: row.id, r: Math.random() }).then(res => {
+            if (res.success === true) {
+              this.$message({
+                message: '操作成功',
+                type: 'success'
+              })
+            }
+          })
         }
       }).catch(() => {})
     },
-    // 表格操作-删除
+    // 表格操作---删除
     handleDelete(index, row) {
-      console.log(index, row)
       this.$confirm('删除后将不可恢复，确认删除吗？', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -394,15 +441,23 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          console.log('确定删除')
+          doDeleteUser({ id: row.id, r: Math.random() }).then(res => {
+            if (res.success === true) {
+              this.$message({
+                message: '操作成功',
+                type: 'success'
+              })
+              this.getInit()
+            }
+          })
         }
       }).catch(() => {})
     },
-    // 分页-改变每页数量
+    // 分页---改变每页数量
     handleSizeChange(val) {
       console.log(`每页 ${val} 条`)
     },
-    // 分页-改变页码
+    // 分页---改变页码
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`)
     }

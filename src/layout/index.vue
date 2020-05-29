@@ -8,6 +8,7 @@
         <tags-view v-if="needTagsView" />
       </div>
       <app-main />
+      <div class="fixed-footer"></div>
     </div>
   </div>
 </template>
@@ -94,5 +95,16 @@ export default {
 
   .mobile .fixed-header {
     width: 100%;
+  }
+
+  .fixed-footer {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index: 9;
+    height: 69px;
+    width: 100%;
+    background-color: #fff;
+    border-top: 1px solid #d2d6de;
   }
 </style>
