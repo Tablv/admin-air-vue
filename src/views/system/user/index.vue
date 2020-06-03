@@ -1,40 +1,44 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="header-left">
-        <div class="header-title">用户管理</div>
-      </div>
-      <div class="header-right">
-        <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-        <el-button icon="el-icon-refresh" @click="getInit"></el-button>
-        <el-dropdown trigger="click" @command="handleOpenImportDialog">
-          <el-button icon="el-icon-download"><i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="import">导入 Excel</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-dropdown trigger="click">
-          <el-button icon="el-icon-upload2">
-            <i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item command="import">导出 Excel</el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-        <el-dropdown trigger="click" :hide-on-click="false">
-          <el-button icon="el-icon-s-grid">
-            <i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>
-              <el-checkbox-group v-model="checkList" @change="changeCheckbox" :min="2">
-                <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                </el-checkbox-group>
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
+      <el-row type="flex" justify="space-between">
+        <el-col :span="6">
+          <div class="header-title">用户管理</div>
+        </el-col>
+        <el-col :span="18">
+          <div class="button-group">
+            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+            <el-button icon="el-icon-refresh" @click="getInit" class="first-button"></el-button>
+            <el-dropdown trigger="click" @command="handleOpenImportDialog" class="center-button">
+              <el-button icon="el-icon-download"><i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="import">导入 Excel</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <el-dropdown trigger="click" class="center-button">
+              <el-button icon="el-icon-upload2">
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item command="import">导出 Excel</el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+            <el-dropdown trigger="click" :hide-on-click="false" class="last-button">
+              <el-button icon="el-icon-s-grid">
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>
+                  <el-checkbox-group v-model="checkList" @change="changeCheckbox" :min="2">
+                    <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
+                    </el-checkbox-group>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
+        </el-col>
+      </el-row>
     </header>
     <article>
       <el-table
@@ -47,49 +51,110 @@
         header-cell-class-name="header-cell">
         <el-table-column prop="name" label="姓名" v-if="checkList.includes('name')" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">姓名</span>
-            <div @click.stop>
+            <span>姓名</span>
+            <span @click.stop>
+              <el-popover
+                placement="bottom"
+                width="160"
+                trigger="click"
+                v-model="activedPop[scope.column.property]">
+                <el-input
+                  v-model="filter.name"
+                  placeholder="姓名"/>
+                <div class="table-filter-btn">
+                  <el-button type="primary" @click="tableFilter('name')">筛选</el-button>
+                  <el-button style="float: right;" @click="tableFilter('name', 'reset')">重置</el-button>
+                </div>
+                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
+              </el-popover>
+            </span>
+            <!-- <div @click.stop>
               <el-input
                 v-model="filter.name"
                 placeholder="姓名"
                 @change="tableFilter($event, 'name')"/>
-            </div>
+            </div> -->
           </template>
         </el-table-column>
         <el-table-column prop="username" label="用户名" v-if="checkList.includes('username')" :formatter="formatter" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">用户名</span>
-            <div @click.stop>
+            <span>用户名</span>
+            <span @click.stop>
+              <el-popover
+                placement="bottom"
+                width="160"
+                trigger="click"
+                v-model="activedPop[scope.column.property]">
+                <el-input
+                  v-model="filter.username"
+                  placeholder="姓名"/>
+                <div class="table-filter-btn">
+                  <el-button type="primary" @click="tableFilter('username')">筛选</el-button>
+                  <el-button style="float: right;" @click="tableFilter('username', 'reset')">重置</el-button>
+                </div>
+                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
+              </el-popover>
+            </span>
+            <!-- <div @click.stop>
               <el-input
                 v-model="filter.username"
                 placeholder="用户名"
                 @change="tableFilter($event, 'username')"/>
-            </div>
+            </div> -->
           </template>
         </el-table-column>
         <el-table-column prop="status" label="状态" v-if="checkList.includes('status')" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">状态</span>
-            <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
+            <span>状态</span>
+            <span @click.stop>
+              <el-popover
+                placement="bottom"
+                width="160"
+                trigger="click"
+                v-model="activedPop[scope.column.property]">
+                <el-select v-model="filter.status" placeholder="">
+                  <el-option
+                    v-for="item in statusOptions"
+                    :key="item.value"
+                    :label="item.label"
+                    :value="item.value">
+                  </el-option>
+                </el-select>
+                <div class="table-filter-btn">
+                  <el-button type="primary" @click="tableFilter('status')">筛选</el-button>
+                  <el-button style="float: right;" @click="tableFilter('status', 'reset')">重置</el-button>
+                </div>
+                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
+              </el-popover>
+            </span>
+            <!-- <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
               <el-option
                 v-for="item in statusOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
               </el-option>
-            </el-select>
+            </el-select> -->
           </template>
           <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
+            <el-switch
+              v-model="scope.row.status"
+              :active-value="0"
+              :inactive-value="1"
+              active-color="#80B762"
+              inactive-color="#ff4949"
+              @change="handleChangeStatus(scope.row)">
+            </el-switch>
+            <!-- <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span> -->
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" v-if="checkList.includes('remark')" :formatter="formatter" sortable="custom">
         </el-table-column>
         <el-table-column prop="operation" label="操作" v-if="checkList.includes('operation')">
           <template slot-scope="scope">
-            <el-button type="warning" icon="el-icon-key" circle @click="handleResetPassword(scope.$index, scope.row)" />
-            <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
-            <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
+            <el-button type="text" @click="handleResetPassword(scope.$index, scope.row)">重置密码</el-button>
+            <el-button type="text" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
+            <el-button type="text" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -227,6 +292,16 @@ export default {
         { value: '1', label: '禁用' }
       ],
       filterParams: {},
+      activedFilter: {
+        name: false,
+        username: false,
+        status: false
+      },
+      activedPop: {
+        name: false,
+        username: false,
+        status: false
+      },
       // 分页
       page: {
         pageSize: 10,
@@ -384,6 +459,36 @@ export default {
       this.showStatus = false
       this.$refs['addForm'].resetFields()
     },
+    // 表格操作---改变状态
+    handleChangeStatus(row) {
+      doGetUserInfo({ id: row.id }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          let editForm = {}
+          editForm = {
+            id: result.id,
+            name: result.name,
+            username: result.username,
+            status: row.status,
+            roleIds: result.roleIds ? result.roleIds : null,
+            depts: result.depts ? result.depts : null,
+            remark: result.remark ? result.remark : null
+          }
+          Object.keys(editForm).forEach(item => {
+            if (editForm[item] === null) delete editForm[item]
+          })
+          doEditUser(editForm).then(res => {
+            if (res.success === true) {
+              this.$message({
+                message: '操作成功！',
+                type: 'success'
+              })
+              this.getInit()
+            }
+          })
+        }
+      })
+    },
     // 表格操作---编辑
     handleEdit(index, row) {
       this.showStatus = true
@@ -450,16 +555,52 @@ export default {
       this.getInit()
     },
     // 表格---筛选
-    tableFilter(value, type) {
+    tableFilter(type, reset) {
       switch (type) {
         case 'name':
-          value ? this.filterParams.name = value : delete this.filterParams.name
+          if (this.filter.name) {
+            this.filterParams.name = this.filter.name
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            this.filter.name = ''
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          this.activedPop[type] = false
           break
         case 'username':
-          value ? this.filterParams.username = value : delete this.filterParams.username
+          if (this.filter.username) {
+            this.filterParams.username = this.filter.username
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.username
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            this.filter.username = ''
+            delete this.filterParams.username
+            this.activedFilter[type] = false
+          }
+          this.activedPop[type] = false
           break
         case 'status':
-          value && value !== '2' ? this.filterParams.status = value : delete this.filterParams.status
+          if (this.filter.status && this.filter.status !== '2') {
+            this.filterParams.status = this.filter.status
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            this.filter.status = ''
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          this.activedPop[type] = false
           break
       }
       Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter

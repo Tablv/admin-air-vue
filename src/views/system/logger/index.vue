@@ -46,7 +46,7 @@
         </el-table-column>
         <el-table-column prop="userName" label="用户名" width="130" v-if="checkList.includes('userName')" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">用户名</span>
+            <span>用户名</span>
             <span @click.stop>
               <el-popover
                 placement="bottom"
@@ -73,7 +73,7 @@
         </el-table-column>
         <el-table-column prop="realName" label="操作人" width="130" v-if="checkList.includes('realName')" sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">操作人</span>
+            <span>操作人</span>
             <span @click.stop>
               <el-popover
                 placement="bottom"
@@ -100,7 +100,7 @@
         </el-table-column>
         <el-table-column prop="operateDate" label="操作时间" width="160" v-if="checkList.includes('operateDate')"  sortable="custom">
           <template slot="header" slot-scope="scope">
-            <span class="table-header-title">操作时间</span>
+            <span>操作时间</span>
             <span @click.stop>
               <el-popover
                 placement="bottom"
