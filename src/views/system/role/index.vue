@@ -6,7 +6,7 @@
       </div>
       <div class="header-right">
         <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-        <el-button icon="el-icon-refresh"></el-button>
+        <el-button icon="el-icon-refresh" @click="getInit"></el-button>
         <el-dropdown trigger="click" @command="handleOpenImportDialog">
           <el-button icon="el-icon-download"><i class="el-icon-arrow-down el-icon--right"></i>
           </el-button>
@@ -41,6 +41,7 @@
         :data="tableData"
         border
         size="medium"
+        v-loading="listLoading"
         @sort-change="sortChange"
         style="width: 100%"
         header-cell-class-name="header-cell">
@@ -49,7 +50,7 @@
             <span class="table-header-title">名称</span>
             <div @click.stop>
               <el-input
-                v-model="filter.nameFilter"
+                v-model="filter.name"
                 placeholder="名称"
                 @change="tableFilter($event, 'name')"/>
             </div>
@@ -60,7 +61,7 @@
             <span class="table-header-title">编码</span>
             <div @click.stop>
               <el-input
-                v-model="filter.codeFilter"
+                v-model="filter.code"
                 placeholder="编码"
                 @change="tableFilter($event, 'code')"/>
             </div>
@@ -69,9 +70,9 @@
         <el-table-column prop="status" label="状态" v-if="checkList.includes('status')" sortable="custom">
           <template slot="header" slot-scope="scope">
             <span class="table-header-title">状态</span>
-            <el-select v-model="filter.statusFilter" placeholder="" @change="tableFilter($event, 'status')">
+            <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
               <el-option
-                v-for="item in filter.statusOptions"
+                v-for="item in statusOptions"
                 :key="item.value"
                 :label="item.label"
                 :value="item.value">
@@ -79,7 +80,7 @@
             </el-select>
           </template>
           <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 1 ? '#80B762' : 'red')}">{{ scope.row.status === 1 ? '启用' : '禁用' }}</span>
+            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注" v-if="checkList.includes('remark')" :formatter="formatter" sortable="custom">
@@ -98,7 +99,7 @@
           background
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :page-sizes="[10, 20, 50, 100]"
+          :page-sizes="[5, 10, 20, 50, 100]"
           :page-size="page.pageSize"
           :current-page="page.pageNum"
           layout="sizes, total, next, pager, prev"
@@ -107,9 +108,9 @@
       </div>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
-        <span>{{ addForm.showStatus ? '修改' : '新增' }}</span>
+        <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px">
         <el-row>
@@ -124,10 +125,10 @@
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="状态" v-if="addForm.showStatus">
+        <el-form-item label="状态" v-if="showStatus">
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="1">启用</el-radio>
-            <el-radio :label="0">禁用</el-radio>
+            <el-radio :label="0">启用</el-radio>
+            <el-radio :label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
@@ -149,6 +150,8 @@
 </template>
 
 <script>
+import { getRoleList, doAddRole, getRoleInfo, doEditRole, doDeleteRole } from '@/api/system/role'
+import { doCheckRepeat } from '@/api/system/user'
 import assignUser from './assignUserDialog'
 import assignMenu from './assignMenuDrawer'
 import importDialog from '@/components/importDialog'
@@ -160,12 +163,57 @@ export default {
     importDialog
   },
   data() {
+    var validName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_ROLE',
+          columnName: 'NAME',
+          value: value,
+          username: value
+        }
+        if (this.showStatus) data.oldval = this.oldVal.name
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('角色名称已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
+    var validCode = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_ROLE',
+          columnName: 'CODE',
+          value: value,
+          username: value
+        }
+        if (this.showStatus) data.oldval = this.oldVal.code
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('角色编码已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
     return {
+      // 初始化参数
+      initParams: {
+        order: 'asc',
+        offset: 0,
+        limit: 10
+      },
       // 表格数据
-      tableData: [
-        { name: '访客', code: 'GUEST', status: 1, remark: '' },
-        { name: '超级管理员', code: 'SUPERADMIN', status: 1, remark: '' }
-      ],
+      tableData: [],
+      // 表格loading
+      listLoading: false,
       // 表格配置
       headerList: [
         { prop: 'name', label: '名称' },
@@ -178,15 +226,16 @@ export default {
       checkList: ['name', 'code', 'status', 'remark', 'operation'],
       // 表格过滤
       filter: {
-        nameFilter: '',
-        codeFilter: '',
-        statusFilter: '2',
-        statusOptions: [
-          { value: '2', label: ' ' },
-          { value: '1', label: '启用' },
-          { value: '0', label: '禁用' }
-        ]
+        name: '',
+        code: '',
+        status: '2'
       },
+      statusOptions: [
+        { value: '2', label: ' ' },
+        { value: '0', label: '启用' },
+        { value: '1', label: '禁用' }
+      ],
+      filterParams: {},
       // 分页
       page: {
         pageSize: 10,
@@ -206,18 +255,19 @@ export default {
         name: '',
         code: '',
         remark: '',
-        showStatus: false,
         status: 0
       },
+      showStatus: false,
       // 弹窗表单必填项校验规则
       addRules: {
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, validator: validName, trigger: 'blur' }
         ],
         code: [
-          { required: true, message: '请输入编码', trigger: 'blur' }
+          { required: true, validator: validCode, trigger: 'blur' }
         ]
       },
+      oldVal: {},
       // 导入弹窗表格数据
       importTableData: [
         { name: '状态', number: 3 },
@@ -226,39 +276,92 @@ export default {
       ]
     }
   },
+  created() {
+    this.getInit()
+  },
   methods: {
+    // 初始化
+    getInit() {
+      this.listLoading = true
+      getRoleList(this.initParams).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.tableData = result.list
+          this.page = {
+            pageSize: result.pageSize,
+            pageNum: result.pageNum,
+            total: result.total
+          }
+        }
+      })
+    },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.addVisible = true
     },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.addForm.showStatus = false
-    },
     // 弹窗-保存
     handleSave() {
-      this.addVisible = false
-      this.addForm.showStatus = false
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          let addForm = {}
+          addForm = JSON.parse(JSON.stringify(this.addForm))
+          if (!this.showStatus) {
+            delete addForm.status
+            doAddRole(addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          } else {
+            let editForm = {}
+            editForm = {
+              id: addForm.id,
+              name: addForm.name ? addForm.name : null,
+              code: addForm.code ? addForm.code : null,
+              status: this.showStatus ? addForm.status : null,
+              remark: addForm.remark ? addForm.remark : null
+            }
+            doEditRole(editForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          }
+          this.addVisible = false
+          this.showStatus = false
+          this.$refs['addForm'].resetFields()
+        }
+      })
     },
     // 弹窗-关闭
     handleClose() {
       this.addVisible = false
-      this.addForm.showStatus = false
+      this.showStatus = false
+      this.$refs['addForm'].resetFields()
     },
     // 表格操作-编辑
     handleEdit(index, row) {
-      console.log(index, row)
-      this.addForm.showStatus = true
+      this.showStatus = true
       this.addVisible = true
-    },
-    // 弹窗-选择角色
-    selectRole(val) {
-      console.log(val)
-    },
-    // 弹窗-选择组织
-    selectOgn(val) {
-      console.log(val)
+      getRoleInfo({ id: row.id }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.addForm = result
+          this.oldVal = {
+            name: result.name,
+            code: result.code
+          }
+        }
+      })
     },
     // 导入弹窗-打开
     handleOpenImportDialog(command) {
@@ -276,7 +379,7 @@ export default {
     },
     // 表格-空数据格式化
     formatter(row, column) {
-      if (row[column.property] === '') {
+      if (row[column.property] === null) {
         return '-'
       } else {
         return row[column.property]
@@ -284,22 +387,33 @@ export default {
     },
     // 表格-远程排序
     sortChange(column) {
-      console.log(column)
+      if (column.order) {
+        this.initParams.sort = column.prop
+        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
+      } else {
+        delete this.initParams.sort
+        this.initParams.order = 'asc'
+      }
+      this.getInit()
     },
     // 表格-筛选
     tableFilter(value, type) {
-      if (type === 'name') {
-        this.filter.nameFilter = value
-      } else if (type === 'code') {
-        this.filter.codeFilter = value
-      } else {
-        this.filter.statusFilter = value
+      switch (type) {
+        case 'name':
+          value ? this.filterParams.name = value : delete this.filterParams.name
+          break
+        case 'code':
+          value ? this.filterParams.code = value : delete this.filterParams.code
+          break
+        case 'status':
+          value && value !== '2' ? this.filterParams.status = value : delete this.filterParams.status
+          break
       }
-      console.log(value, type)
+      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
+      this.getInit()
     },
     // 表格操作-删除
     handleDelete(index, row) {
-      console.log(index, row)
       this.$confirm('删除后将不可恢复，确认删除吗？', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
@@ -308,7 +422,15 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          console.log('确定删除')
+          doDeleteRole({ id: row.id }).then(res => {
+            if (res.success === true) {
+              this.$message({
+                message: '操作成功！',
+                type: 'success'
+              })
+              this.getInit()
+            }
+          })
         }
       }).catch(() => {})
     },
@@ -330,11 +452,15 @@ export default {
     },
     // 分页-改变每页数量
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      this.page.pageSize = val
+      this.initParams.limit = val
+      this.getInit()
     },
     // 分页-改变页码
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      this.page.pageNum = val
+      this.initParams.offset = (val - 1) * this.initParams.limit
+      this.getInit()
     }
   }
 }

@@ -28,3 +28,13 @@ export function doAddMenu(data) {
 export function doDeleteMenu(data) {
   return request.post('/system/menu/remove', data, true)
 }
+
+// 查询菜单信息
+export function getMenuInfo(params) {
+  return request.get('/system/menu/selectone', params)
+}
+
+// 编辑菜单
+export function doEditMenu(data) {
+  return request.post('/system/menu/update', data, true)
+}

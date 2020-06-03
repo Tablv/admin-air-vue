@@ -342,7 +342,7 @@ export default {
             doAddUser(addForm).then(res => {
               if (res.success === true) {
                 this.$message({
-                  message: '操作成功',
+                  message: '操作成功！',
                   type: 'success'
                 })
                 this.getInit()
@@ -365,7 +365,7 @@ export default {
             doEditUser(editForm).then(res => {
               if (res.success === true) {
                 this.$message({
-                  message: '操作成功',
+                  message: '操作成功！',
                   type: 'success'
                 })
                 this.getInit()
@@ -478,7 +478,7 @@ export default {
           doResetPwd({ userId: row.id }).then(res => {
             if (res.success === true) {
               this.$message({
-                message: '操作成功',
+                message: '操作成功！',
                 type: 'success'
               })
             }
@@ -499,7 +499,7 @@ export default {
           doDeleteUser({ id: row.id }).then(res => {
             if (res.success === true) {
               this.$message({
-                message: '操作成功',
+                message: '操作成功！',
                 type: 'success'
               })
               this.getInit()

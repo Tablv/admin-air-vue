@@ -8,7 +8,7 @@
         <tags-view v-if="needTagsView" />
       </div>
       <app-main />
-      <div class="fixed-footer"></div>
+      <div :class="{'fixed-footer':fixedHeader}"></div>
     </div>
   </div>
 </template>
@@ -89,12 +89,16 @@ export default {
     transition: width 0.28s;
   }
 
-  .hideSidebar .fixed-header {
-    width: calc(100% - 54px)
+  .hideSidebar {
+    .fixed-header, .fixed-footer {
+      width: calc(100% - 54px)
+    }
   }
 
-  .mobile .fixed-header {
-    width: 100%;
+  .mobile {
+    .fixed-header, .fixed-footer {
+      width: 100%;
+    }
   }
 
   .fixed-footer {
@@ -103,7 +107,7 @@ export default {
     right: 0;
     z-index: 9;
     height: 69px;
-    width: 100%;
+    width: calc(100% - #{$sideBarWidth});
     background-color: #fff;
     border-top: 1px solid #d2d6de;
   }

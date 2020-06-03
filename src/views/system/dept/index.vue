@@ -16,17 +16,22 @@
         border
         lazy
         :load="loadData"
+        v-loading="listLoading"
         header-cell-class-name="header-cell"
-        :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
+        :tree-props="{children: 'children', hasChildren: 'isParent'}">
         <el-table-column prop="name" label="名称"></el-table-column>
         <el-table-column prop="code" label="编码"></el-table-column>
-        <el-table-column prop="type" label="类型"></el-table-column>
-        <el-table-column prop="path" label="全路径"></el-table-column>
+        <el-table-column prop="type" label="类型">
+          <template slot-scope="scope">
+            <span>{{ scope.row.type === 0 ? '组织' : '部门' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="fullPath" label="全路径"></el-table-column>
         <el-table-column prop="lvl" label="层级"></el-table-column>
         <el-table-column prop="sortNum" label="排序号"></el-table-column>
         <el-table-column prop="status" label="状态">
           <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 1 ? '#80B762' : 'red')}">{{ scope.row.status === 1 ? '启用' : '禁用' }}</span>
+            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
           </template>
         </el-table-column>
         <el-table-column prop="remark" label="备注"></el-table-column>
@@ -40,24 +45,24 @@
       </el-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
-        <span>{{ isEdit ? '修改' : '新增' }}</span>
+        <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
         <el-row>
           <el-col :span="11">
-            <el-form-item label="上级组织">
-              <el-input v-model="addForm.preOga" disabled class="input-with-select">
-                <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+            <el-form-item label="上级组织" prop="parentName">
+              <el-input v-model="addForm.parentName" disabled class="input-with-select">
+                <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
               </el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="组织类型">
-              <el-select v-model="addForm.orgType" filterable>
+            <el-form-item label="组织类型" prop="type">
+              <el-select v-model="addForm.type" filterable>
                 <el-option
-                  v-for="item in orgTypeOptions"
+                  v-for="item in typeOptions"
                   :key="item.value"
                   :label="item.label"
                   :value="item.value">
@@ -68,23 +73,23 @@
         </el-row>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="组织名称" prop="orgName">
-              <el-input v-model="addForm.orgName" placeholder="请输入组织名称"></el-input>
+            <el-form-item label="组织名称" prop="name">
+              <el-input v-model="addForm.name" placeholder="请输入组织名称"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="组织编码" prop="orgCode">
-              <el-input v-model="addForm.orgCode"></el-input>
+            <el-form-item label="组织编码" prop="code">
+              <el-input v-model="addForm.code"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="组织状态">
-          <el-radio-group v-model="addForm.orgStatus">
-            <el-radio :label="1">启用 </el-radio>
-            <el-radio :label="0">禁用</el-radio>
+        <el-form-item label="组织状态" prop="status">
+          <el-radio-group v-model="addForm.status">
+            <el-radio :label="0">启用 </el-radio>
+            <el-radio :label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="备注">
+        <el-form-item label="备注" prop="remark">
           <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
         </el-form-item>
       </el-form>
@@ -94,11 +99,13 @@
       </div>
     </el-dialog>
     <!-- 上级组织弹窗 -->
-    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
+    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" :treeData="treeData" @getCurrentNode="getCurrentDept"></tree-dialog>
   </div>
 </template>
 
 <script>
+import { getDeptGroup, doAddDept, doDeleteDept, getDeptInfo, doEditDept } from '@/api/system/dept'
+import { doCheckRepeat, getDeptList } from '@/api/system/user'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'SYS_DEPT',
@@ -106,110 +113,279 @@ export default {
     treeDialog
   },
   data() {
+    var validName = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_DEPT',
+          columnName: 'NAME',
+          value: value,
+          name: value
+        }
+        if (this.isEdit === 3) data.oldval = this.oldVal.name
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('名称已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
+    var validCode = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('该项为必填项'))
+      } else {
+        let data = {
+          tableName: 'AD_DEPT ',
+          columnName: 'CODE',
+          value: value,
+          code: value
+        }
+        if (this.isEdit === 3) data.oldval = this.oldVal.code
+        doCheckRepeat(data).then(res => {
+          if (res.valid === false) {
+            return callback(new Error('编码已存在，请重新输入'))
+          } else {
+            callback()
+          }
+        })
+      }
+    }
     return {
       // 表格数据
-      tableData: [
-        { id: 1, name: 'XXXX公司', code: 'company', type: '组织', path: '/XXXX公司', lvl: 0, sortNum: 0, status: 1, remark: '', hasChildren: true }
-      ],
+      tableData: [],
+      // 表格loading
+      listLoading: false,
       // 新增弹窗
       addVisible: false,
-      // 上级菜单弹窗
+      // 上级组织弹窗
       treeVisible: false,
+      treeData: [],
+      // 上级组织数据
+      preDept: {},
       // 弹窗表单
       addForm: {
-        preOga: '',
-        orgType: 0,
-        orgName: '',
-        orgCode: '',
-        orgStatus: 1,
+        parentName: '',
+        type: 0,
+        name: '',
+        code: '',
+        status: 0,
         remark: ''
       },
-      orgTypeOptions: [
+      typeOptions: [
         { value: 0, label: '组织' },
         { value: 1, label: '部门' }
       ],
       // 弹窗表单必填项校验规则
       addRules: {
-        orgName: [
-          { required: true, message: '请输入组织名称', trigger: 'blur' }
+        name: [
+          { required: true, validator: validName, trigger: 'blur' }
         ],
-        orgCode: [
-          { required: true, message: '请输入组织编码', trigger: 'blur' }
+        code: [
+          { required: true, validator: validCode, trigger: 'blur' }
         ]
       },
+      oldVal: {},
       // 是否编辑弹窗
-      isEdit: false
+      isEdit: 1
     }
   },
+  watch: {
+    'addForm.code': {
+      handler: function() {
+        this.addForm.code = this.addForm.code.toUpperCase()
+      }
+    }
+  },
+  created() {
+    this.getInit()
+    getDeptList({ deptId: 0 }).then(res => {
+      let { success, result } = res
+      // if (success === true) {}
+      this.treeData = result
+    })
+  },
   methods: {
+    // 初始化
+    getInit() {
+      this.listLoading = true
+      this.tableData = []
+      getDeptGroup({ nodeid: 0 }).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {}
+        this.tableData = result
+      })
+    },
     // 新增弹窗-打开
     handleOpenAdd() {
+      this.isEdit = 1
       this.addVisible = true
-    },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.isEdit = false
     },
     // 弹窗-保存
     handleSave() {
-      this.addVisible = false
-      this.isEdit = false
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          let addForm = {}
+          addForm = JSON.parse(JSON.stringify(this.addForm))
+          addForm.terminalId = ''
+          if (this.isEdit === 1 || this.isEdit === 2) {
+            addForm.fullPath = this.preDept.fullPath ? `${this.preDept.fullPath}/${addForm.code}` : `/${addForm.code}`
+            addForm.parentId = this.preDept.id ? this.preDept.id : ''
+            if (this.preDept.lvl === 0) {
+              addForm.lvl = this.preDept.lvl + 1
+            } else if (this.preDept.lvl) {
+              addForm.lvl = this.preDept.lvl + 1
+            } else {
+              addForm.lvl = 0
+            }
+            if (this.isEdit === 2) {
+              if (this.preDept.type === 1 && addForm.type === 0) {
+                this.$message({
+                  message: '不符合组织结构关系!',
+                  type: 'warning'
+                })
+                return false
+              }
+            }
+            doAddDept(addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '新增成功！',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          } else {
+            let editForm = {}
+            editForm = {
+              id: addForm.id,
+              lvl: addForm.lvl ? addForm.lvl : null,
+              terminalId: addForm.terminalId ? addForm.terminalId : null,
+              parentId: addForm.parentId ? addForm.parentId : null,
+              parentName: addForm.parentName ? addForm.parentName : null,
+              name: addForm.name,
+              code: addForm.code,
+              status: addForm.status,
+              type: addForm.type,
+              remark: addForm.remark ? addForm.remark :null
+            }
+            doEditDept(editForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          }
+          this.addVisible = false
+          this.isEdit = 1
+          this.$refs['addForm'].resetFields()
+        }
+      })
     },
     // 弹窗-关闭
     handleClose() {
       this.addVisible = false
-      this.isEdit = false
+      this.isEdit = 1
+      this.$refs['addForm'].resetFields()
     },
-    // 上级菜单弹窗-打开
+    // 上级组织弹窗-打开
     handleOpenTreeDialog() {
       this.treeVisible = true
+      getDeptList({ deptId: 0 }).then(res => {
+        let { success, result } = res
+        // if (success === true) {}
+        this.treeData = result
+      })
     },
     // 上级组织弹窗-关闭
     handleCloseTreeDialog(msg) {
       this.treeVisible = msg
     },
     // 获取选择的上级组织
-    getCurrentMenu(data) {
-      this.addForm.preOga = data.label
+    getCurrentDept(data) {
+      this.preDept = data
+      this.addForm.parentName = data.name
     },
     // 表格-树数据
     loadData(row, treeNode, resolve) {
-      let allData = [
-        { id: 11, parentId: 1, name: '人力资源部', code: 'HR', type: '部门', path: '	/XXXX公司/人力资源部', lvl: 0, sortNum: 0, status: 1, remark: '' }
-      ]
-      let data = allData.filter(item => item.parentId === row.id)
-      setTimeout(() => {
-        resolve(data)
-      }, 1000)
+      getDeptGroup({ nodeid: row.id, parentid: row.parentId }).then(res => {
+        let { success, result } = res
+        if (success === true) {}
+        resolve(result)
+      })
     },
     // 表格操作-新增
     handleAdd(index, row) {
+      this.isEdit = 2
       this.addVisible = true
+      this.preDept = row
+      this.addForm.parentName = row.name
     },
     // 表格操作-编辑
     handleEdit(index, row) {
-      this.isEdit = true
+      this.isEdit = 3
       this.addVisible = true
+      getDeptInfo({ id: row.id }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.addForm = result
+          let preDept = this.doSearchPreDept(this.treeData, result.parentId)
+          if (preDept) {
+            this.addForm.parentId = preDept.id
+            this.addForm.parentName = preDept.name
+          }
+          this.oldVal = {
+            name: result.name,
+            code: result.code
+          }
+        }
+      })
+    },
+    doSearchPreDept(arr, id) {
+      for (let index = 0; index < arr.length; index++) {
+        let item = arr[index]
+        if (item.id === id) {
+          return item
+        } else if (item.children && item.children.length > 0) {
+          this.doSearchPreDept(item.children, id)
+        }
+      }
     },
     // 表格操作-删除
     handleDelete(index, row) {
-      console.log(index, row)
-      this.$message({
-        message: '存在子节点，请先删除子节点！',
-        type: 'warning'
-      })
-      this.$confirm('确认删除吗？', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        closeOnClickModal: false,
-        closeOnPressEscape: false,
-        cancelButtonClass: 'messageBoxCancelButton'
-      }).then(action => {
-        if (action === 'confirm') {
-          console.log('确定删除')
-        }
-      }).catch(() => {})
+      if (row.isParent) {
+        this.$message({
+          message: '存在子节点，请先删除子节点！',
+          type: 'warning'
+        })
+      } else {
+        this.$confirm('确认删除吗？', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          closeOnClickModal: false,
+          closeOnPressEscape: false,
+          cancelButtonClass: 'messageBoxCancelButton'
+        }).then(action => {
+          if (action === 'confirm') {
+            doDeleteDept({ id: row.id }).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '删除成功！',
+                  type: 'success'
+                })
+                this.getInit()
+              }
+            })
+          }
+        }).catch(() => {})
+      }
     }
   }
 }

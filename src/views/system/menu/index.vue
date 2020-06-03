@@ -19,6 +19,7 @@
     <article>
       <el-table
         :data="tableData"
+        ref="table"
         row-key="id"
         size="medium"
         border
@@ -100,8 +101,8 @@
         </el-row>
         <el-form-item label="菜单状态" prop="status">
           <el-radio-group v-model="addForm.status">
-            <el-radio label="0">启用 </el-radio>
-            <el-radio label="1">禁用</el-radio>
+            <el-radio :label="0">启用 </el-radio>
+            <el-radio :label="1">禁用</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
@@ -125,7 +126,7 @@
 </template>
 
 <script>
-import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu } from '@/api/system/menu'
+import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
 import treeDialog from '@/components/treeDialog'
 export default {
@@ -144,7 +145,7 @@ export default {
           value: value,
           name: value
         }
-        if (this.isEdit === 3) data.oldval = value
+        if (this.isEdit === 3) data.oldval = this.oldVal.name
         doCheckRepeat(data).then(res => {
           if (res.valid === false) {
             return callback(new Error('菜单名称已存在，请重新输入'))
@@ -164,7 +165,7 @@ export default {
           value: value,
           code: value
         }
-        if (this.isEdit === 3) data.oldval = value
+        if (this.isEdit === 3) data.oldval = this.oldVal.code
         doCheckRepeat(data).then(res => {
           if (res.valid === false) {
             return callback(new Error('菜单编码已存在，请重新输入'))
@@ -203,7 +204,7 @@ export default {
         path: '',
         permission: '',
         popout: 'L',
-        status: '0'
+        status: 0
       },
       // 弹窗表单必填项校验规则
       addRules: {
@@ -214,6 +215,7 @@ export default {
           { required: true, validator: validCode, trigger: 'blur' }
         ]
       },
+      oldVal: {},
       // 是否编辑弹窗
       isEdit: 1
     }
@@ -247,11 +249,17 @@ export default {
             this.tableData = result
           }
         })
+        getPreMenuList({ menuId: this.platform }).then(res => {
+          let { success, result } = res
+          if (success === true) {
+            this.treeData = result
+          }
+        })
       })
     },
     // 表格-树数据
-    loadData(row, treeNode, resolve) {
-      getMenuList({ nodeid: row.id, parentid: row.parentId }).then(res => {
+    loadData(tree, treeNode, resolve) {
+      getMenuList({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
         let { success, result } = res
         if (success === true) {
           resolve(result)
@@ -281,15 +289,48 @@ export default {
         if (valid) {
           let addForm = {}
           addForm = JSON.parse(JSON.stringify(this.addForm))
-          addForm.lvl = this.preMenu.lvl ? this.preMenu.lvl + 1 : 0
           addForm.terminalId = this.platform
-          addForm.parentId = this.preMenu.id ? this.preMenu.id : ''
-          console.log(addForm)
-          if (this.isEdit === 1) {
+          if (this.isEdit === 1 || this.isEdit === 2) {
+            addForm.parentId = this.preMenu.id ? this.preMenu.id : ''
+            if (this.preMenu.lvl === 0) {
+              addForm.lvl = this.preMenu.lvl + 1
+            } else if (this.preMenu.lvl) {
+              addForm.lvl = this.preMenu.lvl + 1
+            } else {
+              addForm.lvl = 0
+            }
             doAddMenu(addForm).then(res => {
               if (res.success === true) {
                 this.$message({
-                  message: '新增成功',
+                  message: '新增成功！',
+                  type: 'success'
+                })
+                this.getTableData()
+              }
+            })
+          } else {
+            let editForm = {}
+            editForm = {
+              id: addForm.id,
+              lvl: addForm.lvl ? addForm.lvl : null,
+              terminalId: addForm.terminalId ? addForm.terminalId : null,
+              parentId: addForm.parentId ? addForm.parentId : null,
+              parentName: addForm.parentName ? addForm.parentName : null,
+              name: addForm.name,
+              code: addForm.code,
+              iconClass: addForm.iconClass ? addForm.iconClass : null,
+              path: addForm.path ? addForm.path : null,
+              permission: addForm.permission ? addForm.permission : null,
+              popout: addForm.popout,
+              status: addForm.status
+            }
+            Object.keys(editForm).forEach(item => {
+              if (editForm[item] === null) delete editForm[item]
+            })
+            doEditMenu(editForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
                   type: 'success'
                 })
                 this.getTableData()
@@ -324,7 +365,6 @@ export default {
     },
     // 获取选择的上级菜单
     getCurrentMenu(data) {
-      console.log(data)
       this.preMenu = data
       this.addForm.parentName = data.name
     },
@@ -344,15 +384,42 @@ export default {
     handleAdd(index, row) {
       this.isEdit = 2
       this.addVisible = true
+      this.preMenu = row
+      this.addForm.parentName = row.name
     },
     // 表格操作-编辑
     handleEdit(index, row) {
       this.isEdit = 3
       this.addVisible = true
+      getMenuInfo({ id: row.id }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.addForm = result
+          let preMenu = this.doSearchPreDept(this.treeData, result.parentId)
+          if (preMenu) {
+            this.addForm.parentId = preMenu.id
+            this.addForm.parentName = preMenu.name
+          }
+          this.oldVal = {
+            name: result.name,
+            code: result.code
+          }
+        }
+      })
+    },
+    doSearchPreDept(arr, id) {
+      for (let index = 0; index < arr.length; index++) {
+        let item = arr[index]
+        if (item.id === id) {
+          return item
+        } else if (item.children && item.children.length > 0) {
+          this.doSearchPreDept(item.children, id)
+        }
+      }
     },
     // 表格操作-删除
     handleDelete(index, row) {
-      console.log(index, row)
+      console.log(this.$refs.table.store.states.lazyTreeNodeMap)
       if (row.isParent) {
         this.$message({
           message: '存在子节点，请先删除子节点！',
@@ -370,7 +437,7 @@ export default {
             doDeleteMenu({ id: row.id }).then(res => {
               if (res.success === true) {
                 this.$message({
-                  message: '删除成功',
+                  message: '删除成功！',
                   type: 'success'
                 })
                 this.getTableData()
@@ -382,12 +449,14 @@ export default {
     },
     // 获取表格数据
     getTableData() {
-      this.tableData = []
       this.listLoading = true
       getMenuList({ nodeid: this.platform }).then(res => {
+        this.tableData = []
         this.listLoading = false
         let { success, result } = res
         if (success === true) {
+          // this.$refs.table.store.states.lazyTreeNodeMap = []
+          // this.$set(this.$refs.table.store.states.lazyTreeNodeMap, id, res.data.dataList)
           this.tableData = result
         }
       })

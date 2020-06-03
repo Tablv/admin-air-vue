@@ -11,7 +11,7 @@
               :height="300"
               border
               fit
-              v-loading="listLoading"
+              v-loading="userLoadingL"
               @selection-change="handleLeftChange">
               <el-table-column type="selection" width="35"></el-table-column>
               <el-table-column prop="name" label="姓名">
@@ -55,7 +55,7 @@
               :height="300"
               border
               fit
-              v-loading="listLoading"
+              v-loading="userLoadingR"
               @selection-change="handleRightChange">
               <el-table-column type="selection" width="35"></el-table-column>
               <el-table-column prop="name" label="姓名">
@@ -104,7 +104,7 @@
               :height="300"
               border
               fit
-              v-loading="listLoading"
+              v-loading="deptLoadingR"
               @selection-change="handleDeptRightChange">
               <el-table-column type="selection" width="35"></el-table-column>
               <el-table-column prop="code" label="部门编码">
@@ -135,6 +135,7 @@
 </template>
 
 <script>
+import { getUnBindUser, getBindedUser } from '@/api/system/role'
 export default {
   name: 'assignUser',
   props: {
@@ -147,7 +148,9 @@ export default {
     return {
       // 默认选中标签
       activeName: 'user',
-      listLoading: true,
+      userLoadingL: true,
+      userLoadingR: true,
+      deptLoadingR: true,
       // 选择用户-左侧表格
       leftList: [],
       // 左侧选中数据
@@ -221,7 +224,8 @@ export default {
       this.rightList = [
         { name: 'guest', userName: 'guest' }
       ]
-      this.listLoading = false
+      this.userLoadingL = false
+      this.userLoadingR = false
     },
     // 选择用户-左侧选中数据
     handleLeftChange(rows) {
@@ -263,7 +267,7 @@ export default {
         { code: 'company', name: 'XXXX公司' },
         { code: 'HR', name: '人力资源部' }
       ]
-      this.listLoading = false
+      this.deptLoadingR = false
     },
     // 选择部门-左侧选中数据
     handleCheckChange(data, checked, indeterminate) {

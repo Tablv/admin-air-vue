@@ -1,32 +1,71 @@
 .container {
   padding: 10px;
+  overflow-y: auto;
+  height: 100%;
 }
 // 页面头部
 .header {
   height: 40px;
-  .header-left {
-    float: left;
-    .header-title {
-      font-size: 18px;
-    }
+  .header-title {
+    font-size: 18px;
+    line-height: 29px;
   }
-  .header-right {
+  .button-group {
     float: right;
+    .el-button {
+      position: relative;
+      z-index: 1;
+      float: left;
+    }
+    .first-button {
+      float: left;
+      margin-right: -1px;
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+      &:active{
+        z-index: 2;
+      }
+    }
+    .center-button {
+      float: left;
+      .el-button {
+        margin-right: -1px;
+        border-radius: 0;
+        &:active {
+          z-index: 2;
+        }
+      }
+    }
+    .last-button {
+      float: left;
+      .el-button {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+    }
   }
 }
 // 表格头部
 .header-cell {
-  background-color :#e7e7e7 !important;
-  vertical-align: top !important;
+  // vertical-align: top !important;
 }
 .table-header-title {
-  display: block;
-  margin-bottom: 8px;
+  // display: block;
+  // margin-bottom: 8px;
+}
+.table-filter-btn {
+  margin-top: 10px;
+}
+.el-icon-search {
+  position: absolute;
+  right: 10px;
+  top: 0;
+  padding: 5px 0;
 }
 .caret-wrapper {
   position: absolute !important;
-  top: -3px;
-  right: 3px;
+  top: -5px;
+  right: 25px;
 }
 // 分页
 .pagination {
@@ -43,7 +82,7 @@
 }
 // 弹窗
 .el-dialog__wrapper{
-  position: absolute;
+  position: absolute !important;
   .el-dialog {
     margin-top: 0 !important;
     position:absolute;
@@ -64,7 +103,7 @@
 }
 // 弹窗遮罩
 .v-modal {
-  position: absolute;
+  position: absolute !important;
 }
 // 实例化弹窗
 .el-message-box__wrapper {
