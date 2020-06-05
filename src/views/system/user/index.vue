@@ -30,7 +30,7 @@
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>
-                  <el-checkbox-group v-model="checkList" @change="changeCheckbox" :min="2">
+                  <el-checkbox-group v-model="checkedList" @change="changeCheckbox" :min="2">
                     <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
                     </el-checkbox-group>
                 </el-dropdown-item>
@@ -41,142 +41,32 @@
       </el-row>
     </header>
     <article>
-      <el-table
-        :data="tableData"
-        border
-        size="medium"
+      <gw-table
+        :tableData="tableData"
+        :tableColumn="tableColumn"
+        :checkedList="checkedList"
+        :listLoading="listLoading"
+        :activedFilter="activedFilter"
+        :filter="filter"
+        :page="page"
         @sort-change="sortChange"
-        style="width: 100%"
-        v-loading="listLoading"
-        header-cell-class-name="header-cell">
-        <el-table-column prop="name" label="姓名" v-if="checkList.includes('name')" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span>姓名</span>
-            <span @click.stop>
-              <el-popover
-                placement="bottom"
-                width="160"
-                trigger="click"
-                v-model="activedPop[scope.column.property]">
-                <el-input
-                  v-model="filter.name"
-                  placeholder="姓名"/>
-                <div class="table-filter-btn">
-                  <el-button type="primary" @click="tableFilter('name')">筛选</el-button>
-                  <el-button style="float: right;" @click="tableFilter('name', 'reset')">重置</el-button>
-                </div>
-                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
-              </el-popover>
-            </span>
-            <!-- <div @click.stop>
-              <el-input
-                v-model="filter.name"
-                placeholder="姓名"
-                @change="tableFilter($event, 'name')"/>
-            </div> -->
-          </template>
-        </el-table-column>
-        <el-table-column prop="username" label="用户名" v-if="checkList.includes('username')" :formatter="formatter" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span>用户名</span>
-            <span @click.stop>
-              <el-popover
-                placement="bottom"
-                width="160"
-                trigger="click"
-                v-model="activedPop[scope.column.property]">
-                <el-input
-                  v-model="filter.username"
-                  placeholder="姓名"/>
-                <div class="table-filter-btn">
-                  <el-button type="primary" @click="tableFilter('username')">筛选</el-button>
-                  <el-button style="float: right;" @click="tableFilter('username', 'reset')">重置</el-button>
-                </div>
-                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
-              </el-popover>
-            </span>
-            <!-- <div @click.stop>
-              <el-input
-                v-model="filter.username"
-                placeholder="用户名"
-                @change="tableFilter($event, 'username')"/>
-            </div> -->
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" v-if="checkList.includes('status')" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span>状态</span>
-            <span @click.stop>
-              <el-popover
-                placement="bottom"
-                width="160"
-                trigger="click"
-                v-model="activedPop[scope.column.property]">
-                <el-select v-model="filter.status" placeholder="">
-                  <el-option
-                    v-for="item in statusOptions"
-                    :key="item.value"
-                    :label="item.label"
-                    :value="item.value">
-                  </el-option>
-                </el-select>
-                <div class="table-filter-btn">
-                  <el-button type="primary" @click="tableFilter('status')">筛选</el-button>
-                  <el-button style="float: right;" @click="tableFilter('status', 'reset')">重置</el-button>
-                </div>
-                <i slot="reference" :style="{ color: (activedFilter[scope.column.property] ? '#409EFF' : '#909399') }" class="el-icon-search"></i>
-              </el-popover>
-            </span>
-            <!-- <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
-              <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select> -->
-          </template>
-          <template slot-scope="scope">
-            <el-switch
-              v-model="scope.row.status"
-              :active-value="0"
-              :inactive-value="1"
-              active-color="#80B762"
-              inactive-color="#ff4949"
-              @change="handleChangeStatus(scope.row)">
-            </el-switch>
-            <!-- <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span> -->
-          </template>
-        </el-table-column>
-        <el-table-column prop="remark" label="备注" v-if="checkList.includes('remark')" :formatter="formatter" sortable="custom">
-        </el-table-column>
-        <el-table-column prop="operation" label="操作" v-if="checkList.includes('operation')">
-          <template slot-scope="scope">
-            <el-button type="text" @click="handleResetPassword(scope.$index, scope.row)">重置密码</el-button>
-            <el-button type="text" @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-            <el-button type="text" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="pagination">
-        <el-pagination
-          background
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :page-sizes="[5, 10, 20, 50, 100]"
-          :page-size="page.pageSize"
-          :current-page="page.pageNum"
-          layout="sizes, total, next, pager, prev"
-          :total="page.total">
-        </el-pagination>
-      </div>
+        @filter="tableFilter"
+        @handleSizeChange="handleSizeChange"
+        @handleCurrentChange="handleCurrentChange"
+      >
+        <template slot-scope="operation">
+          <el-button type="text" @click="handleResetPassword(operation.index, operation.row)">重置密码</el-button>
+          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        </template>
+      </gw-table>
     </article>
     <!-- 新增弹窗 -->
     <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
         <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="姓名" prop="name">
@@ -223,7 +113,7 @@
       </div>
     </el-dialog>
     <!-- 导入 -->
-    <importDialog :importVisible="importVisible" templateNum="SYS_USER" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></importDialog>
+    <import-dialog :importVisible="importVisible" templateNum="SYS_USER" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
   </div>
 </template>
 
@@ -231,10 +121,12 @@
 import { getUserList, getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
 import { validName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
+import gwTable from '@/components/gwTable'
 export default {
   name: 'SYS_USER',
   components: {
-    importDialog
+    importDialog,
+    gwTable
   },
   data() {
     var validUserName = (rule, value, callback) => {
@@ -268,6 +160,14 @@ export default {
       },
       // 表格数据
       tableData: [],
+      // 表格列数据
+      tableColumn: [
+        { prop: 'name', label: '姓名', sort: 'custom', filter: 'input' },
+        { prop: 'username', label: '用户名', sort: 'custom', filter: 'input' },
+        { prop: 'status', label: '状态', sort: 'custom', filter: 'select' },
+        { prop: 'remark', label: '备注', sort: 'custom' },
+        { prop: 'operation', label: '操作', width: '180' }
+      ],
       // 表格loading
       listLoading: false,
       // 表格配置
@@ -279,29 +179,19 @@ export default {
         { prop: 'operation', label: '操作' }
       ],
       // 表格配置选中
-      checkList: ['name', 'username', 'status', 'remark', 'operation'],
+      checkedList: ['name', 'username', 'status', 'remark', 'operation'],
       // 表格过滤
       filter: {
         name: '',
         username: '',
         status: '2'
       },
-      statusOptions: [
-        { value: '2', label: ' ' },
-        { value: '0', label: '启用' },
-        { value: '1', label: '禁用' }
-      ],
-      filterParams: {},
       activedFilter: {
         name: false,
         username: false,
         status: false
       },
-      activedPop: {
-        name: false,
-        username: false,
-        status: false
-      },
+      filterParams: {},
       // 分页
       page: {
         pageSize: 10,
@@ -531,81 +421,6 @@ export default {
     handleCloseImportDialog(msg) {
       this.importVisible = msg
     },
-    // 表格---配置
-    changeCheckbox(value) {
-      this.checkList = value
-    },
-    // 表格---空数据格式化
-    formatter(row, column) {
-      if (row[column.property] === null) {
-        return '-'
-      } else {
-        return row[column.property]
-      }
-    },
-    // 表格---远程排序
-    sortChange(column) {
-      if (column.order) {
-        this.initParams.sort = column.prop
-        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
-      } else {
-        delete this.initParams.sort
-        this.initParams.order = 'asc'
-      }
-      this.getInit()
-    },
-    // 表格---筛选
-    tableFilter(type, reset) {
-      switch (type) {
-        case 'name':
-          if (this.filter.name) {
-            this.filterParams.name = this.filter.name
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.name
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            this.filter.name = ''
-            delete this.filterParams.name
-            this.activedFilter[type] = false
-          }
-          this.activedPop[type] = false
-          break
-        case 'username':
-          if (this.filter.username) {
-            this.filterParams.username = this.filter.username
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.username
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            this.filter.username = ''
-            delete this.filterParams.username
-            this.activedFilter[type] = false
-          }
-          this.activedPop[type] = false
-          break
-        case 'status':
-          if (this.filter.status && this.filter.status !== '2') {
-            this.filterParams.status = this.filter.status
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.status
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            this.filter.status = ''
-            delete this.filterParams.status
-            this.activedFilter[type] = false
-          }
-          this.activedPop[type] = false
-          break
-      }
-      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
-      this.getInit()
-    },
     // 表格操作---重置密码
     handleResetPassword(index, row) {
       this.$confirm('确认重置吗？重置后将恢复到系统默认设置的密码！', '信息', {
@@ -648,6 +463,68 @@ export default {
           })
         }
       }).catch(() => {})
+    },
+
+    // 表格---配置
+    changeCheckbox(value) {
+      this.checkedList = value
+    },
+    // 表格---远程排序
+    sortChange(column) {
+      if (column.order) {
+        this.initParams.sort = column.prop
+        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
+      } else {
+        delete this.initParams.sort
+        this.initParams.order = 'asc'
+      }
+      this.getInit()
+    },
+    // 表格---筛选
+    tableFilter({ filter, type, reset }) {
+      switch (type) {
+        case 'name':
+          if (filter.name) {
+            this.filterParams.name = filter.name
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          break
+        case 'username':
+          if (filter.username) {
+            this.filterParams.username = filter.username
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.username
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.username
+            this.activedFilter[type] = false
+          }
+          break
+        case 'status':
+          if (filter.status && filter.status !== '2') {
+            this.filterParams.status = filter.status
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          break
+      }
+      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
+      this.getInit()
     },
     // 分页---改变每页数量
     handleSizeChange(val) {

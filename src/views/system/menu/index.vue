@@ -1,51 +1,40 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="header-left">
-        <div class="header-title">菜单管理</div>
-      </div>
-      <div class="header-right">
-        <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
-          <el-option
-            v-for="item in platformOptions"
-            :key="item.id"
-            :label="item.name"
-            :value="item.id">
-          </el-option>
-        </el-select>
-        <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-      </div>
+      <el-row type="flex" justify="space-between">
+        <el-col :span="6">
+          <div class="header-title">菜单管理</div>
+        </el-col>
+        <el-col :span="18">
+          <div style="float: right">
+            <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
+              <el-option
+                v-for="item in platformOptions"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+          </div>
+        </el-col>
+      </el-row>
     </header>
     <article>
-      <el-table
-        :data="tableData"
-        ref="table"
-        row-key="id"
-        size="medium"
-        border
-        lazy
-        :load="loadData"
-        v-loading="listLoading"
-        header-cell-class-name="header-cell"
-        :tree-props="{children: 'children', hasChildren: 'isParent'}">
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column prop="code" label="编码"></el-table-column>
-        <el-table-column prop="path" label="链接地址"></el-table-column>
-        <el-table-column prop="lvl" label="层级"></el-table-column>
-        <el-table-column prop="sortNum" label="排序号"></el-table-column>
-        <el-table-column prop="status" label="状态">
-          <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="operation" label="操作">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-plus" circle @click="handleAdd(scope.$index, scope.row)" />
-            <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
-            <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
-          </template>
-        </el-table-column>
-      </el-table>
+      <gw-table
+        :tableData="tableData"
+        :tableColumn="tableColumn"
+        :listLoading="listLoading"
+        :hasTree="true"
+        :tableTreeData="tableTreeData"
+        @loadData="loadData"
+      >
+        <template slot-scope="operation">
+          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
+          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        </template>
+      </gw-table>
     </article>
     <!-- 新增弹窗 -->
     <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
@@ -128,10 +117,12 @@
 <script>
 import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
+import gwTable from '@/components/gwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'SYS_MENU',
   components: {
+    gwTable,
     treeDialog
   },
   data() {
@@ -181,6 +172,18 @@ export default {
       platformOptions: [],
       // 表格数据
       tableData: [],
+      // 表格列数据
+      tableColumn: [
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
+        { prop: 'path', label: '链接地址' },
+        { prop: 'lvl', label: '层级' },
+        { prop: 'sortNum', label: '排序号' },
+        { prop: 'status', label: '状态' },
+        { prop: 'operation', label: '操作', width: '180' }
+      ],
+      // 表格树数据
+      tableTreeData: [],
       // 表格loading
       listLoading: false,
       // 新增弹窗
@@ -258,11 +261,11 @@ export default {
       })
     },
     // 表格-树数据
-    loadData(tree, treeNode, resolve) {
+    loadData(tree) {
       getMenuList({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
         let { success, result } = res
         if (success === true) {
-          resolve(result)
+          this.tableTreeData = result
         }
       })
     },

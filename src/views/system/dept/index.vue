@@ -1,48 +1,32 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="header-left">
-        <div class="header-title">组织管理</div>
-      </div>
-      <div class="header-right">
-        <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-      </div>
+      <el-row type="flex" justify="space-between">
+        <el-col :span="6">
+          <div class="header-title">组织管理</div>
+        </el-col>
+        <el-col :span="18">
+          <div style="float: right">
+            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+          </div>
+        </el-col>
+      </el-row>
     </header>
     <article>
-      <el-table
-        :data="tableData"
-        row-key="id"
-        size="medium"
-        border
-        lazy
-        :load="loadData"
-        v-loading="listLoading"
-        header-cell-class-name="header-cell"
-        :tree-props="{children: 'children', hasChildren: 'isParent'}">
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column prop="code" label="编码"></el-table-column>
-        <el-table-column prop="type" label="类型">
-          <template slot-scope="scope">
-            <span>{{ scope.row.type === 0 ? '组织' : '部门' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="fullPath" label="全路径"></el-table-column>
-        <el-table-column prop="lvl" label="层级"></el-table-column>
-        <el-table-column prop="sortNum" label="排序号"></el-table-column>
-        <el-table-column prop="status" label="状态">
-          <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="remark" label="备注"></el-table-column>
-        <el-table-column prop="operation" label="操作" width="150">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-plus" circle @click="handleAdd(scope.$index, scope.row)" />
-            <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
-            <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
-          </template>
-        </el-table-column>
-      </el-table>
+      <gw-table
+        :tableData="tableData"
+        :tableColumn="tableColumn"
+        :listLoading="listLoading"
+        :hasTree="true"
+        :tableTreeData="tableTreeData"
+        @loadData="loadData"
+      >
+        <template slot-scope="operation">
+          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
+          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        </template>
+      </gw-table>
     </article>
     <!-- 新增弹窗 -->
     <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
@@ -106,10 +90,12 @@
 <script>
 import { getDeptGroup, doAddDept, doDeleteDept, getDeptInfo, doEditDept } from '@/api/system/dept'
 import { doCheckRepeat, getDeptList } from '@/api/system/user'
+import gwTable from '@/components/gwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'SYS_DEPT',
   components: {
+    gwTable,
     treeDialog
   },
   data() {
@@ -156,6 +142,20 @@ export default {
     return {
       // 表格数据
       tableData: [],
+      // 表格列数据
+      tableColumn: [
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
+        { prop: 'type', label: '类型' },
+        { prop: 'fullPath', label: '全路径' },
+        { prop: 'lvl', label: '层级' },
+        { prop: 'sortNum', label: '排序号' },
+        { prop: 'status', label: '状态' },
+        { prop: 'remark', label: '备注' },
+        { prop: 'operation', label: '操作', width: '180' }
+      ],
+      // 表格树数据
+      tableTreeData: [],
       // 表格loading
       listLoading: false,
       // 新增弹窗
@@ -314,11 +314,11 @@ export default {
       this.addForm.parentName = data.name
     },
     // 表格-树数据
-    loadData(row, treeNode, resolve) {
-      getDeptGroup({ nodeid: row.id, parentid: row.parentId }).then(res => {
+    loadData(tree) {
+      getDeptGroup({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
         let { success, result } = res
         if (success === true) {}
-        resolve(result)
+        this.tableTreeData = result
       })
     },
     // 表格操作-新增

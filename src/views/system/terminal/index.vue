@@ -1,94 +1,49 @@
 <template>
   <div class="container">
     <header class="header">
-      <div class="header-left">
-        <div class="header-title">终端管理</div>
-      </div>
-      <div class="header-right">
-        <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-        <el-button icon="el-icon-refresh" @click="getInit"></el-button>
-        <el-dropdown trigger="click" :hide-on-click="false">
-          <el-button icon="el-icon-s-grid">
-            <i class="el-icon-arrow-down el-icon--right"></i>
-          </el-button>
-          <el-dropdown-menu slot="dropdown">
-            <el-dropdown-item>
-              <el-checkbox-group v-model="checkList" @change="changeCheckbox" :min="2">
-                <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                </el-checkbox-group>
-            </el-dropdown-item>
-          </el-dropdown-menu>
-        </el-dropdown>
-      </div>
-    </header>
+      <el-row type="flex" justify="space-between">
+        <el-col :span="6">
+          <div class="header-title">终端管理</div>
+        </el-col>
+        <el-col :span="18">
+          <div class="button-group">
+            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+            <el-button icon="el-icon-refresh" class="first-button" @click="getInit"></el-button>
+            <el-dropdown trigger="click" :hide-on-click="false" class="last-button">
+              <el-button icon="el-icon-s-grid">
+                <i class="el-icon-arrow-down el-icon--right"></i>
+              </el-button>
+              <el-dropdown-menu slot="dropdown">
+                <el-dropdown-item>
+                  <el-checkbox-group v-model="checkedList" @change="changeCheckbox" :min="2">
+                    <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
+                    </el-checkbox-group>
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </el-dropdown>
+          </div>
+        </el-col>
+      </el-row>
+      </header>
     <article>
-      <el-table
-        :data="tableData"
-        border
-        size="medium"
+      <gw-table
+        :tableData="tableData"
+        :tableColumn="tableColumn"
+        :checkedList="checkedList"
+        :listLoading="listLoading"
+        :activedFilter="activedFilter"
+        :filter="filter"
+        :page="page"
         @sort-change="sortChange"
-        style="width: 100%"
-        v-loading="listLoading"
-        header-cell-class-name="header-cell">
-        <el-table-column prop="name" label="名称" v-if="checkList.includes('name')" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span class="table-header-title">名称</span>
-            <div @click.stop>
-              <el-input
-                v-model="filter.name"
-                placeholder="名称"
-                @change="tableFilter($event, 'name')"/>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="code" label="编码" v-if="checkList.includes('code')" :formatter="formatter" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span class="table-header-title">编码</span>
-            <div @click.stop>
-              <el-input
-                v-model="filter.code"
-                placeholder="编码"
-                @change="tableFilter($event, 'code')"/>
-            </div>
-          </template>
-        </el-table-column>
-        <el-table-column prop="status" label="状态" v-if="checkList.includes('status')" sortable="custom">
-          <template slot="header" slot-scope="scope">
-            <span class="table-header-title">状态</span>
-            <el-select v-model="filter.status" placeholder="" @change="tableFilter($event, 'status')">
-              <el-option
-                v-for="item in statusOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </template>
-          <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="remark" label="备注" v-if="checkList.includes('remark')" :formatter="formatter" sortable="custom">
-        </el-table-column>
-        <el-table-column prop="operation" label="操作" v-if="checkList.includes('operation')">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
-            <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="pagination">
-        <el-pagination
-          background
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
-          :page-sizes="[10, 20, 50, 100]"
-          :page-size="page.pageSize"
-          :current-page="page.pageNum"
-          layout="sizes, total, next, pager, prev"
-          :total="page.total">
-        </el-pagination>
-      </div>
+        @filter="tableFilter"
+        @handleSizeChange="handleSizeChange"
+        @handleCurrentChange="handleCurrentChange"
+      >
+        <template slot-scope="operation">
+          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        </template>
+      </gw-table>
     </article>
     <!-- 新增弹窗 -->
     <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
@@ -135,8 +90,12 @@
 <script>
 import { getTerminalList, doAddTerminal, doEditTerminal, getTerminalInfo, doDeleteTerminal } from '@/api/system/terminal'
 import { doCheckRepeat } from '@/api/system/user'
+import gwTable from '@/components/gwTable'
 export default {
   name: 'SYS_TERMINAL',
+  components: {
+    gwTable
+  },
   data() {
     var validName = (rule, value, callback) => {
       if (value === '') {
@@ -187,6 +146,14 @@ export default {
       },
       // 表格数据
       tableData: [],
+      // 表格列数据
+      tableColumn: [
+        { prop: 'name', label: '名称', sort: 'custom', filter: 'input' },
+        { prop: 'code', label: '编码', sort: 'custom', filter: 'input' },
+        { prop: 'status', label: '状态', sort: 'custom', filter: 'select' },
+        { prop: 'remark', label: '备注', sort: 'custom' },
+        { prop: 'operation', label: '操作', width: '180' }
+      ],
       // 表格loading
       listLoading: false,
       // 表格配置
@@ -198,18 +165,18 @@ export default {
         { prop: 'operation', label: '操作' }
       ],
       // 表格配置选中
-      checkList: ['name', 'code', 'status', 'remark', 'operation'],
+      checkedList: ['name', 'code', 'status', 'remark', 'operation'],
       // 表格过滤
       filter: {
         name: '',
         code: '',
         status: '2'
       },
-      statusOptions: [
-        { value: '2', label: ' ' },
-        { value: '0', label: '启用' },
-        { value: '1', label: '禁用' }
-      ],
+      activedFilter: {
+        name: false,
+        code: false,
+        status: false
+      },
       filterParams: {},
       // 分页
       page: {
@@ -332,45 +299,6 @@ export default {
         }
       })
     },
-    // 表格-配置
-    changeCheckbox(value) {
-      this.checkList = value
-    },
-    // 表格-空数据格式化
-    formatter(row, column) {
-      if (row[column.property] === null) {
-        return '-'
-      } else {
-        return row[column.property]
-      }
-    },
-    // 表格-远程排序
-    sortChange(column) {
-      if (column.order) {
-        this.initParams.sort = column.prop
-        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
-      } else {
-        delete this.initParams.sort
-        this.initParams.order = 'asc'
-      }
-      this.getInit()
-    },
-    // 表格-筛选
-    tableFilter(value, type) {
-      switch (type) {
-        case 'name':
-          value ? this.filterParams.name = value : delete this.filterParams.name
-          break
-        case 'code':
-          value ? this.filterParams.code = value : delete this.filterParams.code
-          break
-        case 'status':
-          value && value !== '2' ? this.filterParams.status = value : delete this.filterParams.status
-          break
-      }
-      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
-      this.getInit()
-    },
     // 表格操作-删除
     handleDelete(index, row) {
       this.$confirm('删除后将不可恢复，确认删除吗？', '信息', {
@@ -392,6 +320,67 @@ export default {
           })
         }
       }).catch(() => {})
+    },
+    // 表格-配置
+    changeCheckbox(value) {
+      this.checkedList = value
+    },
+    // 表格-远程排序
+    sortChange(column) {
+      if (column.order) {
+        this.initParams.sort = column.prop
+        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
+      } else {
+        delete this.initParams.sort
+        this.initParams.order = 'asc'
+      }
+      this.getInit()
+    },
+    // 表格-筛选
+    tableFilter({ filter, type, reset }) {
+      switch (type) {
+        case 'name':
+          if (filter.name) {
+            this.filterParams.name = filter.name
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.name
+            this.activedFilter[type] = false
+          }
+          break
+        case 'code':
+          if (filter.code) {
+            this.filterParams.code = filter.code
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.code
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.code
+            this.activedFilter[type] = false
+          }
+          break
+        case 'status':
+          if (filter.status && filter.status !== '2') {
+            this.filterParams.status = filter.status
+            this.activedFilter[type] = true
+          } else {
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          if (reset === 'reset') {
+            delete this.filterParams.status
+            this.activedFilter[type] = false
+          }
+          break
+      }
+      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
+      this.getInit()
     },
     // 分页-改变每页数量
     handleSizeChange(val) {
