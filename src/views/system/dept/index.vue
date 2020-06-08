@@ -165,6 +165,8 @@ export default {
       treeData: [],
       // 上级组织数据
       preDept: {},
+      // 编辑弹窗上级组织数据
+      editPreDept: {},
       // 弹窗表单
       addForm: {
         parentName: '',
@@ -336,10 +338,10 @@ export default {
         let { success, result } = res
         if (success === true) {
           this.addForm = result
-          let preDept = this.doSearchPreDept(this.treeData, result.parentId)
-          if (preDept) {
-            this.addForm.parentId = preDept.id
-            this.addForm.parentName = preDept.name
+          this.doSearchPreDept(this.treeData, result.parentId)
+          if (this.editPreDept) {
+            this.addForm.parentId = this.editPreDept.id
+            this.addForm.parentName = this.editPreDept.name
           }
           this.oldVal = {
             name: result.name,
@@ -349,14 +351,14 @@ export default {
       })
     },
     doSearchPreDept(arr, id) {
-      for (let index = 0; index < arr.length; index++) {
-        let item = arr[index]
+      arr.map(item => {
         if (item.id === id) {
-          return item
-        } else if (item.children && item.children.length > 0) {
+          this.editPreDept = item
+        }
+        if (item.children && item.children.length > 0) {
           this.doSearchPreDept(item.children, id)
         }
-      }
+      })
     },
     // 表格操作-删除
     handleDelete(index, row) {

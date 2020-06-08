@@ -194,6 +194,8 @@ export default {
       treeData: [],
       // 上级菜单数据
       preMenu: {},
+      // 编辑弹窗上级菜单数据
+      editPreMenu: {},
       // 菜单图标弹窗
       iconVisible: false,
       // 图标数据
@@ -398,10 +400,10 @@ export default {
         let { success, result } = res
         if (success === true) {
           this.addForm = result
-          let preMenu = this.doSearchPreDept(this.treeData, result.parentId)
-          if (preMenu) {
-            this.addForm.parentId = preMenu.id
-            this.addForm.parentName = preMenu.name
+          this.doSearchPreDept(this.treeData, result.parentId)
+          if (this.editPreMenu) {
+            this.addForm.parentId = this.editPreMenu.id
+            this.addForm.parentName = this.editPreMenu.name
           }
           this.oldVal = {
             name: result.name,
@@ -411,14 +413,14 @@ export default {
       })
     },
     doSearchPreDept(arr, id) {
-      for (let index = 0; index < arr.length; index++) {
-        let item = arr[index]
+      arr.map(item => {
         if (item.id === id) {
-          return item
-        } else if (item.children && item.children.length > 0) {
+          this.editPreMenu = item
+        }
+        if (item.children && item.children.length > 0) {
           this.doSearchPreDept(item.children, id)
         }
-      }
+      })
     },
     // 表格操作-删除
     handleDelete(index, row) {

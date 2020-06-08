@@ -8,50 +8,62 @@
             <span>菜单</span>
           </div>
           <div class="pane-headerR">
-            <el-button icon="el-icon-refresh" circle></el-button>
+            <el-button icon="el-icon-refresh" circle @click="getMenuTreeData"></el-button>
           </div>
         </div>
         <div class="pane-main">
           <el-select v-model="platform" filterable>
             <el-option
               v-for="item in platformOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
             </el-option>
           </el-select>
-          <el-tree :data="treeData" :props="defaultProps" :highlight-current=true :expand-on-click-node=false @node-click="handleNodeClick"></el-tree>
+          <el-tree
+            v-loading="treeLoading"
+            :data="treeData"
+            :props="defaultProps"
+            :highlight-current=true
+            :expand-on-click-node=false
+            @node-click="handleNodeClick"></el-tree>
         </div>
       </pane>
       <pane class="res-right">
         <header class="header">
-          <div class="header-left">
-            <div class="header-title">资源</div>
-          </div>
-          <div class="header-right">
-            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd('add')">新增</el-button>
-            <el-button type="primary" icon="el-icon-edit-outline" @click="handleOpenAdd('edit')">修改</el-button>
-            <el-button type="danger" icon="el-icon-delete" @click="handleDelete">删除</el-button>
-            <el-button icon="el-icon-refresh"></el-button>
-            <el-dropdown trigger="click" :hide-on-click="false">
-              <el-button icon="el-icon-s-grid">
-                <i class="el-icon-arrow-down el-icon--right"></i>
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
-                  <el-checkbox-group v-model="checkList" @change="changeCheckbox" :min="2">
-                    <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                    </el-checkbox-group>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
+          <el-row type="flex" justify="space-between">
+            <el-col :span="6">
+              <div class="header-title">资源</div>
+            </el-col>
+            <el-col :span="18">
+              <div class="button-group">
+                <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd('add')">新增</el-button>
+                <el-button type="primary" icon="el-icon-edit-outline" @click="handleOpenAdd('edit')">修改</el-button>
+                <el-button type="danger" icon="el-icon-delete" @click="handleDelete">删除</el-button>
+                <el-button icon="el-icon-refresh" class="first-button" @click="initTable.menuId !== '' ? getTableList() : null"></el-button>
+                <el-dropdown trigger="click" :hide-on-click="false" class="last-button">
+                  <el-button icon="el-icon-s-grid">
+                    <i class="el-icon-arrow-down el-icon--right"></i>
+                  </el-button>
+                  <el-dropdown-menu slot="dropdown">
+                    <el-dropdown-item>
+                      <el-checkbox-group v-model="checkedList" @change="changeCheckbox" :min="2">
+                        <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
+                        </el-checkbox-group>
+                    </el-dropdown-item>
+                  </el-dropdown-menu>
+                </el-dropdown>
+              </div>
+            </el-col>
+          </el-row>
         </header>
         <article>
           <el-table
             :data="tableData"
             border
             size="medium"
+            :max-height="tableHeight"
+            v-loading="tableLoading"
             @sort-change="sortChange"
             highlight-current-row
             @current-change="handleTableCurrentChange"
@@ -62,11 +74,11 @@
                 <el-radio :label="scope.row.id" v-model="idRadio"></el-radio>
               </template>
             </el-table-column>
-            <el-table-column prop="name" label="名称" v-if="checkList.includes('name')" sortable="custom">
+            <el-table-column prop="name" label="名称" v-if="checkedList.includes('name')" sortable="custom">
             </el-table-column>
-            <el-table-column prop="license" label="许可" v-if="checkList.includes('license')"  sortable="custom">
+            <el-table-column prop="permission" label="许可" v-if="checkedList.includes('permission')"  sortable="custom">
             </el-table-column>
-            <el-table-column prop="address" label="地址" v-if="checkList.includes('address')" sortable="custom">
+            <el-table-column prop="location" label="地址" v-if="checkedList.includes('location')" sortable="custom">
             </el-table-column>
           </el-table>
           <div class="pagination">
@@ -84,11 +96,12 @@
         </article>
       </pane>
     </splitpanes>
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <!-- 新增弹窗 -->
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
         <span>{{ isEdit ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" status-icon label-position="right" label-width="70px">
         <el-row>
           <el-col :span="11">
             <el-form-item label="名称" prop="name">
@@ -96,13 +109,13 @@
             </el-form-item>
           </el-col>
           <el-col :span="11" :offset="2">
-            <el-form-item label="许可" prop="license">
-              <el-input v-model="addForm.license" placeholder="请输入许可"></el-input>
+            <el-form-item label="许可" prop="permission">
+              <el-input v-model="addForm.permission" placeholder="请输入许可"></el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="地址" prop="address">
-          <el-input v-model="addForm.address" placeholder="请输入地址"></el-input>
+        <el-form-item label="地址" prop="location">
+          <el-input v-model="addForm.location" placeholder="请输入地址"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -114,58 +127,42 @@
 </template>
 
 <script>
+import { getTerminalList, getMenuList, getTableList, doAddRes, getResInfo, doUpdateRes } from '@/api/system/resource'
 export default {
   name: 'SYSTEM_RESOURCE',
-  components: {},
   data() {
     return {
       // 平台选择框
-      platform: 0,
-      platformOptions: [
-        { value: 0, label: '后台管理平台' },
-        { value: 1, label: '测试终端平台' }
-      ],
+      platform: null,
+      platformOptions: [],
       // 树结构
-      treeData: [
-        {
-          label: '系统管理',
-          menuId: 1,
-          children: [{
-            label: '用户管理',
-            menuId: 11
-          }]
-        },
-        {
-          label: '开发运维',
-          menuId: 2,
-          children: [{
-            label: '代码生成',
-            menuId: 21
-          }]
-        },
-        {
-          label: '数据源',
-          menuId: 3
-        }
-      ],
+      treeData: [],
+      // 树loading
+      treeLoading: false,
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'name'
+      },
+      // 表格初始化参数
+      initTable: {
+        order: 'asc',
+        offset: 0,
+        limit: 10,
+        menuId: ''
       },
       // 表格数据
-      tableData: [
-        { id: 1, name: '11', license: '11', address: '1' },
-        { id: 2, name: '22', license: '22', address: '2' },
-        { id: 3, name: '33', license: '33', address: '3' }
-      ],
+      tableData: [],
+      // 表格loading
+      tableLoading: false,
+      tableHeight: document.body.clientHeight - 255,
       // 表格配置
       headerList: [
         { prop: 'name', label: '名称' },
-        { prop: 'license', label: '许可' },
-        { prop: 'address', label: '地址' }
+        { prop: 'permission', label: '许可' },
+        { prop: 'location', label: '地址' }
       ],
       // 表格配置选中
-      checkList: ['name', 'license', 'address'],
+      checkedList: ['name', 'permission', 'location'],
       // 表格单选
       idRadio: '',
       // 分页
@@ -179,33 +176,87 @@ export default {
       // 弹窗表单
       addForm: {
         name: '',
-        license: '',
-        address: ''
+        permission: '',
+        location: ''
       },
       // 弹窗表单必填项校验规则
       addRules: {
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, message: '该项为必填项', trigger: 'blur' }
         ],
-        license: [
-          { required: true, message: '请输入许可', trigger: 'blur' }
+        permission: [
+          { required: true, message: '该项为必填项', trigger: 'blur' }
         ],
-        address: [
-          { required: true, message: '请输入地址', trigger: 'blur' }
+        location: [
+          { required: true, message: '该项为必填项', trigger: 'blur' }
         ]
       },
       // 是否编辑弹窗
       isEdit: false
     }
   },
+  created() {
+    this.getInit()
+  },
+  mounted() {
+    window.onresize = () => {
+      return (() => {
+        this.tableHeight = document.body.clientHeight - 255
+      })()
+    }
+  },
   methods: {
+    // 初始化
+    getInit() {
+      getTerminalList().then(res => {
+        let { success, result } = res
+        this.platformOptions = result
+        this.platform = result[0].id
+        this.getMenuTreeData()
+      })
+    },
+    // 获取菜单树数据
+    getMenuTreeData() {
+      this.treeLoading = true
+      getMenuList({ menuId: this.platform }).then(res => {
+        this.treeLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.treeData = result
+        }
+      })
+    },
     // 树结构选择
     handleNodeClick(data) {
-      console.log(data)
+      this.initTable.menuId = data.id
+      this.getTableList()
+    },
+    // 获取右侧表格数据
+    getTableList() {
+      this.tableLoading = true
+      getTableList(this.initTable).then(res => {
+        this.tableLoading = false
+        let { success, result } = res
+        if (success === true) {}
+        this.tableData = result.list
+        this.page = {
+          pageSize: result.pageSize,
+          pageNum: result.pageNum,
+          total: result.total
+        }
+        this.idRadio = ''
+      })
     },
     // 新增弹窗-打开
     handleOpenAdd(type) {
       if (type === 'add') {
+        if (!this.initTable.menuId) {
+          this.$message({
+            message: '请选择一个菜单',
+            type: 'warning'
+          })
+          return false
+        }
         this.addVisible = true
       } else {
         if (this.idRadio === '') {
@@ -214,25 +265,58 @@ export default {
             type: 'warning'
           })
         } else {
+          getResInfo({ id: this.idRadio }).then(res => {
+            let { success, result } = res
+            if (success === true) {}
+            this.addForm = {
+              name: result.name,
+              permission: result.permission,
+              location: result.location
+            }
+          })
           this.isEdit = true
           this.addVisible = true
         }
       }
     },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.isEdit = false
-    },
     // 弹窗-保存
     handleSave() {
+      this.$refs['addForm'].validate((valid) => {
+        if (valid) {
+          if (!this.isEdit) {
+            this.addForm.menuId = this.initTable.menuId
+            doAddRes(this.addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getTableList()
+              }
+            })
+          } else {
+            this.addForm.id = this.idRadio
+            doUpdateRes(this.addForm).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getTableList()
+              }
+            })
+          }
+        }
+      })
       this.addVisible = false
       this.isEdit = false
+      this.$refs['addForm'].resetFields()
     },
     // 弹窗-关闭
     handleClose() {
       this.addVisible = false
       this.isEdit = false
+      this.$refs['addForm'].resetFields()
     },
     // 删除
     handleDelete() {
@@ -257,24 +341,34 @@ export default {
     },
     // 表格-配置
     changeCheckbox(value) {
-      this.checkList = value
+      this.checkedList = value
     },
     // 表格-远程排序
     sortChange(column) {
-      console.log(column)
+      if (column.order) {
+        this.initTable.sort = column.prop
+        this.initTable.order = column.order === 'descending' ? 'desc' : 'asc'
+      } else {
+        delete this.initTable.sort
+        this.initTable.order = 'asc'
+      }
+      this.getTableList()
     },
     // 表格单选
     handleTableCurrentChange(val) {
       this.idRadio = val.id
-      console.log(val.name)
     },
     // 分页-改变每页数量
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`)
+      this.page.pageSize = val
+      this.initTable.limit = val
+      this.getTableList()
     },
     // 分页-改变页码
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`)
+      this.page.pageNum = val
+      this.initTable.offset = (val - 1) * this.initTable.limit
+      this.getTableList()
     }
   }
 }

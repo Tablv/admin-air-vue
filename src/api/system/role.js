@@ -36,4 +36,52 @@ export function getBindedUser(params) {
 }
 
 // 分配用户-绑定用户
+export function doBindUser(data) {
+  return request.post('/system/role/bindUser', data, true)
+}
+
 // 分配用户-解绑用户
+export function doUnBindUser(data) {
+  return request.post('/system/role/unBindUser', data, true)
+}
+
+// 分配用户-左侧全部部门
+export function getAllDept(params) {
+  return request.get('/system/dept/findDept', params)
+}
+
+// 分配用户-左侧未绑定部门
+export function getUnBindDept(params) {
+  return request.get('/system/role/listDeptUnBinded', params)
+}
+
+// 分配用户-右侧已绑定部门
+export function getBindedDept(params) {
+  return request.get('/system/role/listDeptBinded', params)
+}
+
+// 分配用户-绑定部门
+export function doBindDept(data) {
+  return request.post('/system/role/bindDept', data, true)
+}
+
+// 分配用户-解绑部门
+export function doUnBindDept(data) {
+  return request.post('/system/role/unBindDept', data, true)
+}
+
+// 分配菜单-获取全部终端
+export function getTerminalList(params) {
+  return request.get('/system/terminal/findAll', params)
+}
+
+// 分配菜单-获取菜单
+export function getMenuList(params) {
+  return request.get('/system/role/findMenusOfChecked', params)
+}
+
+// 分配菜单-绑定菜单
+export function doBindMenu(data) {
+  return request.post('/system/role/bindMenu', data, true)
+}
+

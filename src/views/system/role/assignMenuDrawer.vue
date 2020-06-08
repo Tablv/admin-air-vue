@@ -12,16 +12,16 @@
       <template slot="title" slot-scope="scope">
         <div class="drawer-header">
           <span>分配菜单</span>
-          <el-button type="danger" icon="el-icon-close" circle @click="handleClose"></el-button>
+          <el-button icon="el-icon-close" type="text" @click="handleClose"></el-button>
         </div>
       </template>
       <div class="drawer-main">
-        <el-select v-model="platform" filterable placeholder="请选择">
+        <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
           <el-option
             v-for="item in platformOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            :key="item.id"
+            :label="item.name"
+            :value="item.id">
           </el-option>
         </el-select>
         <el-tree
@@ -43,6 +43,7 @@
 </template>
 
 <script>
+import { getTerminalList, getMenuList, doBindMenu } from '@/api/system/role'
 export default {
   name: 'assignMenu',
   components: {},
@@ -50,64 +51,112 @@ export default {
     drawer: {
       type: Boolean,
       default: false
+    },
+    assignParams: {
+      type: Object,
+      default: () => {
+        return {}
+      }
     }
   },
   data() {
     return {
       // 平台选择框
-      platform: 0,
-      platformOptions: [
-        { value: 0, label: '后台管理平台' },
-        { value: 1, label: '测试终端平台' }
-      ],
+      platform: '0',
+      platformOptions: [],
       // 选择菜单
-      treeData: [
-        {
-          label: '系统管理',
-          id: 1,
-          children: [
-            { label: '用户管理', id: 11 },
-            { label: '菜单管理', id: 12 }
-          ]
-        },
-        {
-          label: '开发运维',
-          id: 2,
-          children: [
-            { label: '代码生成', id: 21 }
-          ]
-        },
-        { label: '数据源', id: 3 },
-        { label: '数据集', id: 4 }
-      ],
+      treeData: [],
       defaultProps: {
         children: 'children',
-        label: 'label'
+        label: 'name'
       },
+      // 选中菜单
+      selectedMenu: '',
       // 已选中的菜单
       defaultChecked: []
     }
   },
   computed: {},
-  watch: {},
-  created() {
-    this.doInit()
+  watch: {
+    drawer(val) {
+      if (val) {
+        this.getAllTerminal()
+      }
+    }
   },
   mounted() {},
   methods: {
-    // 初始化
-    doInit() {
-      this.defaultChecked = [3, 4]
+    // 获取全部终端
+    getAllTerminal() {
+      getTerminalList().then(res => {
+        let { success, result } = res
+        this.platformOptions = result
+        this.platformOptions.unshift({ id: '0', name: '请选择' })
+      })
+    },
+    // 改变终端
+    handleChangeTerminal(val) {
+      this.platform = val
+      let params = {
+        terminalId: val,
+        roleId: this.assignParams.id
+      }
+      getMenuList(params).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.treeData = result
+          this.defaultChecked = []
+          this.getCheckedMenu(result)
+        }
+      })
+    },
+    // 获取选中菜单
+    getCheckedMenu(data) {
+      data.map(item => {
+        if (item.children && item.children.length > 0) {
+          item.children.map(i => {
+            if (i.checked === true) {
+              this.defaultChecked.push(i.id)
+            }
+            if (i.children && i.children.length > 0) {
+              this.getCheckedMenu(i.children)
+            }
+          })
+        }
+      })
     },
     // 选择菜单
     handleCheckChange(data, checked, indeterminate) {
-      console.log(this.$refs.tree.getCheckedNodes())
+      this.selectedMenu = this.$refs.tree.getHalfCheckedKeys().concat(this.$refs.tree.getCheckedKeys()).join(',')
+    },
+    handleSave() {
+      let bindParams = {
+        menuIds: this.selectedMenu,
+        roleId: this.assignParams.id,
+        rolename: this.assignParams.name,
+        terminalId: this.platform
+      }
+      doBindMenu(bindParams).then(res => {
+        if (res.success === true) {
+          this.$message({
+            message: '操作成功！',
+            type: 'success'
+          })
+          this.$emit('closeDrawer', false)
+          this.handleReset()
+        }
+      })
     },
     handleClose() {
       this.$emit('closeDrawer', false)
+      this.handleReset()
     },
-    handleSave() {
-      this.$emit('closeDrawer', false)
+    handleReset() {
+      this.platform = '0'
+      this.platformOptions = []
+      this.treeData = []
+      this.selectedMenu = ''
+      this.defaultChecked = []
     }
   }
 }
@@ -130,9 +179,15 @@ export default {
     }
     .el-drawer__body {
       padding: 10px;
+      height: calc(100% - 69px);
       .drawer-main {
+        height: calc(100% - 49px);
+        overflow: auto;
         .el-select {
           margin-bottom: 5px;
+        }
+        .el-tree-node__label {
+          font-size: 12px;
         }
       }
       .drawer-footer {

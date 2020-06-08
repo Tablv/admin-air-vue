@@ -57,7 +57,7 @@
         <template slot-scope="operation">
           <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
-          <el-button type="text" @click="handhandleAssignUserleEdit(operation.index, operation.row)">分配用户</el-button>
+          <el-button type="text" @click="handleAssignUser(operation.index, operation.row)">分配用户</el-button>
           <el-button type="text" @click="handleAssignMenu(operation.index, operation.row)">分配菜单</el-button>
         </template>
       </gw-table>
@@ -96,9 +96,9 @@
       </div>
     </el-dialog>
     <!-- 分配用户 -->
-    <assign-user :assignUserVisible="assignUserVisible" @closeDialog="handleCloseAssignUserDialog"></assign-user>
+    <assign-user :assignUserVisible="assignUserVisible" :assignParams="assignParams" @closeDialog="handleCloseAssignUserDialog"></assign-user>
     <!-- 分配菜单 -->
-    <assign-menu :drawer="drawer" @closeDrawer="handleCloseDrawer"></assign-menu>
+    <assign-menu :drawer="drawer" :assignParams="assignParams" @closeDrawer="handleCloseDrawer"></assign-menu>
     <!-- 导入 -->
     <import-dialog :importVisible="importVisible" templateNum="SYS_ROLE" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
   </div>
@@ -213,6 +213,8 @@ export default {
       assignUserVisible: false,
       // 分配菜单抽屉
       drawer: false,
+      // 分配用户、分配菜单参数
+      assignParams: {},
       // 导入弹窗
       importVisible: false,
       // 弹窗表单
@@ -362,6 +364,7 @@ export default {
     },
     // 表格操作-分配用户
     handleAssignUser(index, row) {
+      this.assignParams = row
       this.assignUserVisible = true
     },
     // 分配用户弹窗-关闭
@@ -370,6 +373,7 @@ export default {
     },
     // 表格操作-分配菜单
     handleAssignMenu(index, row) {
+      this.assignParams = row
       this.drawer = true
     },
     // 分配菜单抽屉-关闭
