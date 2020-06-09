@@ -22,6 +22,7 @@
     </header>
     <article>
       <gw-table
+        ref="gwTable"
         :tableData="tableData"
         :tableColumn="tableColumn"
         :listLoading="listLoading"
@@ -424,7 +425,6 @@ export default {
     },
     // 表格操作-删除
     handleDelete(index, row) {
-      console.log(this.$refs.table.store.states.lazyTreeNodeMap)
       if (row.isParent) {
         this.$message({
           message: '存在子节点，请先删除子节点！',
@@ -442,10 +442,11 @@ export default {
             doDeleteMenu({ id: row.id }).then(res => {
               if (res.success === true) {
                 this.$message({
-                  message: '删除成功！',
+                  message: '操作成功！',
                   type: 'success'
                 })
                 this.getTableData()
+                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
               }
             })
           }
@@ -456,12 +457,10 @@ export default {
     getTableData() {
       this.listLoading = true
       getMenuList({ nodeid: this.platform }).then(res => {
-        this.tableData = []
+        this.tableData.splice(0)
         this.listLoading = false
         let { success, result } = res
         if (success === true) {
-          // this.$refs.table.store.states.lazyTreeNodeMap = []
-          // this.$set(this.$refs.table.store.states.lazyTreeNodeMap, id, res.data.dataList)
           this.tableData = result
         }
       })

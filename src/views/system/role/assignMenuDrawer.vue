@@ -167,7 +167,7 @@ export default {
     position: absolute;
     .el-drawer__header {
       height: 44px;
-      background-color: #F8F8F8;
+      // background-color: #F8F8F8;
       border-bottom: 1px solid #E7E7E7;
       margin-bottom: 0;
       padding: 10px;

@@ -69,6 +69,7 @@
         <template slot-scope="scope">
           <span v-if="item.prop === 'status'" :style="{ color: (scope.row.status === 0 ? '#80B762' : 'red')}">{{ scope.row.status === 0 ? '启用' : '禁用' }}</span>
           <span v-else-if="item.prop === 'type'">{{ scope.row.type === 0 ? '组织' : '部门' }}</span>
+          <span v-else-if="item.prop === 'dataType'">{{ scope.row.dataType === 0 ? '数据分组' : '数据项' }}</span>
           <span v-else-if="item.prop === 'operation'">
             <slot :index='scope.$index' :row='scope.row'></slot>
           </span>

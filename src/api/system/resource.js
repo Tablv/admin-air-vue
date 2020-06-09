@@ -29,3 +29,8 @@ export function getResInfo(params) {
 export function doUpdateRes(data) {
   return request.post('/system/resource/update', data, true)
 }
+
+// 删除资源
+export function doDeleteRes(data) {
+  return request.post('/system/resource/delete', data, true)
+}

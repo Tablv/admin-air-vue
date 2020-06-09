@@ -14,6 +14,7 @@
     </header>
     <article>
       <gw-table
+        ref="gwTable"
         :tableData="tableData"
         :tableColumn="tableColumn"
         :listLoading="listLoading"
@@ -213,7 +214,7 @@ export default {
     // 初始化
     getInit() {
       this.listLoading = true
-      this.tableData = []
+      this.tableData.splice(0)
       getDeptGroup({ nodeid: 0 }).then(res => {
         this.listLoading = false
         let { success, result } = res
@@ -383,6 +384,7 @@ export default {
                   type: 'success'
                 })
                 this.getInit()
+                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
               }
             })
           }

@@ -86,7 +86,7 @@
               background
               @size-change="handleSizeChange"
               @current-change="handleCurrentChange"
-              :page-sizes="[10, 20, 50, 100]"
+              :page-sizes="[5, 10, 20, 50, 100]"
               :page-size="page.pageSize"
               :current-page="page.pageNum"
               layout="sizes, total, ->, prev, pager, next"
@@ -127,7 +127,7 @@
 </template>
 
 <script>
-import { getTerminalList, getMenuList, getTableList, doAddRes, getResInfo, doUpdateRes } from '@/api/system/resource'
+import { getTerminalList, getMenuList, getTableList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
 export default {
   name: 'SYSTEM_RESOURCE',
   data() {
@@ -334,7 +334,14 @@ export default {
           cancelButtonClass: 'messageBoxCancelButton'
         }).then(action => {
           if (action === 'confirm') {
-            console.log('确定删除')
+            doDeleteRes({ id: this.idRadio }).then(res => {
+              if (res.success === true) {}
+              this.$message({
+                message: '操作成功！',
+                type: 'success'
+              })
+              this.getTableList()
+            })
           }
         }).catch(() => {})
       }
@@ -356,7 +363,7 @@ export default {
     },
     // 表格单选
     handleTableCurrentChange(val) {
-      this.idRadio = val.id
+      if (val) this.idRadio = val.id
     },
     // 分页-改变每页数量
     handleSizeChange(val) {

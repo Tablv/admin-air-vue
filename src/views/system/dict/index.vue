@@ -1,51 +1,43 @@
 <template>
 <div class="container">
     <header class="header">
-      <div class="header-left">
-        <div class="header-title">数据维护</div>
-      </div>
-      <div class="header-right">
-        <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-      </div>
+      <el-row type="flex" justify="space-between">
+        <el-col :span="6">
+          <div class="header-title">数据维护</div>
+        </el-col>
+        <el-col :span="18">
+          <div style="float: right">
+            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+          </div>
+        </el-col>
+      </el-row>
     </header>
     <article>
-      <el-table
-        :data="tableData"
-        row-key="id"
-        size="medium"
-        border
-        lazy
-        :load="loadData"
-        header-cell-class-name="header-cell"
-        :tree-props="{children: 'children', hasChildren: 'hasChildren'}">
-        <el-table-column prop="name" label="名称"></el-table-column>
-        <el-table-column prop="code" label="编码"></el-table-column>
-        <el-table-column prop="type" label="类型"></el-table-column>
-        <el-table-column prop="lvl" label="层级"></el-table-column>
-        <el-table-column prop="sortNum" label="排序号"></el-table-column>
-        <el-table-column prop="status" label="状态">
-          <template slot-scope="scope">
-            <span :style="{ color: (scope.row.status === 1 ? '#80B762' : 'red')}">{{ scope.row.status === 1 ? '启用' : '禁用' }}</span>
-          </template>
-        </el-table-column>
-        <el-table-column prop="operation" label="操作" width="150">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-plus" circle @click="handleAdd(scope.$index, scope.row)" />
-            <el-button type="primary" icon="el-icon-edit-outline" circle @click="handleEdit(scope.$index, scope.row)" />
-            <el-button type="danger" icon="el-icon-delete" circle @click="handleDelete(scope.$index, scope.row)" />
-          </template>
-        </el-table-column>
-      </el-table>
+      <gw-table
+        ref="gwTable"
+        :tableData="tableData"
+        :tableColumn="tableColumn"
+        :listLoading="listLoading"
+        :hasTree="true"
+        :tableTreeData="tableTreeData"
+        @loadData="loadData"
+      >
+        <template slot-scope="operation">
+          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
+          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
+          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        </template>
+      </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleCloseAdd" :destroy-on-close="true">
+    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
       <div slot="title" class="dialog-title">
-        <span>{{ isEdit ? '修改' : '新增' }}</span>
+        <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
       <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
         <el-form-item label="上级名称">
           <el-input v-model="addForm.preName" disabled class="input-with-select">
-            <el-button slot="append" :disabled="isEdit" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+            <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
           </el-input>
         </el-form-item>
         <el-form-item label="类型" prop="type">
@@ -76,29 +68,46 @@
       </div>
     </el-dialog>
     <!-- 上级名称弹窗 -->
-    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
+    <tree-dialog :treeVisible="treeVisible"
+    :treeData="treeData"
+    @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
   </div>
 </template>
 
 <script>
+import { getDataList, doDeleteData } from '@/api/system/dict'
+import gwTable from '@/components/gwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'DICT',
   components: {
+    gwTable,
     treeDialog
   },
   data() {
     return {
       // 表格数据
-      tableData: [
-        { id: 1, name: 'A', code: 'A', type: '数据分组', lvl: 0, sortNum: 2, status: 1, hasChildren: true },
-        { id: 2, name: 'B', code: 'B', type: '数据分组', lvl: 0, sortNum: 4, status: 1, hasChildren: true },
-        { id: 3, name: 'C', code: 'C', type: '数据分组', lvl: 0, sortNum: 5, status: 1 }
+      tableData: [],
+      // 表格列数据
+      tableColumn: [
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
+        { prop: 'dataType', label: '类型' },
+        { prop: 'lvl', label: '层级' },
+        { prop: 'sortnum', label: '排序号' },
+        { prop: 'status', label: '状态' },
+        { prop: 'operation', label: '操作', width: '180' }
       ],
+      // 表格树数据
+      tableTreeData: [],
+      // 表格loading
+      listLoading: false,
       // 新增弹窗
       addVisible: false,
-      // 上级菜单弹窗
+      // 上级名称弹窗
       treeVisible: false,
+      // 上级名称弹窗数据
+      treeData: [],
       // 弹窗表单
       addForm: {
         preName: '',
@@ -111,43 +120,67 @@ export default {
       // 弹窗表单必填项校验规则
       addRules: {
         type: [
-          { required: true, message: '请选择类型', trigger: 'change' }
+          { required: true, message: '该项为必填项', trigger: 'change' }
         ],
         code: [
-          { required: true, message: '请输入编码', trigger: 'blur' }
+          { required: true, message: '该项为必填项', trigger: 'blur' }
         ],
         name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, message: '该项为必填项', trigger: 'blur' }
         ],
         status: [
-          { required: true, message: '请选择数据状态', trigger: 'change' }
+          { required: true, message: '该项为必填项', trigger: 'change' }
         ]
       },
       // 是否编辑弹窗
-      isEdit: false
+      isEdit: 1
     }
   },
+  created() {
+    this.getInit()
+  },
   methods: {
+    // 初始化
+    getInit() {
+      this.listLoading = true
+      this.tableData.splice(0)
+      // 获取全部终端数据
+      getDataList({ nodeid: 0 }).then(res => {
+        this.listLoading = false
+        let { success, result } = res
+        if (success === true) {
+          this.tableData = result.map(item => {
+            item.dataType = item.type
+            return item
+          })
+        }
+      })
+    },
+    // 表格-树数据
+    loadData(tree) {
+      getDataList({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.tableTreeData = result
+        }
+      })
+    },
     // 新增弹窗-打开
     handleOpenAdd() {
+      this.isEdit = 1
       this.addVisible = true
-    },
-    // 新增弹窗-关闭
-    handleCloseAdd() {
-      this.addVisible = false
-      this.isEdit = false
     },
     // 弹窗-保存
     handleSave() {
       this.addVisible = false
-      this.isEdit = false
+      this.isEdit = 1
     },
     // 弹窗-关闭
     handleClose() {
       this.addVisible = false
-      this.isEdit = false
+      this.isEdit = 1
     },
-    // 上级菜单弹窗-打开
+    // 上级名称弹窗-打开
     handleOpenTreeDialog() {
       this.treeVisible = true
     },
@@ -159,46 +192,45 @@ export default {
     getCurrentMenu(data) {
       this.addForm.preName = data.label
     },
-    // 表格-树数据
-    loadData(row, treeNode, resolve) {
-      let allData = [
-        { id: 11, parentId: 1, name: 'D', code: 'D', type: '数据分组', lvl: 0, sortNum: 5, status: 1, hasChildren: true },
-        { id: 111, parentId: 11, name: 'E', code: 'E', type: '数据分组', lvl: 0, sortNum: 5, status: 1, hasChildren: true },
-        { id: 1111, parentId: 111, name: 'F', code: 'F', type: '数据分组', lvl: 0, sortNum: 5, status: 1 },
-        { id: 21, parentId: 2, name: 'G', code: 'G', type: '数据分组', lvl: 0, sortNum: 5, status: 1 }
-      ]
-      let data = allData.filter(item => item.parentId === row.id)
-      setTimeout(() => {
-        resolve(data)
-      }, 1000)
-    },
     // 表格操作-新增
     handleAdd(index, row) {
+      this.isEdit = 2
       this.addVisible = true
     },
     // 表格操作-编辑
     handleEdit(index, row) {
-      this.isEdit = true
+      this.isEdit = 3
       this.addVisible = true
     },
     // 表格操作-删除
     handleDelete(index, row) {
-      console.log(index, row)
-      this.$message({
-        message: '存在子节点，请先删除子节点！',
-        type: 'warning'
-      })
-      this.$confirm('确认删除吗？', '信息', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        closeOnClickModal: false,
-        closeOnPressEscape: false,
-        cancelButtonClass: 'messageBoxCancelButton'
-      }).then(action => {
-        if (action === 'confirm') {
-          console.log('确定删除')
-        }
-      }).catch(() => {})
+      if (row.isParent) {
+        this.$message({
+          message: '存在子节点，请先删除子节点！',
+          type: 'warning'
+        })
+      } else {
+        this.$confirm('确认删除吗？', '信息', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          closeOnClickModal: false,
+          closeOnPressEscape: false,
+          cancelButtonClass: 'messageBoxCancelButton'
+        }).then(action => {
+          if (action === 'confirm') {
+            doDeleteData({ id: row.id }).then(res => {
+              if (res.success === true) {
+                this.$message({
+                  message: '操作成功！',
+                  type: 'success'
+                })
+                this.getInit()
+                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
+              }
+            })
+          }
+        }).catch(() => {})
+      }
     }
   }
 }
