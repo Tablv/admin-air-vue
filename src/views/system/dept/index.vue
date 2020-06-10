@@ -231,12 +231,19 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          let addForm = {}
-          addForm = JSON.parse(JSON.stringify(this.addForm))
-          addForm.terminalId = ''
           if (this.isEdit === 1 || this.isEdit === 2) {
+            let addForm = {}
+            addForm = {
+              type: this.addForm.type,
+              name: this.addForm.name,
+              code: this.addForm.code,
+              status: this.addForm.status,
+              remark: this.addForm.remark
+            }
+            addForm.terminalId = ''
             addForm.fullPath = this.preDept.fullPath ? `${this.preDept.fullPath}/${addForm.code}` : `/${addForm.code}`
             addForm.parentId = this.preDept.id ? this.preDept.id : ''
+            addForm.parentName = this.preDept.name ? this.preDept.name : ''
             if (this.preDept.lvl === 0) {
               addForm.lvl = this.preDept.lvl + 1
             } else if (this.preDept.lvl) {
@@ -265,16 +272,16 @@ export default {
           } else {
             let editForm = {}
             editForm = {
-              id: addForm.id,
-              lvl: addForm.lvl ? addForm.lvl : null,
-              terminalId: addForm.terminalId ? addForm.terminalId : null,
-              parentId: addForm.parentId ? addForm.parentId : null,
-              parentName: addForm.parentName ? addForm.parentName : null,
-              name: addForm.name,
-              code: addForm.code,
-              status: addForm.status,
-              type: addForm.type,
-              remark: addForm.remark ? addForm.remark :null
+              id: this.addForm.id,
+              lvl: this.addForm.lvl,
+              terminalId: this.addForm.terminalId ? this.addForm.terminalId : '',
+              parentId: this.addForm.parentId ? this.addForm.parentId : '',
+              parentName: this.addForm.parentName ? this.addForm.parentName : '',
+              name: this.addForm.name,
+              code: this.addForm.code,
+              status: this.addForm.status,
+              type: this.addForm.type,
+              remark: this.addForm.remark ? this.addForm.remark : ''
             }
             doEditDept(editForm).then(res => {
               if (res.success === true) {
@@ -339,6 +346,7 @@ export default {
         let { success, result } = res
         if (success === true) {
           this.addForm = result
+          this.editPreDept = {}
           this.doSearchPreDept(this.treeData, result.parentId)
           if (this.editPreDept) {
             this.addForm.parentId = this.editPreDept.id

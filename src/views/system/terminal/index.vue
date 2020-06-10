@@ -235,14 +235,13 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          let addForm = {}
-          addForm = JSON.parse(JSON.stringify(this.addForm))
           if (!this.showStatus) {
-            delete addForm.status
-            delete addForm.appKey
-            delete addForm.appSecret
-          }
-          if (!this.showStatus) {
+            let addForm = {}
+            addForm = {
+              name: this.addForm.name,
+              code: this.addForm.code,
+              remark: this.addForm.remark
+            }
             doAddTerminal(addForm).then(res => {
               if (res.success === true) {
                 this.$message({
@@ -255,13 +254,13 @@ export default {
           } else {
             let editForm = {}
             editForm = {
-              id: addForm.id,
-              name: addForm.name,
-              coed: addForm.code,
-              status: addForm.status,
-              remark: addForm.remark,
-              appKey: addForm.appKey,
-              appSecret: addForm.appSecret
+              id: this.addForm.id,
+              name: this.addForm.name,
+              coed: this.addForm.code,
+              status: this.addForm.status,
+              remark: this.addForm.remark,
+              appKey: this.addForm.appKey,
+              appSecret: this.addForm.appSecret
             }
             doEditTerminal(editForm).then(res => {
               if (res.success === true) {

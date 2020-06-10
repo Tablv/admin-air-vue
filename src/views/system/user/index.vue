@@ -290,20 +290,19 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          let addForm = {}
-          addForm = JSON.parse(JSON.stringify(this.addForm))
-          if (!this.showStatus) delete addForm.status
-          if (addForm.roleIds && addForm.roleIds.length > 0) {
-            addForm.roleIds = addForm.roleIds.join(',')
-          } else {
-            delete addForm.roleIds
-          }
-          if (addForm.depts && addForm.depts.length > 0) {
-            addForm.depts = addForm.depts.join(',')
-          } else {
-            delete addForm.depts
-          }
           if (!this.showStatus) {
+            let addForm = {}
+            addForm = {
+              name: this.addForm.name,
+              username: this.addForm.username,
+              remark: this.addForm.remark
+            }
+            if (this.addForm.roleIds && this.addForm.roleIds.length > 0) {
+              addForm.roleIds = this.addForm.roleIds.join(',')
+            }
+            if (this.addForm.depts && this.addForm.depts.length > 0) {
+              addForm.depts = this.addForm.depts.join(',')
+            }
             doAddUser(addForm).then(res => {
               if (res.success === true) {
                 this.$message({
@@ -316,13 +315,17 @@ export default {
           } else {
             let editForm = {}
             editForm = {
-              id: addForm.id,
-              name: addForm.name ? addForm.name : null,
-              username: addForm.username ? addForm.username : null,
-              status: this.showStatus ? addForm.status : null,
-              roleIds: addForm.roleIds ? addForm.roleIds : null,
-              depts: addForm.depts ? addForm.depts : null,
-              remark: addForm.remark ? addForm.remark : null
+              id: this.addForm.id,
+              name: this.addForm.name ? this.addForm.name : null,
+              username: this.addForm.username ? this.addForm.username : null,
+              status: this.showStatus ? this.addForm.status : null,
+              remark: this.addForm.remark ? this.addForm.remark : null
+            }
+            if (this.addForm.roleIds && this.addForm.roleIds.length > 0) {
+              editForm.roleIds = this.addForm.roleIds.join(',')
+            }
+            if (this.addForm.depts && this.addForm.depts.length > 0) {
+              editForm.depts = this.addForm.depts.join(',')
             }
             Object.keys(editForm).forEach(item => {
               if (editForm[item] === null) delete editForm[item]

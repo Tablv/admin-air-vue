@@ -271,10 +271,13 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          let addForm = {}
-          addForm = JSON.parse(JSON.stringify(this.addForm))
           if (!this.showStatus) {
-            delete addForm.status
+            let addForm = {}
+            addForm = {
+              name: this.addForm.name,
+              code: this.addForm.code,
+              remark: this.addForm.remark
+            }
             doAddRole(addForm).then(res => {
               if (res.success === true) {
                 this.$message({
@@ -287,11 +290,11 @@ export default {
           } else {
             let editForm = {}
             editForm = {
-              id: addForm.id,
-              name: addForm.name ? addForm.name : null,
-              code: addForm.code ? addForm.code : null,
-              status: this.showStatus ? addForm.status : null,
-              remark: addForm.remark ? addForm.remark : null
+              id: this.addForm.id,
+              name: this.addForm.name ? this.addForm.name : null,
+              code: this.addForm.code ? this.addForm.code : null,
+              status: this.showStatus ? this.addForm.status : null,
+              remark: this.addForm.remark ? this.addForm.remark : null
             }
             doEditRole(editForm).then(res => {
               if (res.success === true) {

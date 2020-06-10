@@ -293,11 +293,20 @@ export default {
     handleSave() {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
-          let addForm = {}
-          addForm = JSON.parse(JSON.stringify(this.addForm))
-          addForm.terminalId = this.platform
           if (this.isEdit === 1 || this.isEdit === 2) {
-            addForm.parentId = this.preMenu.id ? this.preMenu.id : ''
+            let addForm = {}
+            addForm = {
+              parentName: this.addForm.parentName,
+              name: this.addForm.name,
+              code: this.addForm.code,
+              iconClass: this.addForm.iconClass,
+              path: this.addForm.path,
+              permission: this.addForm.permission,
+              popout: this.addForm.popout,
+              status: this.addForm.status
+            }
+            addForm.terminalId = this.platform
+            addForm.parentId = this.preMenu.id ? this.preMenu.id : this.platform
             if (this.preMenu.lvl === 0) {
               addForm.lvl = this.preMenu.lvl + 1
             } else if (this.preMenu.lvl) {
@@ -317,22 +326,19 @@ export default {
           } else {
             let editForm = {}
             editForm = {
-              id: addForm.id,
-              lvl: addForm.lvl ? addForm.lvl : null,
-              terminalId: addForm.terminalId ? addForm.terminalId : null,
-              parentId: addForm.parentId ? addForm.parentId : null,
-              parentName: addForm.parentName ? addForm.parentName : null,
-              name: addForm.name,
-              code: addForm.code,
-              iconClass: addForm.iconClass ? addForm.iconClass : null,
-              path: addForm.path ? addForm.path : null,
-              permission: addForm.permission ? addForm.permission : null,
-              popout: addForm.popout,
-              status: addForm.status
+              id: this.addForm.id,
+              lvl: this.addForm.lvl,
+              terminalId: this.addForm.terminalId ? this.addForm.terminalId : '',
+              parentId: this.addForm.parentId ? this.addForm.parentId : this.addForm.terminalId,
+              parentName: this.addForm.parentName ? this.addForm.parentName : '',
+              name: this.addForm.name,
+              code: this.addForm.code,
+              iconClass: this.addForm.iconClass ? this.addForm.iconClass : '',
+              path: this.addForm.path ? this.addForm.path : '',
+              permission: this.addForm.permission ? this.addForm.permission : '',
+              popout: this.addForm.popout,
+              status: this.addForm.status
             }
-            Object.keys(editForm).forEach(item => {
-              if (editForm[item] === null) delete editForm[item]
-            })
             doEditMenu(editForm).then(res => {
               if (res.success === true) {
                 this.$message({
@@ -401,6 +407,7 @@ export default {
         let { success, result } = res
         if (success === true) {
           this.addForm = result
+          this.editPreMenu = {}
           this.doSearchPreDept(this.treeData, result.parentId)
           if (this.editPreMenu) {
             this.addForm.parentId = this.editPreMenu.id
