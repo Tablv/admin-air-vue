@@ -34,7 +34,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
         <el-form-item label="上级名称" prop="parentName">
           <el-input v-model="addForm.parentName" disabled class="input-with-select">
             <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>

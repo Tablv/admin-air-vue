@@ -42,7 +42,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="上级菜单" prop="parentName">

@@ -101,7 +101,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" status-icon label-position="right" label-width="70px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" status-icon label-position="right" label-width="70px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="名称" prop="name">
