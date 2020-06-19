@@ -56,7 +56,9 @@
     .svg-icon {
       margin-right: 16px;
     }
-
+    .svg-inline--fa {
+      margin-right: 16px;
+    }
     .el-menu {
       border: none;
       height: 100%;
@@ -105,6 +107,9 @@
         .svg-icon {
           margin-left: 20px;
         }
+        .svg-inline--fa {
+          margin-left: 20px;
+        }
       }
     }
 
@@ -115,6 +120,10 @@
         padding: 0 !important;
 
         .svg-icon {
+          margin-left: 20px;
+        }
+
+        .svg-inline--fa {
           margin-left: 20px;
         }
 
@@ -176,6 +185,9 @@
 .el-menu--vertical {
   &>.el-menu {
     .svg-icon {
+      margin-right: 16px;
+    }
+    .svg-inline--fa {
       margin-right: 16px;
     }
   }

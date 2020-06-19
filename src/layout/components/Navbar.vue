@@ -8,7 +8,9 @@
       <el-dropdown class="avatar-container" trigger="click">
         <!-- 用户信息 -->
         <div class="avatar-wrapper">
-          <img src="" class="user-avatar">
+          <!-- <img src="" class="user-avatar"> -->
+          <!-- <i class="el-icon-user-solid"></i> -->
+          <font-awesome-icon icon="user-circle" size="2x"/>
           <i class="el-icon-caret-bottom" />
         <!-- 用户名 -->
         </div>

@@ -1,45 +1,16 @@
 <template>
   <div class="container">
-    <header class="header">
-      <el-row type="flex" justify="space-between">
-        <el-col :span="6">
-          <div class="header-title">终端管理</div>
-        </el-col>
-        <el-col :span="18">
-          <div class="button-group">
-            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-            <el-button icon="el-icon-refresh" class="first-button" @click="getInit"></el-button>
-            <el-dropdown trigger="click" :hide-on-click="false" class="last-button">
-              <el-button icon="el-icon-s-grid">
-                <i class="el-icon-arrow-down el-icon--right"></i>
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
-                  <el-checkbox-group v-model="checkedList" @change="changeCheckbox" :min="2">
-                    <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                    </el-checkbox-group>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
-        </el-col>
-      </el-row>
-      </header>
-    <article>
+     <article>
       <gw-table
-        :tableData="tableData"
-        :tableColumn="tableColumn"
-        :checkedList="checkedList"
-        :listLoading="listLoading"
-        :activedFilter="activedFilter"
-        :filter="filter"
-        :page="page"
-        @sort-change="sortChange"
-        @filter="tableFilter"
-        @handleSizeChange="handleSizeChange"
-        @handleCurrentChange="handleCurrentChange"
+        ref="gwTable"
+        :tableConfig="tableConfig"
+        @changeColumns="changeColumns"
+        @add="handleOpenAdd"
       >
-        <template slot-scope="operation">
+        <template slot="conver" slot-scope="conver">
+          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        </template>
+        <template slot="operation" slot-scope="operation">
           <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
         </template>
@@ -50,7 +21,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="auto">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="auto" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="名称" prop="name">
@@ -138,51 +109,24 @@ export default {
       }
     }
     return {
-      // 初始化参数
-      initParams: {
-        order: 'asc',
-        offset: 0,
-        limit: 10
-      },
-      // 表格数据
-      tableData: [],
-      // 表格列数据
-      tableColumn: [
-        { prop: 'name', label: '名称', sort: 'custom', filter: 'input' },
-        { prop: 'code', label: '编码', sort: 'custom', filter: 'input' },
-        { prop: 'status', label: '状态', sort: 'custom', filter: 'select' },
-        { prop: 'remark', label: '备注', sort: 'custom' },
-        { prop: 'operation', label: '操作', width: '180' }
-      ],
-      // 表格loading
-      listLoading: false,
-      // 表格配置
-      headerList: [
-        { prop: 'name', label: '名称' },
-        { prop: 'code', label: '编码' },
-        { prop: 'status', label: '状态' },
-        { prop: 'remark', label: '备注' },
-        { prop: 'operation', label: '操作' }
-      ],
-      // 表格配置选中
-      checkedList: ['name', 'code', 'status', 'remark', 'operation'],
-      // 表格过滤
-      filter: {
-        name: '',
-        code: '',
-        status: '2'
-      },
-      activedFilter: {
-        name: false,
-        code: false,
-        status: false
-      },
-      filterParams: {},
-      // 分页
-      page: {
-        pageSize: 10,
-        pageNum: 1,
-        total: 0
+     // 表格
+      tableConfig: {
+        api: '/system/terminal/list',
+        // 表格列数据
+        columns: [
+          { prop: 'name', label: '名称', sort: 'custom', filter: { type: 'input', data: 'name' } },
+          { prop: 'code', label: '编码', sort: 'custom', filter: { type: 'input', data: 'code' } },
+          { prop: 'status', label: '状态', conver: true, sort: 'custom', filter: { type: 'select', data: 'status', option: { '0': '启用', '1': '禁用' } } },
+          { prop: 'remark', label: '备注', sort: 'custom' },
+          { prop: 'operation', label: '操作', width: '180' }
+        ],
+        // 表格配置选中
+        checkedColumns: ['name', 'code', 'status', 'remark', 'operation'],
+        title: '终端管理',
+        // 按钮配置
+        buttons: ['add', 'refresh', 'columns'],
+        // 是否分页
+        pagination: true
       },
       // 新增弹窗
       addVisible: false,
@@ -208,25 +152,7 @@ export default {
       oldVal: {}
     }
   },
-  created() {
-    this.getInit()
-  },
   methods: {
-    // 初始化
-    getInit() {
-      this.listLoading = true
-      getTerminalList(this.initParams).then(res => {
-        this.listLoading = false
-        let { success, result } = res
-        if (success === true) {}
-        this.tableData = result.list
-        this.page = {
-          pageSize: result.pageSize,
-          pageNum: result.pageNum,
-          total: result.total
-        }
-      })
-    },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.addVisible = true
@@ -248,7 +174,7 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
+                this.$refs.gwTable.getInit()
               }
             })
           } else {
@@ -268,7 +194,7 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
+                this.$refs.gwTable.getInit()
               }
             })
           }
@@ -314,84 +240,15 @@ export default {
                 message: '操作成功！',
                 type: 'success'
               })
-              this.getInit()
+              this.$refs.gwTable.getInit()
             }
           })
         }
       }).catch(() => {})
     },
-    // 表格-配置
-    changeCheckbox(value) {
-      this.checkedList = value
-    },
-    // 表格-远程排序
-    sortChange(column) {
-      if (column.order) {
-        this.initParams.sort = column.prop
-        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
-      } else {
-        delete this.initParams.sort
-        this.initParams.order = 'asc'
-      }
-      this.getInit()
-    },
-    // 表格-筛选
-    tableFilter({ filter, type, reset }) {
-      switch (type) {
-        case 'name':
-          if (filter.name) {
-            this.filterParams.name = filter.name
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.name
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            delete this.filterParams.name
-            this.activedFilter[type] = false
-          }
-          break
-        case 'code':
-          if (filter.code) {
-            this.filterParams.code = filter.code
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.code
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            delete this.filterParams.code
-            this.activedFilter[type] = false
-          }
-          break
-        case 'status':
-          if (filter.status && filter.status !== '2') {
-            this.filterParams.status = filter.status
-            this.activedFilter[type] = true
-          } else {
-            delete this.filterParams.status
-            this.activedFilter[type] = false
-          }
-          if (reset === 'reset') {
-            delete this.filterParams.status
-            this.activedFilter[type] = false
-          }
-          break
-      }
-      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
-      this.getInit()
-    },
-    // 分页-改变每页数量
-    handleSizeChange(val) {
-      this.page.pageSize = val
-      this.initParams.limit = val
-      this.getInit()
-    },
-    // 分页-改变页码
-    handleCurrentChange(val) {
-      this.page.pageNum = val
-      this.initParams.offset = (val - 1) * this.initParams.limit
-      this.getInit()
+    // 表格---配置
+    changeColumns(value) {
+      this.tableConfig.checkedColumns = value
     }
   }
 }

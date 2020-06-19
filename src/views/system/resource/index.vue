@@ -4,11 +4,13 @@
       <pane size="30" min-size="30" max-size="40">
         <div class="pane-header">
           <div class="pane-headerL">
-            <i class="el-icon-coin"></i>
+            <font-awesome-icon icon="cubes" />
             <span>菜单</span>
           </div>
           <div class="pane-headerR">
-            <el-button icon="el-icon-refresh" circle @click="getMenuTreeData"></el-button>
+            <el-button circle @click="getMenuTreeData">
+              <font-awesome-icon icon="sync-alt" />
+            </el-button>
           </div>
         </div>
         <div class="pane-main">
@@ -30,69 +32,18 @@
         </div>
       </pane>
       <pane class="res-right">
-        <header class="header">
-          <el-row type="flex" justify="space-between">
-            <el-col :span="6">
-              <div class="header-title">资源</div>
-            </el-col>
-            <el-col :span="18">
-              <div class="button-group">
-                <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd('add')">新增</el-button>
-                <el-button type="primary" icon="el-icon-edit-outline" @click="handleOpenAdd('edit')">修改</el-button>
-                <el-button type="danger" icon="el-icon-delete" @click="handleDelete">删除</el-button>
-                <el-button icon="el-icon-refresh" class="first-button" @click="initTable.menuId !== '' ? getTableList() : null"></el-button>
-                <el-dropdown trigger="click" :hide-on-click="false" class="last-button">
-                  <el-button icon="el-icon-s-grid">
-                    <i class="el-icon-arrow-down el-icon--right"></i>
-                  </el-button>
-                  <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item>
-                      <el-checkbox-group v-model="checkedList" @change="changeCheckbox" :min="2">
-                        <el-checkbox v-for="item in headerList" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                        </el-checkbox-group>
-                    </el-dropdown-item>
-                  </el-dropdown-menu>
-                </el-dropdown>
-              </div>
-            </el-col>
-          </el-row>
-        </header>
         <article>
-          <el-table
-            :data="tableData"
-            border
-            size="medium"
-            :max-height="tableHeight"
-            v-loading="tableLoading"
-            @sort-change="sortChange"
-            highlight-current-row
-            @current-change="handleTableCurrentChange"
-            style="width: 100%"
-            header-cell-class-name="header-cell">
-            <el-table-column width="35">
-              <template slot-scope="scope">
-                <el-radio :label="scope.row.id" v-model="idRadio"></el-radio>
-              </template>
-            </el-table-column>
-            <el-table-column prop="name" label="名称" v-if="checkedList.includes('name')" sortable="custom">
-            </el-table-column>
-            <el-table-column prop="permission" label="许可" v-if="checkedList.includes('permission')"  sortable="custom">
-            </el-table-column>
-            <el-table-column prop="location" label="地址" v-if="checkedList.includes('location')" sortable="custom">
-            </el-table-column>
-          </el-table>
-          <div class="pagination">
-            <el-pagination
-              background
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-              :page-sizes="[5, 10, 20, 50, 100]"
-              :page-size="page.pageSize"
-              :current-page="page.pageNum"
-              layout="sizes, total, ->, prev, pager, next"
-              :total="page.total">
-            </el-pagination>
-          </div>
+          <gw-table
+            ref="gwTable"
+            :queryParams="queryParams"
+            :tableConfig="tableConfig"
+            @changeColumns="changeColumns"
+            @handleTableCurrentChange="handleTableCurrentChange"
+            @add="handleOpenAdd('add')"
+            @update="handleOpenAdd('edit')"
+            @delete="handleDelete"
+          >
+          </gw-table>
         </article>
       </pane>
     </splitpanes>
@@ -101,7 +52,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" status-icon label-position="right" label-width="70px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="名称" prop="name">
@@ -128,8 +79,12 @@
 
 <script>
 import { getTerminalList, getMenuList, getTableList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
+import gwTable from '@/components/gwTable'
 export default {
   name: 'SYSTEM_RESOURCE',
+  components: {
+    gwTable
+  },
   data() {
     return {
       // 平台选择框
@@ -144,33 +99,30 @@ export default {
         label: 'name'
       },
       // 表格初始化参数
-      initTable: {
-        order: 'asc',
-        offset: 0,
-        limit: 10,
+      queryParams: {
         menuId: ''
       },
-      // 表格数据
-      tableData: [],
-      // 表格loading
-      tableLoading: false,
-      tableHeight: document.body.clientHeight - 255,
-      // 表格配置
-      headerList: [
-        { prop: 'name', label: '名称' },
-        { prop: 'permission', label: '许可' },
-        { prop: 'location', label: '地址' }
-      ],
-      // 表格配置选中
-      checkedList: ['name', 'permission', 'location'],
+      // 表格
+      tableConfig: {
+        api: '/system/resource/findOfPage',
+        // 表格列数据
+        columns: [
+          { prop: 'name', label: '名称', sort: 'custom' },
+          { prop: 'permission', label: '许可', sort: 'custom' },
+          { prop: 'location', label: '地址', sort: 'custom' }
+        ],
+        // 表格配置选中
+        checkedColumns: ['name', 'permission', 'location'],
+        title: '资源',
+        // 按钮配置
+        buttons: ['add', 'update', 'delete', 'refresh', 'columns'],
+        // 是否单选
+        hasRadio: true,
+        // 是否分页
+        pagination: true
+      },
       // 表格单选
       idRadio: '',
-      // 分页
-      page: {
-        pageSize: 10,
-        pageNum: 1,
-        total: 0
-      },
       // 新增弹窗
       addVisible: false,
       // 弹窗表单
@@ -198,13 +150,6 @@ export default {
   created() {
     this.getInit()
   },
-  mounted() {
-    window.onresize = () => {
-      return (() => {
-        this.tableHeight = document.body.clientHeight - 255
-      })()
-    }
-  },
   methods: {
     // 初始化
     getInit() {
@@ -228,29 +173,14 @@ export default {
     },
     // 树结构选择
     handleNodeClick(data) {
-      this.initTable.menuId = data.id
-      this.getTableList()
-    },
-    // 获取右侧表格数据
-    getTableList() {
-      this.tableLoading = true
-      getTableList(this.initTable).then(res => {
-        this.tableLoading = false
-        let { success, result } = res
-        if (success === true) {}
-        this.tableData = result.list
-        this.page = {
-          pageSize: result.pageSize,
-          pageNum: result.pageNum,
-          total: result.total
-        }
-        this.idRadio = ''
-      })
+      this.queryParams.menuId = data.id
+      this.$refs.gwTable.getInit()
+      this.idRadio = ''
     },
     // 新增弹窗-打开
     handleOpenAdd(type) {
       if (type === 'add') {
-        if (!this.initTable.menuId) {
+        if (!this.queryParams.menuId) {
           this.$message({
             message: '请选择一个菜单',
             type: 'warning'
@@ -284,14 +214,15 @@ export default {
       this.$refs['addForm'].validate((valid) => {
         if (valid) {
           if (!this.isEdit) {
-            this.addForm.menuId = this.initTable.menuId
+            this.addForm.menuId = this.queryParams.menuId
             doAddRes(this.addForm).then(res => {
               if (res.success === true) {
                 this.$message({
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getTableList()
+                this.$refs.gwTable.getInit()
+                this.idRadio = ''
               }
             })
           } else {
@@ -302,7 +233,8 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getTableList()
+                this.$refs.gwTable.getInit()
+                this.idRadio = ''
               }
             })
           }
@@ -340,42 +272,20 @@ export default {
                 message: '操作成功！',
                 type: 'success'
               })
-              this.getTableList()
+              this.$refs.gwTable.getInit()
+              this.idRadio = ''
             })
           }
         }).catch(() => {})
       }
     },
     // 表格-配置
-    changeCheckbox(value) {
-      this.checkedList = value
-    },
-    // 表格-远程排序
-    sortChange(column) {
-      if (column.order) {
-        this.initTable.sort = column.prop
-        this.initTable.order = column.order === 'descending' ? 'desc' : 'asc'
-      } else {
-        delete this.initTable.sort
-        this.initTable.order = 'asc'
-      }
-      this.getTableList()
+    changeColumns(value) {
+      this.tableConfig.checkedColumns = value
     },
     // 表格单选
     handleTableCurrentChange(val) {
-      if (val) this.idRadio = val.id
-    },
-    // 分页-改变每页数量
-    handleSizeChange(val) {
-      this.page.pageSize = val
-      this.initTable.limit = val
-      this.getTableList()
-    },
-    // 分页-改变页码
-    handleCurrentChange(val) {
-      this.page.pageNum = val
-      this.initTable.offset = (val - 1) * this.initTable.limit
-      this.getTableList()
+      if (Object.keys(val).length > 0) this.idRadio = val.id
     }
   }
 }

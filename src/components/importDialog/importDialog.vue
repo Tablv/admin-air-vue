@@ -8,7 +8,7 @@
         <pane size="40" min-size="40" max-size="50">
           <div class="pane-header">
             <div class="pane-headerL">
-              <i class="el-icon-coin"></i>
+              <font-awesome-icon icon="cubes" />
               <span>Excel 配置项</span>
             </div>
             <div class="pane-headerR">
@@ -40,12 +40,12 @@
         <pane>
           <div class="pane-header">
             <div class="pane-headerL">
-              <i class="el-icon-info"></i>
+              <font-awesome-icon icon="info" />
               <span>Excel 上传</span>
             </div>
           </div>
           <div class="pane-main">
-
+            <font-awesome-icon icon="table" />
           </div>
         </pane>
       </splitpanes>

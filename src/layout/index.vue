@@ -9,11 +9,11 @@
       </div>
       <app-main />
       <div :class="{'fixed-footer':fixedHeader}">
-        <div>
+        <!-- <div>
           <a href="javascript:void(0);">帮助</a>
           <a href="javascript:void(0);">隐私</a>
           <a href="javascript:void(0);">条款</a>
-        </div>
+        </div> -->
         <div>
           <span>Copyright 2019 南京国睿信维软件有限公司出品</span>
         </div>
@@ -119,11 +119,11 @@ export default {
     width: calc(100% - #{$sideBarWidth});
     background-color: #fff;
     border-top: 1px solid #d2d6de;
-    padding: 15px;
+    // padding: 15px;
     font-size: 14px;
     text-align: center;
     color: #444;
-    line-height: 19px;
+    line-height: 69px;
     a + a {
       margin-left: 10px;
     }

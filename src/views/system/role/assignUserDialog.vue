@@ -214,6 +214,7 @@ export default {
   watch: {
     assignUserVisible(val) {
       if (val) {
+        this.activeName = 'user'
         this.doInit()
       }
     }

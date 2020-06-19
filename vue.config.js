@@ -25,6 +25,12 @@ module.exports = {
   devServer: {
     port: port,
     proxy: {
+      '/admin/static': {
+        target: 'http://127.0.0.1:9528/static',
+        pathRewrite: {
+          '^/admin/static': ''
+        }
+      },
       '/admin': {
         // target: 'http://192.168.137.121:8080/admin',
         // target: 'http://192.168.1.205:8080/admin',

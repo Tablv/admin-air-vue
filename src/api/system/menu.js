@@ -16,7 +16,7 @@ export function getPreMenuList(params) {
 }
 // 获取菜单图标
 export function getIconList(params) {
-  return request.get('/json/icon_admin.json', params)
+  return request.get('/static/icons/icons.json', params)
 }
 
 // 新增菜单

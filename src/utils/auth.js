@@ -16,14 +16,15 @@ export function removeToken() {
 
 export function handleRoute(routeList, asyncRoutes) {
   const routeObj = handleRecursion(routeList)
-  return filterRoute(asyncRoutes, Object.keys(routeObj))
+  return filterRoute(asyncRoutes, Object.keys(routeObj), routeObj)
 }
 
-function filterRoute(asyncRoutes = [], codeArray = []) {
+function filterRoute(asyncRoutes = [], codeArray = [], routeObj = {}) {
   asyncRoutes.forEach((item, index, arr) => {
     if (codeArray.includes(item.name)) {
+      item.meta.icon = routeObj[item.name].iconClass
       if (item.children) {
-        filterRoute(item.children, codeArray)
+        filterRoute(item.children, codeArray, routeObj)
         if (!item.children.length) {
           arr.splice(index, 1)
         }

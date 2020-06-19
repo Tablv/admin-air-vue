@@ -1,36 +1,27 @@
 <template>
   <div class="container">
-    <header class="header">
-      <el-row type="flex" justify="space-between">
-        <el-col :span="6">
-          <div class="header-title">菜单管理</div>
-        </el-col>
-        <el-col :span="18">
-          <div style="float: right">
-            <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
-              <el-option
-                v-for="item in platformOptions"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-              </el-option>
-            </el-select>
-            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-          </div>
-        </el-col>
-      </el-row>
-    </header>
     <article>
       <gw-table
         ref="gwTable"
-        :tableData="tableData"
-        :tableColumn="tableColumn"
-        :listLoading="listLoading"
-        :hasTree="true"
-        :tableTreeData="tableTreeData"
-        @loadData="loadData"
+        :queryParams="queryParams"
+        :tableConfig="tableConfig"
+        :treeLoad="loadData"
       >
-        <template slot-scope="operation">
+        <template slot="buttons">
+          <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
+            <el-option
+              v-for="item in platformOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.id">
+            </el-option>
+          </el-select>
+          <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+        </template>
+        <template slot="conver" slot-scope="conver">
+          <span :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        </template>
+        <template slot="operation" slot-scope="operation">
           <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
           <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
@@ -42,7 +33,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="上级菜单" prop="parentName">
@@ -103,10 +94,10 @@
     </el-dialog>
     <!-- 菜单图标弹窗 -->
     <el-dialog title="图标选择（双击选中）" :visible.sync="iconVisible" width="60%" class="icon-dialog" :modal-append-to-body="false" :destroy-on-close="true">
-      <div class="icon-container" v-for="(item, index) in iconData" :key="index">
-        <div class="icon-item" @dblclick="handleSelectIcon(item)">
-          <i class="el-icon-edit"></i>
-          <span class="icon-name">{{item}}</span>
+      <div class="icon-container" v-for="(icon, index) in iconData" :key="index">
+        <div class="icon-item" @dblclick="handleSelectIcon(icon)">
+          <font-awesome-icon :icon="icon" />
+          <span class="icon-name">{{icon}}</span>
         </div>
       </div>
     </el-dialog>
@@ -171,22 +162,35 @@ export default {
       // 平台选择框
       platform: null,
       platformOptions: [],
-      // 表格数据
-      tableData: [],
-      // 表格列数据
-      tableColumn: [
-        { prop: 'name', label: '名称' },
-        { prop: 'code', label: '编码' },
-        { prop: 'path', label: '链接地址' },
-        { prop: 'lvl', label: '层级' },
-        { prop: 'sortNum', label: '排序号' },
-        { prop: 'status', label: '状态' },
-        { prop: 'operation', label: '操作', width: '180' }
-      ],
-      // 表格树数据
-      tableTreeData: [],
-      // 表格loading
-      listLoading: false,
+      // 表格初始化参数
+      queryParams: {
+        nodeid: ''
+      },
+      // 表格
+      tableConfig: {
+        api: '/system/menu/findMenusAsync',
+        // 表格列数据
+        columns: [
+          { prop: 'name', label: '名称' },
+          { prop: 'code', label: '编码' },
+          { prop: 'path', label: '链接地址' },
+          { prop: 'lvl', label: '层级' },
+          { prop: 'sortNum', label: '排序号' },
+          { prop: 'status', label: '状态', conver: true },
+          { prop: 'operation', label: '操作', width: '180' }
+        ],
+        title: '菜单管理',
+        // 按钮配置
+        buttons: ['slot'],
+        hasTree: true,
+        treeConfig: {
+          key: 'id',
+          treeProps: {
+            children: 'children',
+            hasChildren: 'isParent'
+          }
+        }
+      },
       // 新增弹窗
       addVisible: false,
       // 上级菜单弹窗
@@ -223,7 +227,9 @@ export default {
       },
       oldVal: {},
       // 是否编辑弹窗
-      isEdit: 1
+      isEdit: 1,
+      // 当前节点ID
+      nodeId: ''
     }
   },
   watch: {
@@ -240,53 +246,43 @@ export default {
   methods: {
     // 初始化
     getInit() {
-      this.listLoading = true
       // 获取全部终端数据
       getAllTerminal().then(res => {
         let { success, result } = res
         // if (success === true) {}
         this.platformOptions = result
         this.platform = result[0].id
-        // 获取表格数据
-        getMenuList({ nodeid: this.platform }).then(res => {
-          this.listLoading = false
-          let { success, result } = res
-          if (success === true) {
-            this.tableData = result
-          }
-        })
         getPreMenuList({ menuId: this.platform }).then(res => {
           let { success, result } = res
           if (success === true) {
             this.treeData = result
           }
         })
+      }).then(() => {
+        this.queryParams.nodeid = this.platform
+        this.$refs.gwTable.getInit()
       })
     },
     // 表格-树数据
-    loadData(tree) {
+    loadData(tree, treeNode, resolve) {
       getMenuList({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
         let { success, result } = res
         if (success === true) {
-          this.tableTreeData = result
+          resolve(result)
         }
       })
     },
     // 改变终端
     handleChangeTerminal(val) {
       this.platform = val
-      this.listLoading = true
-      getMenuList({ nodeid: val }).then(res => {
-        this.listLoading = false
-        let { success, result } = res
-        if (success === true) {
-          this.tableData = result
-        }
-      })
+      this.queryParams.nodeid = val
+      this.$refs.gwTable.getInit()
     },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.isEdit = 1
+      this.preMenu = {}
+      this.editPreMenu = {}
       this.addVisible = true
     },
     // 弹窗-保存
@@ -320,7 +316,10 @@ export default {
                   message: '新增成功！',
                   type: 'success'
                 })
-                this.getTableData()
+                if (addForm.parentId !== this.platform) {
+                  this.handleUpdateTree(addForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           } else {
@@ -345,7 +344,10 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getTableData()
+                if (editForm.parentId !== this.platform) {
+                  this.handleUpdateTree(editForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
@@ -420,6 +422,7 @@ export default {
         }
       })
     },
+    // 获取弹窗上级菜单数据
     doSearchPreDept(arr, id) {
       arr.map(item => {
         if (item.id === id) {
@@ -452,23 +455,22 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getTableData()
-                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
+                if (row.parentId !== this.platform) {
+                  this.handleUpdateTree(row.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
         }).catch(() => {})
       }
     },
-    // 获取表格数据
-    getTableData() {
-      this.listLoading = true
-      getMenuList({ nodeid: this.platform }).then(res => {
-        this.tableData.splice(0)
-        this.listLoading = false
+    // 表格树更新数据
+    handleUpdateTree(id) {
+      getMenuList({ nodeid: id }).then(res => {
         let { success, result } = res
         if (success === true) {
-          this.tableData = result
+          this.$set(this.$refs.gwTable.$children[1].store.states.lazyTreeNodeMap, id, result)
         }
       })
     }
@@ -478,6 +480,8 @@ export default {
 <style lang="scss" scoped>
 .el-select {
   width: 120px;
+  float: left;
+  margin-right: 10px;
 }
 .icon-dialog {
   /deep/ .el-dialog__body {

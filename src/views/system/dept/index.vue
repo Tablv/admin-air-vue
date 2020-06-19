@@ -1,29 +1,18 @@
 <template>
   <div class="container">
-    <header class="header">
-      <el-row type="flex" justify="space-between">
-        <el-col :span="6">
-          <div class="header-title">组织管理</div>
-        </el-col>
-        <el-col :span="18">
-          <div style="float: right">
-            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-          </div>
-        </el-col>
-      </el-row>
-    </header>
     <article>
       <gw-table
         ref="gwTable"
-        :tableData="tableData"
-        :tableColumn="tableColumn"
-        :listLoading="listLoading"
-        :hasTree="true"
-        :tableTreeData="tableTreeData"
-        @loadData="loadData"
+        :queryParams="queryParams"
+        :tableConfig="tableConfig"
+        :treeLoad="loadData"
       >
-        <template slot-scope="operation">
-          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
+        <template slot="conver" slot-scope="conver">
+          <span :style="{ color: (conver.row.type === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.type === 0 ? '组织' : '部门' }}</span>
+        </template>
+        <template slot="operation" slot-scope="operation">
+          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增
+          </el-button>
           <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
         </template>
@@ -34,7 +23,7 @@
       <div slot="title" class="dialog-title">
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px">
+      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
         <el-row>
           <el-col :span="11">
             <el-form-item label="上级组织" prop="parentName">
@@ -141,8 +130,31 @@ export default {
       }
     }
     return {
-      // 表格数据
-      tableData: [],
+      // 表格
+      tableConfig: {
+        api: '/system/menu/findMenusAsync',
+        // 表格列数据
+        columns: [
+          { prop: 'name', label: '名称' },
+          { prop: 'code', label: '编码' },
+          { prop: 'path', label: '链接地址' },
+          { prop: 'lvl', label: '层级' },
+          { prop: 'sortNum', label: '排序号' },
+          { prop: 'status', label: '状态', conver: true },
+          { prop: 'operation', label: '操作', width: '180' }
+        ],
+        title: '菜单管理',
+        // 按钮配置
+        buttons: ['slot'],
+        hasTree: true,
+        treeConfig: {
+          key: 'id',
+          treeProps: {
+            children: 'children',
+            hasChildren: 'isParent'
+          }
+        }
+      },
       // 表格列数据
       tableColumn: [
         { prop: 'name', label: '名称' },

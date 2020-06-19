@@ -31,7 +31,7 @@ router.beforeEach(async(to, from, next) => {
         try {
           store.dispatch('user/getInfo', { appKey: 'ynRhty3N' }).then(
             routerList => {
-              router.addRoutes(routerList)
+              router.selfaddRoutes(routerList)
               router.options.routes = routerList
               // router.addRoutes([{ path: '*', redirect: '/404', hidden: true }])
               next({ path: '/index' })
