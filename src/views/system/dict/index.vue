@@ -1,28 +1,18 @@
 <template>
-<div class="container">
-    <header class="header">
-      <el-row type="flex" justify="space-between">
-        <el-col :span="6">
-          <div class="header-title">数据维护</div>
-        </el-col>
-        <el-col :span="18">
-          <div style="float: right">
-            <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
-          </div>
-        </el-col>
-      </el-row>
-    </header>
+  <div class="container">
     <article>
       <gw-table
         ref="gwTable"
-        :tableData="tableData"
-        :tableColumn="tableColumn"
-        :listLoading="listLoading"
-        :hasTree="true"
-        :tableTreeData="tableTreeData"
-        @loadData="loadData"
+        :queryParams="queryParams"
+        :tableConfig="tableConfig"
+        :treeLoad="loadData"
+        @add="handleOpenAdd"
       >
-        <template slot-scope="operation">
+        <template slot="conver" slot-scope="conver">
+          <span v-if="conver.column.property === 'type'">{{ conver.row.type === 0 ? '数据分组' : '数据项' }}</span>
+          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        </template>
+        <template slot="operation" slot-scope="operation">
           <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
           <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
           <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
@@ -107,22 +97,35 @@ export default {
       }
     }
     return {
-      // 表格数据
-      tableData: [],
-      // 表格列数据
-      tableColumn: [
-        { prop: 'name', label: '名称' },
-        { prop: 'code', label: '编码' },
-        { prop: 'dataType', label: '类型' },
-        { prop: 'lvl', label: '层级' },
-        { prop: 'sortnum', label: '排序号' },
-        { prop: 'status', label: '状态' },
-        { prop: 'operation', label: '操作', width: '180' }
-      ],
-      // 表格树数据
-      tableTreeData: [],
-      // 表格loading
-      listLoading: false,
+      // 表格初始化参数
+      queryParams: {
+        nodeid: '0'
+      },
+      // 表格
+      tableConfig: {
+        api: '/system/dict/findDictAsync',
+        // 表格列数据
+        columns: [
+          { prop: 'name', label: '名称' },
+          { prop: 'code', label: '编码' },
+          { prop: 'type', label: '类型', conver: true },
+          { prop: 'lvl', label: '层级' },
+          { prop: 'sortnum', label: '排序号' },
+          { prop: 'status', label: '状态', conver: true },
+          { prop: 'operation', label: '操作', width: '180' }
+        ],
+        title: '数据维护',
+        // 按钮配置
+        buttons: ['add'],
+        hasTree: true,
+        treeConfig: {
+          key: 'id',
+          treeProps: {
+            children: 'children',
+            hasChildren: 'isParent'
+          }
+        }
+      },
       // 新增弹窗
       addVisible: false,
       // 上级名称弹窗
@@ -162,9 +165,6 @@ export default {
       isEdit: 1
     }
   },
-  created() {
-    this.getInit()
-  },
   watch: {
     'addForm.code': {
       handler: function() {
@@ -173,22 +173,15 @@ export default {
       }
     }
   },
+  created() {
+    this.getInit()
+  },
+  mounted() {
+    this.$refs.gwTable.getInit()
+  },
   methods: {
     // 初始化
     getInit() {
-      this.listLoading = true
-      this.tableData.splice(0)
-      // 获取全部数据
-      getDataList({ nodeid: 0 }).then(res => {
-        this.listLoading = false
-        let { success, result } = res
-        if (success === true) {
-          this.tableData = result.map(item => {
-            item.dataType = item.type
-            return item
-          })
-        }
-      })
       getPreDataList({ dictId: 0, type: 0 }).then(res => {
         let { success, result } = res
         if (success === true) {
@@ -197,20 +190,19 @@ export default {
       })
     },
     // 表格-树数据
-    loadData(tree) {
+    loadData(tree, treeNode, resolve) {
       getDataList({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
         let { success, result } = res
         if (success === true) {
-          this.tableTreeData = result.map(item => {
-            item.dataType = item.type
-            return item
-          })
+          resolve(result)
         }
       })
     },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.isEdit = 1
+      this.preData = {}
+      this.editPreData = {}
       this.addVisible = true
     },
     // 弹窗-保存
@@ -247,7 +239,10 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
+                if (addForm.parentId !== '') {
+                  this.handleUpdateTree(addForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           } else {
@@ -255,7 +250,7 @@ export default {
             editForm = {
               id: this.addForm.id,
               lvl: this.addForm.lvl,
-              parentId: this.addForm.parentId ? this.addForm.parentId : 0,
+              parentId: this.addForm.parentId ? this.addForm.parentId : '0',
               parentName: this.addForm.parentName ? this.addForm.parentName : '',
               parentCode: this.addForm.parentCode ? this.addForm.parentCode : '',
               type: this.addForm.type,
@@ -271,7 +266,10 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
+                if (editForm.parentId !== '0') {
+                  this.handleUpdateTree(editForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
@@ -373,13 +371,24 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
-                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
+                if (row.parentId !== '0') {
+                  this.handleUpdateTree(row.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
         }).catch(() => {})
       }
+    },
+    // 表格树更新数据
+    handleUpdateTree(id) {
+      getDataList({ nodeid: id }).then(res => {
+        let { success, result } = res
+        if (success === true) {
+          this.$set(this.$refs.gwTable.$children[1].store.states.lazyTreeNodeMap, id, result)
+        }
+      })
     }
   }
 }
