@@ -120,20 +120,23 @@ export default {
     }
   }
 
+  .app-main {
+    height: calc(100vh - #{$footerBarHeight});
+  }
+
   .fixed-footer {
     position: fixed;
     bottom: 0;
     right: 0;
     z-index: 9;
-    height: 69px;
+    height: $footerBarHeight;
+    line-height: $footerBarHeight;
     width: calc(100% - #{$sideBarWidth});
     background-color: #fff;
     border-top: 1px solid #d2d6de;
-    // padding: 15px;
     font-size: 14px;
     text-align: center;
     color: #444;
-    line-height: 69px;
     a + a {
       margin-left: 10px;
     }
