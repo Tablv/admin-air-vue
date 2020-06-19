@@ -31,7 +31,7 @@ export default {
       <div class="gw-table-filter">
         <el-popover
           placement="bottom"
-          width="160px"
+          width="160"
           trigger="click"
         >
           { this.renderWidget(h) }
