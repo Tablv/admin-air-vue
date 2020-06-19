@@ -105,10 +105,10 @@ export default {
       default: () => []
     }
   },
-  data () {
-    return {
-    }
-  },
+  // data () {
+  //   return {
+  //   }
+  // },
   methods: {
     handleCloseImport() {
       this.$emit('closeDialog', false)
