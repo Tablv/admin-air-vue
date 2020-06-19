@@ -26,7 +26,7 @@
             icon="el-icon-plus"
             @click="handleOpenAdd"
           >
-            新增
+            <span>新增</span>
           </el-button>
         </template>
         <template
@@ -43,19 +43,19 @@
             type="text"
             @click="handleAdd(operation.index, operation.row)"
           >
-            新增
+            <span>新增</span>
           </el-button>
           <el-button
             type="text"
             @click="handleEdit(operation.index, operation.row)"
           >
-            编辑
+            <span>编辑</span>
           </el-button>
           <el-button
             type="text"
             @click="handleDelete(operation.index, operation.row)"
           >
-            删除
+            <span>删除</span>
           </el-button>
         </template>
       </gw-table>
@@ -178,10 +178,10 @@
             >
               <el-radio-group v-model="addForm.popout">
                 <el-radio label="L">
-                  标签页
+                  <span>标签页</span>
                 </el-radio>
                 <el-radio label="W">
-                  新窗口
+                  <span>新窗口</span>
                 </el-radio>
               </el-radio-group>
             </el-form-item>
@@ -193,10 +193,10 @@
         >
           <el-radio-group v-model="addForm.status">
             <el-radio :label="0">
-              启用
+              <span>启用</span>
             </el-radio>
             <el-radio :label="1">
-              禁用
+              <span>禁用</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -209,10 +209,10 @@
           type="primary"
           @click="handleSave"
         >
-          保存
+          <span>保存</span>
         </el-button>
         <el-button @click="handleClose">
-          关闭
+          <span>关闭</span>
         </el-button>
       </div>
     </el-dialog>
@@ -253,12 +253,12 @@
 import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
 import GwTable from '@/components/GwTable'
-import treeDialog from '@/components/treeDialog'
+import TreeDialog from '@/components/TreeDialog'
 export default {
   name: 'SYSMENU',
   components: {
     GwTable,
-    treeDialog
+    TreeDialog
   },
   data() {
     var validName = (rule, value, callback) => {

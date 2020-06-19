@@ -25,19 +25,19 @@
             type="text"
             @click="handleResetPassword(operation.index, operation.row)"
           >
-            重置密码
+            <span>重置密码</span>
           </el-button>
           <el-button
             type="text"
             @click="handleEdit(operation.index, operation.row)"
           >
-            编辑
+            <span>编辑</span>
           </el-button>
           <el-button
             type="text"
             @click="handleDelete(operation.index, operation.row)"
           >
-            删除
+            <span>删除</span>
           </el-button>
         </template>
       </gw-table>
@@ -99,10 +99,10 @@
         >
           <el-radio-group v-model="addForm.status">
             <el-radio :label="0">
-              启用
+              <span>启用</span>
             </el-radio>
             <el-radio :label="1">
-              禁用
+              <span>禁用</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -157,10 +157,10 @@
           type="primary"
           @click="handleSave"
         >
-          保存
+          <span>保存</span>
         </el-button>
         <el-button @click="handleClose">
-          关闭
+          <span>关闭</span>
         </el-button>
       </div>
     </el-dialog>
@@ -177,12 +177,12 @@
 <script>
 import { getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
 import { validName } from '@/utils/validate'
-import importDialog from '@/components/importDialog'
+import ImportDialog from '@/components/ImportDialog'
 import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSUSER',
   components: {
-    importDialog,
+    ImportDialog,
     GwTable
   },
   data() {
