@@ -4,6 +4,7 @@ module.exports = {
     '@vue/babel-preset-jsx'
   ],
   plugins: [
-    '@babel/plugin-proposal-optional-chaining'
+    '@babel/plugin-proposal-optional-chaining',
+    'jsx-v-model'
   ]
 }

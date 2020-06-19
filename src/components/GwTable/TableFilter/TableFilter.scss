@@ -1,0 +1,10 @@
+.gw-table-filter {
+  .filter-popover-btn {
+    outline: none;
+    color: #909399;
+
+    &.is-active {
+      color: #409EFF;
+    }
+  }
+}

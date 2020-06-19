@@ -187,7 +187,7 @@
             v-if="item.filter"
             @click.stop
           >
-            <gw-table-filter
+            <table-filter
               :ref="item.prop"
               :filter-init="filterInit[item.prop]"
               :filter-item="item"
@@ -240,10 +240,10 @@
 
 <script>
 import request from '@/utils/request'
-import GwTableFilter from '@/components/GwTableFilter'
+import TableFilter from './TableFilter'
 export default {
   components: {
-    GwTableFilter
+    TableFilter
   },
   props: {
     // 表格初始化参数
@@ -304,11 +304,7 @@ export default {
     },
     // 是否有头部区域
     hasHeader() {
-      if (!this.tableConfig.hasHeader) {
-        return true
-      } else {
-        return this.tableConfig.hasHeader
-      }
+      return this.tableConfig.hasHeader !== false;
     }
   },
   watch: {

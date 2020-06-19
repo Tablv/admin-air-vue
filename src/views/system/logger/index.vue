@@ -41,7 +41,7 @@ export default {
           { prop: 'content', label: '日志内容', width: '150' },
           { prop: 'userName', label: '用户名', sort: 'custom', filter: { type: 'input', data: 'userName' }, width: '130' },
           { prop: 'realName', label: '操作人', sort: 'custom', filter: { type: 'input', data: 'realName' }, width: '130' },
-          { prop: 'operateDate', label: '操作时间', sort: 'custom', filter: { type: 'dates', data1: 'operateDate_start', data2: 'operateDate_end' }, width: '160' },
+          { prop: 'operateDate', label: '操作时间', sort: 'custom', filter: { type: 'dates', startDate: 'operateDate_start', endDate: 'operateDate_end' }, width: '160' },
           { prop: 'browser', label: '浏览器', width: '130' },
           { prop: 'operatingSystem', label: '操作系统', width: '130' },
           { prop: 'ipAddress', label: 'IP地址', width: '150' },
