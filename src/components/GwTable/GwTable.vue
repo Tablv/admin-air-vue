@@ -188,11 +188,11 @@
             @click.stop
           >
             <table-filter
-              :ref="item.prop"
+              :ref="item.prop + '-filter'"
               :filter-init="filterInit[item.prop]"
               :filter-item="item"
-              @doClosePopover="doClosePopover"
-              @tableFilter="tableFilter"
+              @close-popover="doClosePopover"
+              @table-filter="tableFilter"
             />
           </span>
         </template>
@@ -318,7 +318,6 @@ export default {
                 column.filter.option = res
               })
             }
-            column.filter.options = this.getSelectOption(column)
           }
         })
       },
@@ -438,25 +437,16 @@ export default {
       this.getInit()
       this.doClosePopover('close')
     },
-    // 转换表格筛选下拉框数据
-    getSelectOption(column) {
-      let options = Object.keys(column.filter.option).map(key => {
-        const option = {
-          label: column.filter.option[key],
-          value: key
-        }
-        return option
-      })
-      options.unshift({ value: '', label: column.label })
-      return options
-    },
     // 关闭popover
-    doClosePopover(val) {
-      for (const key in this.$refs) {
-        if (key !== val) {
-          this.$refs[key][0].$children[0].doClose()
-        }
-      }
+    doClosePopover(propName) {
+      // 过滤组件的ref名
+      const filterRefName = propName + '-filter';
+      let filterRefs = Object.keys(this.$refs).filter(refKey => refKey !== filterRefName);
+
+      filterRefs.forEach(refName => {
+        const filter = this.$refs[refName];
+        filter && filter[0].$children[0].doClose()
+      })
     },
     // 分页---改变每页数量
     handleSizeChange(val) {

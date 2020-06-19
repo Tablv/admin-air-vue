@@ -14,14 +14,13 @@ export const widgetsRenderer = {
     return (
       <el-select
         v-model={ this.filterInits[this.filterItem.prop] }
-        placeholder=""
       >
         {
-          this.filterItem.filter.options.map(option => (
+          Object.entries(this.filterItem.filter.option).map(([value, label]) => (
             <el-option
-              key={ option.value }
-              label={ option.label }
-              value={ option.value }
+              key={ value }
+              label={ label }
+              value={ value }
             />
           ))
         }

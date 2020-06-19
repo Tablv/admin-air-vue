@@ -39,13 +39,13 @@ export default {
           <div class="table-filter-btn">
             <el-button
               type="primary"
-              onClick={ () => this.tableFilter(this.filterItem) }
+              onClick={ this.doTableFilter }
             >
               <span>筛选</span>
             </el-button>
             <el-button
               style="float: right;"
-              onClick={ () => this.tableFilter(this.filterItem, 'reset') }
+              onClick={ this.resetTableFilter }
             >
               <span>重置</span>
             </el-button>
@@ -76,29 +76,25 @@ export default {
     /**
      * 表格远程筛选
      */
-    tableFilter(data, reset) {
-      debugger
-      let filterParams = {}
-      if (data.filter.type !== 'dates') {
-        if (reset) {
-          this.filterInits[data.filter.data] = ''
-        }
-        filterParams = this.filterInits
-      } else {
-        if (reset) {
-          this.filterInits[data.filter.data1] = ''
-          this.filterInits[data.filter.data2] = ''
-        }
-        filterParams = this.filterInits
-      }
-      this.filterParams = filterParams
-      this.$emit('tableFilter', filterParams)
+    doTableFilter() {
+      this.filterParams = this.filterInits
+      this.$emit('table-filter', this.filterParams)
     },
+    
+    resetTableFilter() {
+      if (this.filterType === 'dates') {
+        this.filterInits[this.filterItem.filter.startDate] = ''
+        this.filterInits[this.filterItem.filter.endDate] = ''
+      } else {
+        this.filterInits[this.filterItem.filter.data] = ''
+      }
+    },
+
     /**
      * 点击筛选图标关闭popover
      */
-    doClosePopover(val) {
-      this.$emit('doClosePopover', val)
+    doClosePopover(propName) {
+      this.$emit('close-popover', propName)
     }
   }
 }
