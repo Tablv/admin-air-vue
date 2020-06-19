@@ -8,8 +8,6 @@
       <el-dropdown class="avatar-container" trigger="click">
         <!-- 用户信息 -->
         <div class="avatar-wrapper">
-          <!-- <img src="" class="user-avatar"> -->
-          <!-- <i class="el-icon-user-solid"></i> -->
           <font-awesome-icon icon="user-circle" size="2x"/>
           <i class="el-icon-caret-bottom" />
         <!-- 用户名 -->
@@ -17,11 +15,11 @@
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
           <router-link to="/">
             <el-dropdown-item>
-              Home
+              <span>首页</span>
             </el-dropdown-item>
           </router-link>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">注销登录</span>
+            <span>注销登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -110,25 +108,18 @@ export default {
     }
 
     .avatar-container {
-      margin-right: 30px;
+      height: 100%;
+      cursor: pointer;
 
       .avatar-wrapper {
-        margin-top: 5px;
-        position: relative;
-
-        .user-avatar {
-          cursor: pointer;
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-        }
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
 
         .el-icon-caret-bottom {
-          cursor: pointer;
-          position: absolute;
-          right: -20px;
-          top: 25px;
           font-size: 12px;
+          margin: 0 4px;
         }
       }
     }
