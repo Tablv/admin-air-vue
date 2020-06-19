@@ -1,87 +1,144 @@
 <template>
   <div class="container">
     <splitpanes>
-      <pane size="30" min-size="30" max-size="40">
+      <pane
+        size="30"
+        min-size="30"
+        max-size="40"
+      >
         <div class="pane-header">
           <div class="pane-headerL">
             <font-awesome-icon icon="cubes" />
             <span>菜单</span>
           </div>
           <div class="pane-headerR">
-            <el-button circle @click="getMenuTreeData">
+            <el-button
+              circle
+              @click="getMenuTreeData"
+            >
               <font-awesome-icon icon="sync-alt" />
             </el-button>
           </div>
         </div>
         <div class="pane-main">
-          <el-select v-model="platform" filterable>
+          <el-select
+            v-model="platform"
+            filterable
+          >
             <el-option
               v-for="item in platformOptions"
               :key="item.id"
               :label="item.name"
-              :value="item.id">
-            </el-option>
+              :value="item.id"
+            />
           </el-select>
           <el-tree
             v-loading="treeLoading"
             :data="treeData"
             :props="defaultProps"
-            :highlight-current=true
-            :expand-on-click-node=false
-            @node-click="handleNodeClick"></el-tree>
+            :highlight-current="true"
+            :expand-on-click-node="false"
+            @node-click="handleNodeClick"
+          />
         </div>
       </pane>
       <pane class="res-right">
         <article>
           <gw-table
             ref="gwTable"
-            :queryParams="queryParams"
-            :tableConfig="tableConfig"
+            :query-params="queryParams"
+            :table-config="tableConfig"
             @changeColumns="changeColumns"
             @handleTableCurrentChange="handleTableCurrentChange"
             @add="handleOpenAdd('add')"
             @update="handleOpenAdd('edit')"
             @delete="handleDelete"
-          >
-          </gw-table>
+          />
         </article>
       </pane>
     </splitpanes>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ isEdit ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="70px"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="名称" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入名称"></el-input>
+            <el-form-item
+              label="名称"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入名称"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="许可" prop="permission">
-              <el-input v-model="addForm.permission" placeholder="请输入许可"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="许可"
+              prop="permission"
+            >
+              <el-input
+                v-model="addForm.permission"
+                placeholder="请输入许可"
+              />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="地址" prop="location">
-          <el-input v-model="addForm.location" placeholder="请输入地址"></el-input>
+        <el-form-item
+          label="地址"
+          prop="location"
+        >
+          <el-input
+            v-model="addForm.location"
+            placeholder="请输入地址"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getTerminalList, getMenuList, getTableList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
+import { getTerminalList, getMenuList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
 import gwTable from '@/components/gwTable'
 export default {
-  name: 'SYSTEM_RESOURCE',
+  name: 'SYSTEMRESOURCE',
   components: {
     gwTable
   },
@@ -154,7 +211,7 @@ export default {
     // 初始化
     getInit() {
       getTerminalList().then(res => {
-        let { success, result } = res
+        let { result } = res
         this.platformOptions = result
         this.platform = result[0].id
         this.getMenuTreeData()
@@ -188,16 +245,14 @@ export default {
           return false
         }
         this.addVisible = true
-      } else {
-        if (this.idRadio === '') {
+      } else if (this.idRadio === '') {
           this.$message({
             message: '请选择一项数据',
             type: 'warning'
           })
         } else {
           getResInfo({ id: this.idRadio }).then(res => {
-            let { success, result } = res
-            if (success === true) {}
+            let { result } = res
             this.addForm = {
               name: result.name,
               permission: result.permission,
@@ -207,7 +262,6 @@ export default {
           this.isEdit = true
           this.addVisible = true
         }
-      }
     },
     // 弹窗-保存
     handleSave() {
@@ -266,8 +320,7 @@ export default {
           cancelButtonClass: 'messageBoxCancelButton'
         }).then(action => {
           if (action === 'confirm') {
-            doDeleteRes({ id: this.idRadio }).then(res => {
-              if (res.success === true) {}
+            doDeleteRes({ id: this.idRadio }).then(() => {
               this.$message({
                 message: '操作成功！',
                 type: 'success'

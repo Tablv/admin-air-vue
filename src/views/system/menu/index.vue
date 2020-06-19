@@ -3,106 +3,249 @@
     <article>
       <gw-table
         ref="gwTable"
-        :queryParams="queryParams"
-        :tableConfig="tableConfig"
-        :treeLoad="loadData"
+        :query-params="queryParams"
+        :table-config="tableConfig"
+        :tree-load="loadData"
       >
         <template slot="buttons">
-          <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
+          <el-select
+            v-model="platform"
+            filterable
+            placeholder="请选择"
+            @change="handleChangeTerminal"
+          >
             <el-option
               v-for="item in platformOptions"
               :key="item.id"
               :label="item.name"
-              :value="item.id">
-            </el-option>
+              :value="item.id"
+            />
           </el-select>
-          <el-button type="primary" icon="el-icon-plus" @click="handleOpenAdd">新增</el-button>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            @click="handleOpenAdd"
+          >
+            新增
+          </el-button>
         </template>
-        <template slot="conver" slot-scope="conver">
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
           <span :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleAdd(operation.index, operation.row)"
+          >
+            新增
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
         </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="80px"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="上级菜单" prop="parentName">
-              <el-input v-model="addForm.parentName" disabled class="input-with-select">
-                <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+            <el-form-item
+              label="上级菜单"
+              prop="parentName"
+            >
+              <el-input
+                v-model="addForm.parentName"
+                disabled
+                class="input-with-select"
+              >
+                <el-button
+                  slot="append"
+                  :disabled="isEdit !== 1"
+                  icon="el-icon-search"
+                  @click="handleOpenTreeDialog"
+                />
               </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="菜单名称" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入菜单名称"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="菜单名称"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入菜单名称"
+              />
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="菜单编码" prop="code">
-              <el-input v-model="addForm.code" placeholder="请输入菜单编码"></el-input>
+            <el-form-item
+              label="菜单编码"
+              prop="code"
+            >
+              <el-input
+                v-model="addForm.code"
+                placeholder="请输入菜单编码"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="菜单图标" prop="iconClass">
-              <el-input v-model="addForm.iconClass" class="input-with-select">
-                <el-button slot="append" icon="el-icon-search" @click="handleOpenIconDialog"></el-button>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="菜单图标"
+              prop="iconClass"
+            >
+              <el-input
+                v-model="addForm.iconClass"
+                class="input-with-select"
+              >
+                <el-button
+                  slot="append"
+                  icon="el-icon-search"
+                  @click="handleOpenIconDialog"
+                />
               </el-input>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="菜单地址" prop="path">
-          <el-input v-model="addForm.path"></el-input>
+        <el-form-item
+          label="菜单地址"
+          prop="path"
+        >
+          <el-input v-model="addForm.path" />
         </el-form-item>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="权限" prop="permission">
-              <el-input v-model="addForm.permission" disabled></el-input>
+            <el-form-item
+              label="权限"
+              prop="permission"
+            >
+              <el-input
+                v-model="addForm.permission"
+                disabled
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="打开方式" prop="popout">
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="打开方式"
+              prop="popout"
+            >
               <el-radio-group v-model="addForm.popout">
-                <el-radio label="L">标签页 </el-radio>
-                <el-radio label="W">新窗口</el-radio>
+                <el-radio label="L">
+                  标签页
+                </el-radio>
+                <el-radio label="W">
+                  新窗口
+                </el-radio>
               </el-radio-group>
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="菜单状态" prop="status">
+        <el-form-item
+          label="菜单状态"
+          prop="status"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用 </el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
     <!-- 菜单图标弹窗 -->
-    <el-dialog title="图标选择（双击选中）" :visible.sync="iconVisible" width="60%" class="icon-dialog" :modal-append-to-body="false" :destroy-on-close="true">
-      <div class="icon-container" v-for="(icon, index) in iconData" :key="index">
-        <div class="icon-item" @dblclick="handleSelectIcon(icon)">
+    <el-dialog
+      title="图标选择（双击选中）"
+      :visible.sync="iconVisible"
+      width="60%"
+      class="icon-dialog"
+      :modal-append-to-body="false"
+      :destroy-on-close="true"
+    >
+      <div
+        v-for="(icon, index) in iconData"
+        :key="index"
+        class="icon-container"
+      >
+        <div
+          class="icon-item"
+          @dblclick="handleSelectIcon(icon)"
+        >
           <font-awesome-icon :icon="icon" />
-          <span class="icon-name">{{icon}}</span>
+          <span class="icon-name">{{ icon }}</span>
         </div>
       </div>
     </el-dialog>
     <!-- 上级菜单弹窗 -->
-    <tree-dialog :treeVisible="treeVisible" :treeData="treeData" @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
+    <tree-dialog
+      :tree-visible="treeVisible"
+      :tree-data="treeData"
+      @closeDialog="handleCloseTreeDialog"
+      @getCurrentNode="getCurrentMenu"
+    />
   </div>
 </template>
 
@@ -112,7 +255,7 @@ import { doCheckRepeat } from '@/api/system/user'
 import gwTable from '@/components/gwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
-  name: 'SYS_MENU',
+  name: 'SYSMENU',
   components: {
     gwTable,
     treeDialog
@@ -125,7 +268,7 @@ export default {
         let data = {
           tableName: 'AD_MENU',
           columnName: 'NAME',
-          value: value,
+          value,
           name: value
         }
         if (this.isEdit === 3) data.oldval = this.oldVal.name
@@ -145,7 +288,7 @@ export default {
         let data = {
           tableName: 'AD_MENU',
           columnName: 'CODE',
-          value: value,
+          value,
           code: value
         }
         if (this.isEdit === 3) data.oldval = this.oldVal.code
@@ -234,7 +377,7 @@ export default {
   },
   watch: {
     'addForm.code': {
-      handler: function() {
+      handler() {
         this.addForm.permission = this.addForm.code.toLowerCase()
         this.addForm.code = this.addForm.code.toUpperCase()
       }
@@ -248,8 +391,7 @@ export default {
     getInit() {
       // 获取全部终端数据
       getAllTerminal().then(res => {
-        let { success, result } = res
-        // if (success === true) {}
+        let { result } = res
         this.platformOptions = result
         this.platform = result[0].id
         getPreMenuList({ menuId: this.platform }).then(res => {

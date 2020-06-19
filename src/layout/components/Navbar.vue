@@ -1,24 +1,40 @@
 <template>
   <div class="navbar">
-    <hamburger :is-active="sidebar.opened" class="hamburger-container" @toggleClick="toggleSideBar" />
+    <hamburger
+      :is-active="sidebar.opened"
+      class="hamburger-container"
+      @toggleClick="toggleSideBar"
+    />
 
     <breadcrumb class="breadcrumb-container" />
 
     <div class="right-menu">
-      <el-dropdown class="avatar-container" trigger="click">
+      <el-dropdown
+        class="avatar-container"
+        trigger="click"
+      >
         <!-- 用户信息 -->
         <div class="avatar-wrapper">
-          <font-awesome-icon icon="user-circle" size="2x"/>
+          <font-awesome-icon
+            icon="user-circle"
+            size="2x"
+          />
           <i class="el-icon-caret-bottom" />
         <!-- 用户名 -->
         </div>
-        <el-dropdown-menu slot="dropdown" class="user-dropdown">
+        <el-dropdown-menu
+          slot="dropdown"
+          class="user-dropdown"
+        >
           <router-link to="/">
             <el-dropdown-item>
               <span>首页</span>
             </el-dropdown-item>
           </router-link>
-          <el-dropdown-item divided @click.native="logout">
+          <el-dropdown-item
+            divided
+            @click.native="logout"
+          >
             <span>注销登录</span>
           </el-dropdown-item>
         </el-dropdown-menu>

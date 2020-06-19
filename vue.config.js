@@ -23,7 +23,7 @@ module.exports = {
   lintOnSave: process.env.NODE_ENV === 'development',
   productionSourceMap: false,
   devServer: {
-    port: port,
+    port,
     proxy: {
       '/admin/static': {
         target: 'http://127.0.0.1:9528/static',
@@ -45,7 +45,7 @@ module.exports = {
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.
-    name: name,
+    name,
     resolve: {
       alias: {
         '@': resolve('src')

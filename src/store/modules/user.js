@@ -45,7 +45,7 @@ const actions = {
   login({ commit }, userInfo) {
     const { username, password } = userInfo
     return new Promise((resolve, reject) => {
-      login({ username: username.trim(), password: password }).then(response => {
+      login({ username: username.trim(), password }).then(response => {
         const token = response.result
         commit('SET_TOKEN', token)
         setToken(token)
@@ -76,7 +76,7 @@ const actions = {
   /**
    * 注销登录
    */
-  logout({ commit, state }) {
+  logout({ commit }) {
     return new Promise((resolve, reject) => {
       logout().then(() => {
         removeToken()

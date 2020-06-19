@@ -1,14 +1,24 @@
 <template>
   <div class="tree-dialog">
-    <el-dialog :modal-append-to-body="false" :visible.sync="treeVisible" :before-close="handleClose" :destroy-on-close="true" width="30%">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="treeVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+      width="30%"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>选择</span>
       </div>
       <el-input
+        v-model="filterText"
         placeholder="请输入搜索..."
-        v-model="filterText">
-      </el-input>
+      />
       <el-tree
+        ref="tree"
         class="filter-tree"
         :data="treeData"
         :props="defaultProps"
@@ -16,11 +26,24 @@
         :highlight-current="true"
         :expand-on-click-node="false"
         :filter-node-method="filterNode"
-        ref="tree">
-      </el-tree>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="mini" @click="handleSave">保存</el-button>
-        <el-button size="mini" @click="handleClose">关闭</el-button>
+      />
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button
+          size="mini"
+          @click="handleClose"
+        >
+          关闭
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -42,12 +65,6 @@ export default {
       }
     }
   },
-  computed: {},
-  watch: {
-    filterText(val) {
-      this.$refs.tree.filter(val)
-    }
-  },
   data() {
     return {
       filterText: '',
@@ -55,6 +72,12 @@ export default {
         children: 'children',
         label: 'name'
       }
+    }
+  },
+  computed: {},
+  watch: {
+    filterText(val) {
+      this.$refs.tree.filter(val)
     }
   },
   methods: {

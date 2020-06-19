@@ -1,67 +1,142 @@
 <template>
   <div class="gw-table">
-    <header class="header" v-if="hasHeader">
-      <el-row type="flex" justify="space-between">
+    <header
+      v-if="hasHeader"
+      class="header"
+    >
+      <el-row
+        type="flex"
+        justify="space-between"
+      >
         <el-col :span="6">
-          <div class="header-title">{{ tableConfig.title }}</div>
+          <div class="header-title">
+            {{ tableConfig.title }}
+          </div>
         </el-col>
         <el-col :span="18">
           <div class="button-group">
-            <div v-if="tableConfig.buttons[0] === 'slot'" class="custom-buttons">
-              <slot name="buttons"></slot>
+            <div
+              v-if="tableConfig.buttons[0] === 'slot'"
+              class="custom-buttons"
+            >
+              <slot name="buttons" />
             </div>
-            <div v-else class="custom-buttons">
+            <div
+              v-else
+              class="custom-buttons"
+            >
               <!-- 新增 -->
-              <el-button type="primary" v-if="tableConfig.buttons.includes('add')" @click="handleAdd">
-                <font-awesome-icon icon="plus" pull="left" />
+              <el-button
+                v-if="tableConfig.buttons.includes('add')"
+                type="primary"
+                @click="handleAdd"
+              >
+                <font-awesome-icon
+                  icon="plus"
+                  pull="left"
+                />
                 <span>新增</span>
               </el-button>
               <!-- 修改 -->
-              <el-button type="primary" v-if="tableConfig.buttons.includes('update')" @click="handleUpdate">
-                <font-awesome-icon icon="edit" pull="left" />
+              <el-button
+                v-if="tableConfig.buttons.includes('update')"
+                type="primary"
+                @click="handleUpdate"
+              >
+                <font-awesome-icon
+                  icon="edit"
+                  pull="left"
+                />
                 <span>修改</span>
               </el-button>
               <!-- 删除 -->
-              <el-button type="danger" v-if="tableConfig.buttons.includes('delete')" @click="handleDelete">
-                <font-awesome-icon icon="trash-alt" pull="left" />
+              <el-button
+                v-if="tableConfig.buttons.includes('delete')"
+                type="danger"
+                @click="handleDelete"
+              >
+                <font-awesome-icon
+                  icon="trash-alt"
+                  pull="left"
+                />
                 <span>删除</span>
               </el-button>
             </div>
             <!-- 刷新 -->
-            <el-button class="first-button" v-if="tableConfig.buttons.includes('refresh')" @click="getInit">
+            <el-button
+              v-if="tableConfig.buttons.includes('refresh')"
+              class="first-button"
+              @click="getInit"
+            >
               <font-awesome-icon icon="sync-alt" />
             </el-button>
             <!-- 导入 -->
-            <el-dropdown trigger="click" class="center-button" v-if="tableConfig.buttons.includes('import')" @command="handleImport">
+            <el-dropdown
+              v-if="tableConfig.buttons.includes('import')"
+              trigger="click"
+              class="center-button"
+              @command="handleImport"
+            >
               <el-button>
-                <font-awesome-icon icon="download" pull="left" />
-                <i class="el-icon-arrow-down el-icon--right"></i>
+                <font-awesome-icon
+                  icon="download"
+                  pull="left"
+                />
+                <i class="el-icon-arrow-down el-icon--right" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="import">导入 Excel</el-dropdown-item>
+                <el-dropdown-item command="import">
+                  导入 Excel
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <!-- 导出 -->
-            <el-dropdown trigger="click" class="center-button" v-if="tableConfig.buttons.includes('export')" @command="handleExport">
+            <el-dropdown
+              v-if="tableConfig.buttons.includes('export')"
+              trigger="click"
+              class="center-button"
+              @command="handleExport"
+            >
               <el-button>
-                <font-awesome-icon icon="upload" pull="left" />
-                <i class="el-icon-arrow-down el-icon--right"></i>
+                <font-awesome-icon
+                  icon="upload"
+                  pull="left"
+                />
+                <i class="el-icon-arrow-down el-icon--right" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="import">导出 Excel</el-dropdown-item>
+                <el-dropdown-item command="import">
+                  导出 Excel
+                </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
             <!-- 表格配置 -->
-            <el-dropdown trigger="click" :hide-on-click="false" class="last-button" v-if="tableConfig.buttons.includes('columns')">
+            <el-dropdown
+              v-if="tableConfig.buttons.includes('columns')"
+              trigger="click"
+              :hide-on-click="false"
+              class="last-button"
+            >
               <el-button>
                 <font-awesome-icon icon="th" />
-                <i class="el-icon-arrow-down el-icon--right"></i>
+                <i class="el-icon-arrow-down el-icon--right" />
               </el-button>
               <el-dropdown-menu slot="dropdown">
                 <el-dropdown-item>
-                  <el-checkbox-group v-model="tableConfig.checkedColumns" @change="changeColumns" :min="2">
-                    <el-checkbox v-for="item in tableConfig.columns" :key="item.prop" :label="item.prop" style="display:block;">{{ item.label }}</el-checkbox>
-                    </el-checkbox-group>
+                  <el-checkbox-group
+                    v-model="tableConfig.checkedColumns"
+                    :min="2"
+                    @change="changeColumns"
+                  >
+                    <el-checkbox
+                      v-for="item in tableConfig.columns"
+                      :key="item.prop"
+                      :label="item.prop"
+                      style="display:block;"
+                    >
+                      {{ item.label }}
+                    </el-checkbox>
+                  </el-checkbox-group>
                 </el-dropdown-item>
               </el-dropdown-menu>
             </el-dropdown>
@@ -85,9 +160,15 @@
       @sort-change="sortChange"
       @current-change="handleTableCurrentChange"
     >
-      <el-table-column width="35" v-if="tableConfig.hasRadio">
+      <el-table-column
+        v-if="tableConfig.hasRadio"
+        width="35"
+      >
         <template slot-scope="scope">
-          <el-radio :label="scope.row.id" v-model="currentRadio"></el-radio>
+          <el-radio
+            v-model="currentRadio"
+            :label="scope.row.id"
+          />
         </template>
       </el-table-column>
       <el-table-column
@@ -98,24 +179,37 @@
         :width="item.width ? item.width : null"
         :sortable="item.sort ? item.sort : false"
       >
-        <template slot="header" slot-scope="scope">
+        <template
+          slot="header"
+        >
           <span>{{ item.label }}</span>
-          <span @click.stop v-if="item.filter">
+          <span
+            v-if="item.filter"
+            @click.stop
+          >
             <gw-table-filter
               :ref="item.prop"
-              :filterInit="filterInit[item.prop]"
-              :filterItem="item"
+              :filter-init="filterInit[item.prop]"
+              :filter-item="item"
               @doClosePopover="doClosePopover"
               @tableFilter="tableFilter"
-            ></gw-table-filter>
+            />
           </span>
         </template>
         <template slot-scope="scope">
           <span v-if="item.conver">
-            <slot name="conver" :row='scope.row' :column='scope.column'></slot>
+            <slot
+              name="conver"
+              :row="scope.row"
+              :column="scope.column"
+            />
           </span>
           <span v-else-if="item.prop === 'operation'">
-            <slot name="operation" :index='scope.$index' :row='scope.row'></slot>
+            <slot
+              name="operation"
+              :index="scope.$index"
+              :row="scope.row"
+            />
           </span>
           <span v-else-if="item.prop === 'name' && scope.row.isParent === false && scope.row.iconClass">
             <font-awesome-icon :icon="scope.row.iconClass" />
@@ -126,17 +220,20 @@
       </el-table-column>
     </el-table>
     <!-- 分页 -->
-    <div class="pagination" v-if="this.tableConfig.pagination">
+    <div
+      v-if="tableConfig.pagination"
+      class="pagination"
+    >
       <el-pagination
         background
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
         :page-sizes="[5, 10, 20, 50, 100]"
         :page-size="page.pageSize"
         :current-page="page.pageNum"
         layout="sizes, total, ->, prev, pager, next"
-        :total="page.total">
-      </el-pagination>
+        :total="page.total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
     </div>
   </div>
 </template>
@@ -198,7 +295,7 @@ export default {
   },
   computed: {
     // 表格配置
-    tableColumns: function() {
+    tableColumns() {
       if (!this.tableConfig.checkedColumns) return this.tableConfig.columns
 
       return this.tableConfig.columns.filter(column =>

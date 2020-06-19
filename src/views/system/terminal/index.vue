@@ -1,69 +1,158 @@
 <template>
   <div class="container">
-     <article>
+    <article>
       <gw-table
         ref="gwTable"
-        :tableConfig="tableConfig"
+        :table-config="tableConfig"
         @changeColumns="changeColumns"
         @add="handleOpenAdd"
       >
-        <template slot="conver" slot-scope="conver">
-          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
+          <span
+            v-if="conver.column.property === 'status'"
+            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
+          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
         </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="auto" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="auto"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="名称" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入名称"></el-input>
+            <el-form-item
+              label="名称"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入名称"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="编码" prop="code">
-              <el-input v-model="addForm.code" placeholder="请输入编码"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="编码"
+              prop="code"
+            >
+              <el-input
+                v-model="addForm.code"
+                placeholder="请输入编码"
+              />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="状态" prop="status" v-if="showStatus">
+        <el-form-item
+          v-if="showStatus"
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用</el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="AppKey" prop="appKey" v-if="showStatus">
-          <el-input v-model="addForm.appKey" disabled></el-input>
+        <el-form-item
+          v-if="showStatus"
+          label="AppKey"
+          prop="appKey"
+        >
+          <el-input
+            v-model="addForm.appKey"
+            disabled
+          />
         </el-form-item>
-        <el-form-item label="AppSecret" prop="appSecret" v-if="showStatus">
-          <el-input v-model="addForm.appSecret" disabled></el-input>
+        <el-form-item
+          v-if="showStatus"
+          label="AppSecret"
+          prop="appSecret"
+        >
+          <el-input
+            v-model="addForm.appSecret"
+            disabled
+          />
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
+        <el-form-item
+          label="备注"
+          prop="remark"
+        >
+          <el-input
+            v-model="addForm.remark"
+            type="textarea"
+            :rows="4"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { getTerminalList, doAddTerminal, doEditTerminal, getTerminalInfo, doDeleteTerminal } from '@/api/system/terminal'
+import { doAddTerminal, doEditTerminal, getTerminalInfo, doDeleteTerminal } from '@/api/system/terminal'
 import { doCheckRepeat } from '@/api/system/user'
 import gwTable from '@/components/gwTable'
 export default {
-  name: 'SYS_TERMINAL',
+  name: 'SYSTERMINAL',
   components: {
     gwTable
   },
@@ -75,7 +164,7 @@ export default {
         let data = {
           tableName: 'AD_TERMINAL',
           columnName: 'NAME',
-          value: value,
+          value,
           name: value
         }
         if (this.showStatus) data.oldval = this.oldVal.name
@@ -95,7 +184,7 @@ export default {
         let data = {
           tableName: 'AD_TERMINAL',
           columnName: 'CODE',
-          value: value,
+          value,
           code: value
         }
         if (this.showStatus) data.oldval = this.oldVal.code
@@ -215,8 +304,7 @@ export default {
       this.showStatus = true
       this.addVisible = true
       getTerminalInfo({ id: row.id }).then(res => {
-        let { success, result } = res
-        if (success === true) {}
+        let { result } = res
         this.addForm = result
         this.oldVal = {
           name: result.name,

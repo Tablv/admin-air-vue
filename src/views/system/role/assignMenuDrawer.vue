@@ -8,21 +8,33 @@
       :modal="false"
       :show-close="false"
       size="40%"
-      :before-close="handleClose">
-      <template slot="title" slot-scope="scope">
+      :before-close="handleClose"
+    >
+      <template
+        slot="title"
+      >
         <div class="drawer-header">
           <span>分配菜单</span>
-          <el-button icon="el-icon-close" type="text" @click="handleClose"></el-button>
+          <el-button
+            icon="el-icon-close"
+            type="text"
+            @click="handleClose"
+          />
         </div>
       </template>
       <div class="drawer-main">
-        <el-select v-model="platform" filterable placeholder="请选择" @change="handleChangeTerminal">
+        <el-select
+          v-model="platform"
+          filterable
+          placeholder="请选择"
+          @change="handleChangeTerminal"
+        >
           <el-option
             v-for="item in platformOptions"
             :key="item.id"
             :label="item.name"
-            :value="item.id">
-          </el-option>
+            :value="item.id"
+          />
         </el-select>
         <el-tree
           ref="tree"
@@ -32,11 +44,19 @@
           default-expand-all
           :default-checked-keys="defaultChecked"
           show-checkbox
-          @check-change="handleCheckChange"></el-tree>
+          @check-change="handleCheckChange"
+        />
       </div>
       <div class="drawer-footer">
-        <el-button @click="handleClose">关闭</el-button>
-        <el-button type="primary" @click="handleSave">保存</el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
       </div>
     </el-drawer>
   </div>
@@ -45,7 +65,7 @@
 <script>
 import { getTerminalList, getMenuList, doBindMenu } from '@/api/system/role'
 export default {
-  name: 'assignMenu',
+  name: 'AssignMenu',
   components: {},
   props: {
     drawer: {
@@ -89,7 +109,7 @@ export default {
     // 获取全部终端
     getAllTerminal() {
       getTerminalList().then(res => {
-        let { success, result } = res
+        let { result } = res
         this.platformOptions = result
         this.platformOptions.unshift({ id: '0', name: '请选择' })
       })
@@ -126,7 +146,7 @@ export default {
       })
     },
     // 选择菜单
-    handleCheckChange(data, checked, indeterminate) {
+    handleCheckChange() {
       this.selectedMenu = this.$refs.tree.getHalfCheckedKeys().concat(this.$refs.tree.getCheckedKeys()).join(',')
     },
     handleSave() {
