@@ -136,11 +136,11 @@
 
 <script>
 import { getTerminalList, getMenuList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
-import gwTable from '@/components/gwTable'
+import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSTEMRESOURCE',
   components: {
-    gwTable
+    GwTable
   },
   data() {
     return {

@@ -326,7 +326,6 @@ export default {
       getBindedUser(BindedParams).then(res => {
         this.userLoadingR = false
         let { result } = res
-        // if (success === true) {}
         this.rightList = result.list
         this.rightPage = {
           pageSize: result.pageSize,

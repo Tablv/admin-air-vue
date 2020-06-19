@@ -178,12 +178,12 @@
 import { getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
 import { validName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
-import gwTable from '@/components/gwTable'
+import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSUSER',
   components: {
     importDialog,
-    gwTable
+    GwTable
   },
   data() {
     var validUserName = (rule, value, callback) => {
@@ -406,7 +406,6 @@ export default {
       })
       getDeptList({ deptId: 0 }).then(res => {
         let { result } = res
-        // if (success === true) {}
         this.$refs.treeSelect.treeDataUpdateFun(result)
       })
       doGetUserInfo({ id: row.id }).then(res => {

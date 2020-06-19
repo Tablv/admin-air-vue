@@ -3,19 +3,43 @@
     <article>
       <gw-table
         ref="gwTable"
-        :queryParams="queryParams"
-        :tableConfig="tableConfig"
-        :treeLoad="loadData"
+        :query-params="queryParams"
+        :table-config="tableConfig"
+        :tree-load="loadData"
         @add="handleOpenAdd"
       >
-        <template slot="conver" slot-scope="conver">
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
           <span v-if="conver.column.property === 'type'">{{ conver.row.type === 0 ? '数据分组' : '数据项' }}</span>
-          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+          <span
+            v-if="conver.column.property === 'status'"
+            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
+          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增</el-button>
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleAdd(operation.index, operation.row)"
+          >
+            新增
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
         </template>
       </gw-table>
     </article>
@@ -140,12 +164,12 @@
 <script>
 import { getDataList, doDeleteData, getPreDataList, doAddData, getDataInfo, doUpdateData } from '@/api/system/dict'
 import { doCheckRepeat } from '@/api/system/user'
-import gwTable from '@/components/gwTable'
+import GwTable from '@/components/GwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'DICT',
   components: {
-    gwTable,
+    GwTable,
     treeDialog
   },
   data() {

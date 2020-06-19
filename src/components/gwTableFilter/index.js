@@ -1,2 +1,2 @@
-import gwTableFilter from './gwTableFilter.vue'
-export default gwTableFilter
+import GwTableFilter from './GwTableFilter.vue'
+export default GwTableFilter

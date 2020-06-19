@@ -3,12 +3,15 @@
     <article>
       <gw-table
         ref="gwTable"
-        :queryParams="queryParams"
-        :tableConfig="tableConfig"
-        :treeLoad="loadData"
+        :query-params="queryParams"
+        :table-config="tableConfig"
+        :tree-load="loadData"
         @add="handleOpenAdd"
       >
-        <template slot="conver" slot-scope="conver">
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
           <span>{{ conver.row.type === 0 ? '组织' : '部门' }}</span>
         </template>
         <template
@@ -176,12 +179,12 @@
 <script>
 import { getDeptGroup, doAddDept, doDeleteDept, getDeptInfo, doEditDept } from '@/api/system/dept'
 import { doCheckRepeat, getDeptList } from '@/api/system/user'
-import gwTable from '@/components/gwTable'
+import GwTable from '@/components/GwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'SYSDEPT',
   components: {
-    gwTable,
+    GwTable,
     treeDialog
   },
   data() {
@@ -421,8 +424,7 @@ export default {
     // 表格-树数据
     loadData(tree, treeNode, resolve) {
       getDeptGroup({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
-        let { success, result } = res
-        if (success === true) {}
+        let { result } = res
         resolve(result)
       })
     },
@@ -499,8 +501,7 @@ export default {
     // 表格树更新数据
     handleUpdateTree(id) {
       getDeptGroup({ nodeid: id }).then(res => {
-        let { success, result } = res
-        if (success === true) {}
+        let { result } = res
         this.$set(this.$refs.gwTable.$children[1].store.states.lazyTreeNodeMap, id, result)
       })
     }

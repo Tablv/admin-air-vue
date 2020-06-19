@@ -240,10 +240,10 @@
 
 <script>
 import request from '@/utils/request'
-import gwTableFilter from '@/components/gwTableFilter'
+import GwTableFilter from '@/components/GwTableFilter'
 export default {
   components: {
-    gwTableFilter
+    GwTableFilter
   },
   props: {
     // 表格初始化参数
@@ -478,5 +478,5 @@ export default {
 }
 </script>
 <style lang="scss">
-@import './gwTable.scss';
+@import './GwTable.scss';
 </style>

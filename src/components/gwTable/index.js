@@ -1,2 +1,2 @@
-import gwTable from './gwTable.vue'
-export default gwTable
+import GwTable from './GwTable.vue'
+export default GwTable

@@ -252,12 +252,12 @@
 <script>
 import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
-import gwTable from '@/components/gwTable'
+import GwTable from '@/components/GwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
   name: 'SYSMENU',
   components: {
-    gwTable,
+    GwTable,
     treeDialog
   },
   data() {
