@@ -279,7 +279,8 @@ export default {
     font-size: 12px;
     font-weight: 400;
     color: #333;
-    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, .3);
+    box-shadow: 2px 1px 10px 0 rgba(0,0,0,0.15);
+    
     li {
       margin: 0;
       padding: 7px 16px;
