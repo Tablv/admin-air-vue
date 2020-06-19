@@ -1,3 +1,5 @@
+import request from '@/utils/request'
+
 /**
  * 过滤组件
  */
@@ -11,12 +13,21 @@ export const widgetsRenderer = {
     )
   },
   select(h) {
+    let option = this.filterItem.filter.option;
+
+    if (typeof option === "string") {
+      option = [];
+
+      request.get(column.filter.option).then(res => {
+        option = res;
+      })
+    }
     return (
       <el-select
         v-model={ this.filterInits[this.filterItem.prop] }
       >
         {
-          Object.entries(this.filterItem.filter.option).map(([value, label]) => (
+          Object.entries(option).map(([value, label]) => (
             <el-option
               key={ value }
               label={ label }

@@ -241,6 +241,7 @@
 <script>
 import request from '@/utils/request'
 import TableFilter from './TableFilter'
+
 export default {
   components: {
     TableFilter
@@ -305,24 +306,6 @@ export default {
     // 是否有头部区域
     hasHeader() {
       return this.tableConfig.hasHeader !== false;
-    }
-  },
-  watch: {
-    // 获取表格筛选下拉框数据
-    'tableConfig.columns': {
-      handler(columns) {
-        columns.forEach(column => {
-          if (column.filter && column.filter.hasOwnProperty('option')) {
-            if (typeof column.filter.option === 'string') {
-              request.get(column.filter.option).then(res => {
-                column.filter.option = res
-              })
-            }
-          }
-        })
-      },
-      deep: true,
-      immediate: true
     }
   },
   created() {
