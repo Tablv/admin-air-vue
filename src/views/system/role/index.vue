@@ -3,73 +3,167 @@
     <article>
       <gw-table
         ref="gwTable"
-        :tableConfig="tableConfig"
+        :table-config="tableConfig"
         @changeColumns="changeColumns"
         @add="handleOpenAdd"
         @import="handleOpenImportDialog"
       >
-        <template slot="conver" slot-scope="conver">
-          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
+          <span
+            v-if="conver.column.property === 'status'"
+            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
+          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
-          <el-button type="text" @click="handleAssignUser(operation.index, operation.row)">分配用户</el-button>
-          <el-button type="text" @click="handleAssignMenu(operation.index, operation.row)">分配菜单</el-button>
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleAssignUser(operation.index, operation.row)"
+          >
+            分配用户
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleAssignMenu(operation.index, operation.row)"
+          >
+            分配菜单
+          </el-button>
         </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="70px"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="名称" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入名称"></el-input>
+            <el-form-item
+              label="名称"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入名称"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="编码" prop="code">
-              <el-input v-model="addForm.code" placeholder="请输入编码"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="编码"
+              prop="code"
+            >
+              <el-input
+                v-model="addForm.code"
+                placeholder="请输入编码"
+              />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="状态" v-if="showStatus">
+        <el-form-item
+          v-if="showStatus"
+          label="状态"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用</el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="备注">
-          <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
+          <el-input
+            v-model="addForm.remark"
+            type="textarea"
+            :rows="4"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
     <!-- 分配用户 -->
-    <assign-user :assignUserVisible="assignUserVisible" :assignParams="assignParams" @closeDialog="handleCloseAssignUserDialog"></assign-user>
+    <assign-user
+      :assign-user-visible="assignUserVisible"
+      :assign-params="assignParams"
+      @closeDialog="handleCloseAssignUserDialog"
+    />
     <!-- 分配菜单 -->
-    <assign-menu :drawer="drawer" :assignParams="assignParams" @closeDrawer="handleCloseDrawer"></assign-menu>
+    <assign-menu
+      :drawer="drawer"
+      :assign-params="assignParams"
+      @closeDrawer="handleCloseDrawer"
+    />
     <!-- 导入 -->
-    <import-dialog :importVisible="importVisible" templateNum="SYS_ROLE" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
+    <import-dialog
+      :import-visible="importVisible"
+      template-num="SYS_ROLE"
+      :import-table-data="importTableData"
+      @closeDialog="handleCloseImportDialog"
+    />
   </div>
 </template>
 
 <script>
-import { getRoleList, doAddRole, getRoleInfo, doEditRole, doDeleteRole } from '@/api/system/role'
+import { doAddRole, getRoleInfo, doEditRole, doDeleteRole } from '@/api/system/role'
 import { doCheckRepeat } from '@/api/system/user'
 import assignUser from './assignUserDialog'
 import assignMenu from './assignMenuDrawer'
 import importDialog from '@/components/importDialog'
 import gwTable from '@/components/gwTable'
 export default {
-  name: 'SYS_ROLE',
+  name: 'SYSROLE',
   components: {
     assignUser,
     assignMenu,
@@ -84,7 +178,7 @@ export default {
         let data = {
           tableName: 'AD_ROLE',
           columnName: 'NAME',
-          value: value,
+          value,
           username: value
         }
         if (this.showStatus) data.oldval = this.oldVal.name
@@ -104,7 +198,7 @@ export default {
         let data = {
           tableName: 'AD_ROLE',
           columnName: 'CODE',
-          value: value,
+          value,
           username: value
         }
         if (this.showStatus) data.oldval = this.oldVal.code

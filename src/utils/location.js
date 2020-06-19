@@ -6,7 +6,7 @@ export const session = {
    * @param {string} key 键
    * @param {*} value 值
    */
-  setItem: function(key, value) {
+  setItem(key, value) {
     if (typeof value === 'object') {
       value = JSON.stringify(value)
     }
@@ -17,7 +17,7 @@ export const session = {
    * 获取session
    * @param {string} key 键
    */
-  getItem: function(key) {
+  getItem(key) {
     return sessionStorage.getItem(key)
   },
 
@@ -25,7 +25,7 @@ export const session = {
    * 移除session
    * @param {string} key 键
    */
-  remove: function(key) {
+  remove(key) {
     if (sessionStorage.getItem(key)) {
       sessionStorage.removeItem(key)
     }
@@ -34,7 +34,7 @@ export const session = {
   /**
    * 清空session
    */
-  clear: function() {
+  clear() {
     sessionStorage.clear()
   }
 }
@@ -47,7 +47,7 @@ export const local = {
    * @param {string} key 键
    * @param {*} value 值
    */
-  setItem: function(key, value) {
+  setItem(key, value) {
     if (typeof value === 'object') {
       value = JSON.stringify(value)
     }
@@ -58,7 +58,7 @@ export const local = {
    * 获取local
    * @param {string} key 键
    */
-  getItem: function(key) {
+  getItem(key) {
     return localStorage.getItem(key)
   },
 
@@ -66,7 +66,7 @@ export const local = {
    * 移除local
    * @param {string} key 键
    */
-  removeItem: function(key) {
+  removeItem(key) {
     if (localStorage.getItem(key)) {
       localStorage.removeItem(key)
     }
@@ -75,7 +75,7 @@ export const local = {
   /**
    * 清空local
    */
-  clear: function() {
+  clear() {
     localStorage.clear()
   }
 }

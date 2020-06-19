@@ -1,11 +1,24 @@
 <template>
   <div class="import-dialog">
-    <el-dialog :modal-append-to-body="false" :visible.sync="importVisible" :before-close="handleCloseImport" :destroy-on-close="true" width="80%">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="importVisible"
+      :before-close="handleCloseImport"
+      :destroy-on-close="true"
+      width="80%"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>导入</span>
       </div>
       <splitpanes>
-        <pane size="40" min-size="40" max-size="50">
+        <pane
+          size="40"
+          min-size="40"
+          max-size="50"
+        >
           <div class="pane-header">
             <div class="pane-headerL">
               <font-awesome-icon icon="cubes" />
@@ -19,19 +32,21 @@
           <div class="pane-main">
             <el-table
               :data="importTableData"
-              header-cell-class-name="import-cell">
+              header-cell-class-name="import-cell"
+            >
               <el-table-column
                 prop="name"
-                label="列名">
-              </el-table-column>
+                label="列名"
+              />
               <el-table-column
                 prop="number"
-                label="列号">
+                label="列号"
+              >
                 <template slot-scope="scope">
-                 <el-input
-                 :value="scope.row.number"
-                  :disabled="true">
-                </el-input>
+                  <el-input
+                    :value="scope.row.number"
+                    :disabled="true"
+                  />
                 </template>
               </el-table-column>
             </el-table>
@@ -49,9 +64,23 @@
           </div>
         </pane>
       </splitpanes>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" size="mini" @click="handleSave">保存</el-button>
-        <el-button size="mini" @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          size="mini"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button
+          size="mini"
+          @click="handleClose"
+        >
+          关闭
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -72,7 +101,8 @@ export default {
     },
     // 左侧表格数据
     importTableData: {
-      type: Array
+      type: Array,
+      default: () => []
     }
   },
   data () {

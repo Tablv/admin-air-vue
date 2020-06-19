@@ -20,47 +20,120 @@
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
-        <el-form-item label="上级名称" prop="parentName">
-          <el-input v-model="addForm.parentName" disabled class="input-with-select">
-            <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="80px"
+        status-icon
+        :inline-message="true"
+      >
+        <el-form-item
+          label="上级名称"
+          prop="parentName"
+        >
+          <el-input
+            v-model="addForm.parentName"
+            disabled
+            class="input-with-select"
+          >
+            <el-button
+              slot="append"
+              :disabled="isEdit !== 1"
+              icon="el-icon-search"
+              @click="handleOpenTreeDialog"
+            />
           </el-input>
         </el-form-item>
-        <el-form-item label="类型" prop="type">
+        <el-form-item
+          label="类型"
+          prop="type"
+        >
           <el-radio-group v-model="addForm.type">
-            <el-radio :label="0">数据分组 </el-radio>
-            <el-radio :label="1">数据项</el-radio>
+            <el-radio :label="0">
+              数据分组
+            </el-radio>
+            <el-radio :label="1">
+              数据项
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="编码" prop="code">
-          <el-input v-model="addForm.code" placeholder="请输入编码"></el-input>
+        <el-form-item
+          label="编码"
+          prop="code"
+        >
+          <el-input
+            v-model="addForm.code"
+            placeholder="请输入编码"
+          />
         </el-form-item>
-        <el-form-item label="名称" prop="name">
-          <el-input v-model="addForm.name" placeholder="请输入名称"></el-input>
+        <el-form-item
+          label="名称"
+          prop="name"
+        >
+          <el-input
+            v-model="addForm.name"
+            placeholder="请输入名称"
+          />
         </el-form-item>
-        <el-form-item label="值" prop="value">
-          <el-input v-model="addForm.value" placeholder="请输入编码"></el-input>
+        <el-form-item
+          label="值"
+          prop="value"
+        >
+          <el-input
+            v-model="addForm.value"
+            placeholder="请输入编码"
+          />
         </el-form-item>
-        <el-form-item label="数据状态" prop="status">
+        <el-form-item
+          label="数据状态"
+          prop="status"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用 </el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
     <!-- 上级名称弹窗 -->
-    <tree-dialog :treeVisible="treeVisible"
-    :treeData="treeData"
-    @closeDialog="handleCloseTreeDialog" @getCurrentNode="getCurrentMenu"></tree-dialog>
+    <tree-dialog
+      :tree-visible="treeVisible"
+      :tree-data="treeData"
+      @closeDialog="handleCloseTreeDialog"
+      @getCurrentNode="getCurrentMenu"
+    />
   </div>
 </template>
 
@@ -84,7 +157,7 @@ export default {
         let data = {
           tableName: 'AD_DICT',
           columnName: 'CODE',
-          value: value
+          value
         }
         if (this.isEdit === 3) data.oldval = this.oldVal.code
         doCheckRepeat(data).then(res => {
@@ -167,7 +240,7 @@ export default {
   },
   watch: {
     'addForm.code': {
-      handler: function() {
+      handler() {
         this.addForm.code = this.addForm.code.toUpperCase()
         this.addForm.tencode = this.addForm.code
       }

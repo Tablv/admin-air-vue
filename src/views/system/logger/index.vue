@@ -3,12 +3,18 @@
     <article>
       <gw-table
         ref="gwTable"
-        :tableConfig="tableConfig"
+        :table-config="tableConfig"
         @changeColumns="changeColumns"
       >
         <template slot="buttons">
-          <el-button type="primary" @click="handleDelete">
-            <font-awesome-icon icon="eraser" pull="left" />
+          <el-button
+            type="primary"
+            @click="handleDelete"
+          >
+            <font-awesome-icon
+              icon="eraser"
+              pull="left"
+            />
             <span>清空</span>
           </el-button>
         </template>
@@ -18,10 +24,10 @@
 </template>
 
 <script>
-import { getLogList, doDeleteAll } from '@/api/system/logger'
+import { doDeleteAll } from '@/api/system/logger'
 import gwTable from '@/components/gwTable'
 export default {
-  name: 'SYS_LOG',
+  name: 'SYSLOG',
   components: {
     gwTable
   },
@@ -67,8 +73,7 @@ export default {
         cancelButtonClass: 'messageBoxCancelButton'
       }).then(action => {
         if (action === 'confirm') {
-          doDeleteAll().then(res => {
-            if (res.success === true) {}
+          doDeleteAll().then(() => {
             this.$message({
               message: '操作成功！',
               type: 'success'

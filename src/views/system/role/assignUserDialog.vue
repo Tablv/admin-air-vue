@@ -1,45 +1,75 @@
 <template>
   <div class="assignUser">
-    <el-dialog title="分配用户" :visible.sync="assignUserVisible" :modal-append-to-body="false"  :before-close="handleClose" :destroy-on-close="true" width="70%">
-      <el-tabs v-model="activeName" @tab-click="handleClick">
-        <el-tab-pane label="选择用户" name="user"></el-tab-pane>
-        <el-tab-pane label="选择部门" name="department"></el-tab-pane>
-        <el-row :gutter="20" v-if="activeName === 'user'">
+    <el-dialog
+      title="分配用户"
+      :visible.sync="assignUserVisible"
+      :modal-append-to-body="false"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+      width="70%"
+    >
+      <el-tabs
+        v-model="activeName"
+        @tab-click="handleClick"
+      >
+        <el-tab-pane
+          label="选择用户"
+          name="user"
+        />
+        <el-tab-pane
+          label="选择部门"
+          name="department"
+        />
+        <el-row
+          v-if="activeName === 'user'"
+          :gutter="20"
+        >
           <el-col :span="11">
             <el-table
+              v-loading="userLoadingL"
               :data="leftList"
               :height="300"
               border
               fit
-              v-loading="userLoadingL"
-              @selection-change="handleLeftChange">
-              <el-table-column type="selection" width="35"></el-table-column>
-              <el-table-column prop="name" label="姓名">
-              </el-table-column>
-              <el-table-column prop="userName" label="用户名">
-              </el-table-column>
+              @selection-change="handleLeftChange"
+            >
+              <el-table-column
+                type="selection"
+                width="35"
+              />
+              <el-table-column
+                prop="name"
+                label="姓名"
+              />
+              <el-table-column
+                prop="userName"
+                label="用户名"
+              />
             </el-table>
             <div class="dialog-pagination">
               <el-pagination
                 background
-                @size-change="handleLeftSizeChange"
-                @current-change="handleLeftCurrentChange"
                 :page-sizes="[10, 20, 50, 100]"
                 :page-size="leftPage.pageSize"
                 :current-page="leftPage.pageNum"
                 layout="prev, pager, next, jumper, total, sizes"
-                :total="leftPage.total">
-              </el-pagination>
+                :total="leftPage.total"
+                @size-change="handleLeftSizeChange"
+                @current-change="handleLeftCurrentChange"
+              />
             </div>
           </el-col>
-          <el-col :span="2" class="center-button">
+          <el-col
+            :span="2"
+            class="center-button"
+          >
             <el-button
               type="primary"
               plain
               :disabled="!leftSelected.length"
               icon="el-icon-arrow-right"
               @click="doBindUser"
-            ></el-button>
+            />
             <el-button
               type="primary"
               plain
@@ -47,57 +77,78 @@
               icon="el-icon-arrow-left"
               style="margin-left: 0;margin-top: 10px;"
               @click="doUnBindUser"
-            ></el-button>
+            />
           </el-col>
-          <el-col :span="11" :offset="2">
+          <el-col
+            :span="11"
+            :offset="2"
+          >
             <el-table
+              v-loading="userLoadingR"
               :data="rightList"
               :height="300"
               border
               fit
-              v-loading="userLoadingR"
-              @selection-change="handleRightChange">
-              <el-table-column type="selection" width="35"></el-table-column>
-              <el-table-column prop="name" label="姓名">
-              </el-table-column>
-              <el-table-column prop="userName" label="用户名">
-              </el-table-column>
+              @selection-change="handleRightChange"
+            >
+              <el-table-column
+                type="selection"
+                width="35"
+              />
+              <el-table-column
+                prop="name"
+                label="姓名"
+              />
+              <el-table-column
+                prop="userName"
+                label="用户名"
+              />
             </el-table>
             <div class="dialog-pagination">
               <el-pagination
                 background
-                @size-change="handleRightSizeChange"
-                @current-change="handleRightCurrentChange"
                 :page-sizes="[10, 20, 50, 100]"
                 :page-size="rightPage.pageSize"
                 :current-page="rightPage.pageNum"
                 layout="prev, pager, next, jumper, total, sizes"
-                :total="rightPage.total">
-              </el-pagination>
+                :total="rightPage.total"
+                @size-change="handleRightSizeChange"
+                @current-change="handleRightCurrentChange"
+              />
             </div>
           </el-col>
         </el-row>
-        <el-row :gutter="20" v-if="activeName === 'department'">
-          <el-col :span="11" class="dept-left">
+        <el-row
+          v-if="activeName === 'department'"
+          :gutter="20"
+        >
+          <el-col
+            :span="11"
+            class="dept-left"
+          >
             <el-tree
               ref="tree"
+              v-loading="deptLoadingL"
               :data="treeData"
               node-key="id"
               :props="defaultProps"
               default-expand-all
               show-checkbox
-              v-loading="deptLoadingL"
-              @check-change="handleCheckChange"></el-tree>
-              <!-- :default-checked-keys="checkedTree" -->
+              @check-change="handleCheckChange"
+            />
+            <!-- :default-checked-keys="checkedTree" -->
           </el-col>
-          <el-col :span="2" class="center-button">
+          <el-col
+            :span="2"
+            class="center-button"
+          >
             <el-button
               type="primary"
               plain
               :disabled="!deptLeftSelected.length"
               icon="el-icon-arrow-right"
               @click="doAddDept"
-            ></el-button>
+            />
             <el-button
               type="primary"
               plain
@@ -105,39 +156,58 @@
               icon="el-icon-arrow-left"
               style="margin-left: 0;margin-top: 10px;"
               @click="doRemoveDept"
-            ></el-button>
+            />
           </el-col>
-          <el-col :span="11" :offset="2">
+          <el-col
+            :span="11"
+            :offset="2"
+          >
             <el-table
+              v-loading="deptLoadingR"
               :data="deptRightList"
               :height="300"
               border
               fit
-              v-loading="deptLoadingR"
-              @selection-change="handleDeptRightChange">
-              <el-table-column type="selection" width="35"></el-table-column>
-              <el-table-column prop="code" label="部门编码">
-              </el-table-column>
-              <el-table-column prop="name" label="部门名称">
-              </el-table-column>
+              @selection-change="handleDeptRightChange"
+            >
+              <el-table-column
+                type="selection"
+                width="35"
+              />
+              <el-table-column
+                prop="code"
+                label="部门编码"
+              />
+              <el-table-column
+                prop="name"
+                label="部门名称"
+              />
             </el-table>
             <div class="dialog-pagination">
               <el-pagination
                 background
-                @size-change="handleDeptRightSizeChange"
-                @current-change="handleDeptRightCurrentChange"
                 :page-sizes="[10, 20, 50, 100]"
                 :page-size="deptRightPage.pageSize"
                 :current-page="deptRightPage.pageNum"
                 layout="prev, pager, next, jumper, total, sizes"
-                :total="deptRightPage.total">
-              </el-pagination>
+                :total="deptRightPage.total"
+                @size-change="handleDeptRightSizeChange"
+                @current-change="handleDeptRightCurrentChange"
+              />
             </div>
           </el-col>
         </el-row>
       </el-tabs>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleClose"
+        >
+          关闭
+        </el-button>
       </div>
     </el-dialog>
   </div>
@@ -145,9 +215,8 @@
 
 <script>
 import { getUnBindUser, getBindedUser, doBindUser, doUnBindUser, getAllDept, getUnBindDept,getBindedDept, doBindDept, doUnBindDept } from '@/api/system/role'
-import { isArray } from 'util';
 export default {
-  name: 'assignUser',
+  name: 'AssignUser',
   props: {
     assignUserVisible: {
       type: Boolean,
@@ -221,7 +290,7 @@ export default {
   },
   methods: {
     // 切换标签
-    handleClick(tab, event) {
+    handleClick(tab) {
       if (tab.name === 'user') {
         this.doInit()
       } else {
@@ -256,7 +325,7 @@ export default {
       }
       getBindedUser(BindedParams).then(res => {
         this.userLoadingR = false
-        let { success, result } = res
+        let { result } = res
         // if (success === true) {}
         this.rightList = result.list
         this.rightPage = {
@@ -327,8 +396,7 @@ export default {
       this.deptLoadingL = true
       this.deptLoadingR = true
       getAllDept({ deptId: 0 }).then(res => {
-        let { success, result } = res
-        if (success === true) {}
+        let { result } = res
         this.treeData = this.setDisabled(result)
         getUnBindDept({ roleId: this.assignParams.id }).then(res => {
           this.deptLoadingL = false
@@ -385,7 +453,7 @@ export default {
       })
     },
     // 选择部门-左侧选中数据
-    handleCheckChange(data, checked, indeterminate) {
+    handleCheckChange() {
       let deptLeftSelected = []
       deptLeftSelected = this.$refs.tree.getCheckedNodes().filter(item => {
         return item.disabled !== true

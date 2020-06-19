@@ -11,70 +11,165 @@
         <template slot="conver" slot-scope="conver">
           <span>{{ conver.row.type === 0 ? '组织' : '部门' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleAdd(operation.index, operation.row)">新增
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleAdd(operation.index, operation.row)"
+          >
+            新增
           </el-button>
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
         </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ isEdit === 3 ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="80px" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="80px"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="上级组织" prop="parentName">
-              <el-input v-model="addForm.parentName" disabled class="input-with-select">
-                <el-button slot="append" :disabled="isEdit !== 1" icon="el-icon-search" @click="handleOpenTreeDialog"></el-button>
+            <el-form-item
+              label="上级组织"
+              prop="parentName"
+            >
+              <el-input
+                v-model="addForm.parentName"
+                disabled
+                class="input-with-select"
+              >
+                <el-button
+                  slot="append"
+                  :disabled="isEdit !== 1"
+                  icon="el-icon-search"
+                  @click="handleOpenTreeDialog"
+                />
               </el-input>
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="组织类型" prop="type">
-              <el-select v-model="addForm.type" filterable>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="组织类型"
+              prop="type"
+            >
+              <el-select
+                v-model="addForm.type"
+                filterable
+              >
                 <el-option
                   v-for="item in typeOptions"
                   :key="item.value"
                   :label="item.label"
-                  :value="item.value">
-                </el-option>
+                  :value="item.value"
+                />
               </el-select>
             </el-form-item>
           </el-col>
         </el-row>
         <el-row>
           <el-col :span="11">
-            <el-form-item label="组织名称" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入组织名称"></el-input>
+            <el-form-item
+              label="组织名称"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入组织名称"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="组织编码" prop="code">
-              <el-input v-model="addForm.code"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="组织编码"
+              prop="code"
+            >
+              <el-input v-model="addForm.code" />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="组织状态" prop="status">
+        <el-form-item
+          label="组织状态"
+          prop="status"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用 </el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input type="textarea" :rows="4" v-model="addForm.remark"></el-input>
+        <el-form-item
+          label="备注"
+          prop="remark"
+        >
+          <el-input
+            v-model="addForm.remark"
+            type="textarea"
+            :rows="4"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
     <!-- 上级组织弹窗 -->
-    <tree-dialog :treeVisible="treeVisible" @closeDialog="handleCloseTreeDialog" :treeData="treeData" @getCurrentNode="getCurrentDept"></tree-dialog>
+    <tree-dialog
+      :tree-visible="treeVisible"
+      :tree-data="treeData"
+      @closeDialog="handleCloseTreeDialog"
+      @getCurrentNode="getCurrentDept"
+    />
   </div>
 </template>
 
@@ -84,7 +179,7 @@ import { doCheckRepeat, getDeptList } from '@/api/system/user'
 import gwTable from '@/components/gwTable'
 import treeDialog from '@/components/treeDialog'
 export default {
-  name: 'SYS_DEPT',
+  name: 'SYSDEPT',
   components: {
     gwTable,
     treeDialog
@@ -97,7 +192,7 @@ export default {
         let data = {
           tableName: 'AD_DEPT',
           columnName: 'NAME',
-          value: value,
+          value,
           name: value
         }
         if (this.isEdit === 3) data.oldval = this.oldVal.name
@@ -117,7 +212,7 @@ export default {
         let data = {
           tableName: 'AD_DEPT ',
           columnName: 'CODE',
-          value: value,
+          value,
           code: value
         }
         if (this.isEdit === 3) data.oldval = this.oldVal.code
@@ -200,15 +295,14 @@ export default {
   },
   watch: {
     'addForm.code': {
-      handler: function() {
+      handler() {
         this.addForm.code = this.addForm.code.toUpperCase()
       }
     }
   },
   created() {
     getDeptList({ deptId: 0 }).then(res => {
-      let { success, result } = res
-      // if (success === true) {}
+      let { result } = res
       this.treeData = result
     })
   },
@@ -311,8 +405,7 @@ export default {
     handleOpenTreeDialog() {
       this.treeVisible = true
       getDeptList({ deptId: 0 }).then(res => {
-        let { success, result } = res
-        // if (success === true) {}
+        let { result } = res
         this.treeData = result
       })
     },

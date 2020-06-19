@@ -3,84 +3,184 @@
     <article>
       <gw-table
         ref="gwTable"
-        :tableConfig="tableConfig"
+        :table-config="tableConfig"
         @changeColumns="changeColumns"
         @add="handleOpenAdd"
         @import="handleOpenImportDialog"
       >
-        <template slot="conver" slot-scope="conver">
-          <span v-if="conver.column.property === 'status'" :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
+        <template
+          slot="conver"
+          slot-scope="conver"
+        >
+          <span
+            v-if="conver.column.property === 'status'"
+            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
+          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
         </template>
-        <template slot="operation" slot-scope="operation">
-          <el-button type="text" @click="handleResetPassword(operation.index, operation.row)">重置密码</el-button>
-          <el-button type="text" @click="handleEdit(operation.index, operation.row)">编辑</el-button>
-          <el-button type="text" @click="handleDelete(operation.index, operation.row)">删除</el-button>
+        <template
+          slot="operation"
+          slot-scope="operation"
+        >
+          <el-button
+            type="text"
+            @click="handleResetPassword(operation.index, operation.row)"
+          >
+            重置密码
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleEdit(operation.index, operation.row)"
+          >
+            编辑
+          </el-button>
+          <el-button
+            type="text"
+            @click="handleDelete(operation.index, operation.row)"
+          >
+            删除
+          </el-button>
         </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
-    <el-dialog :modal-append-to-body="false" :visible.sync="addVisible" :before-close="handleClose" :destroy-on-close="true">
-      <div slot="title" class="dialog-title">
+    <el-dialog
+      :modal-append-to-body="false"
+      :visible.sync="addVisible"
+      :before-close="handleClose"
+      :destroy-on-close="true"
+    >
+      <div
+        slot="title"
+        class="dialog-title"
+      >
         <span>{{ showStatus ? '修改' : '新增' }}</span>
       </div>
-      <el-form ref="addForm" :model="addForm" :rules="addRules" label-position="right" label-width="70px" status-icon :inline-message="true">
+      <el-form
+        ref="addForm"
+        :model="addForm"
+        :rules="addRules"
+        label-position="right"
+        label-width="70px"
+        status-icon
+        :inline-message="true"
+      >
         <el-row>
           <el-col :span="11">
-            <el-form-item label="姓名" prop="name">
-              <el-input v-model="addForm.name" placeholder="请输入姓名"></el-input>
+            <el-form-item
+              label="姓名"
+              prop="name"
+            >
+              <el-input
+                v-model="addForm.name"
+                placeholder="请输入姓名"
+              />
             </el-form-item>
           </el-col>
-          <el-col :span="11" :offset="2">
-            <el-form-item label="用户名" prop="username">
-              <el-input v-model="addForm.username" placeholder="请输入用户名" :disabled="showStatus"></el-input>
+          <el-col
+            :span="11"
+            :offset="2"
+          >
+            <el-form-item
+              label="用户名"
+              prop="username"
+            >
+              <el-input
+                v-model="addForm.username"
+                placeholder="请输入用户名"
+                :disabled="showStatus"
+              />
             </el-form-item>
           </el-col>
         </el-row>
-        <el-form-item label="状态" v-if="showStatus" prop="status">
+        <el-form-item
+          v-if="showStatus"
+          label="状态"
+          prop="status"
+        >
           <el-radio-group v-model="addForm.status">
-            <el-radio :label="0">启用</el-radio>
-            <el-radio :label="1">禁用</el-radio>
+            <el-radio :label="0">
+              启用
+            </el-radio>
+            <el-radio :label="1">
+              禁用
+            </el-radio>
           </el-radio-group>
         </el-form-item>
-        <el-form-item label="角色" prop="roleIds">
-          <el-select v-model="addForm.roleIds" multiple filterable placeholder="请选择" @change="selectRole" clearable>
+        <el-form-item
+          label="角色"
+          prop="roleIds"
+        >
+          <el-select
+            v-model="addForm.roleIds"
+            multiple
+            filterable
+            placeholder="请选择"
+            clearable
+            @change="selectRole"
+          >
             <el-option
               v-for="item in roleOptions"
               :key="item.id"
               :label="item.name"
-              :value="item.id">
-            </el-option>
+              :value="item.id"
+            />
           </el-select>
         </el-form-item>
-        <el-form-item label="组织" prop="depts">
+        <el-form-item
+          label="组织"
+          prop="depts"
+        >
           <el-tree-select
+            ref="treeSelect"
             v-model="addForm.depts"
-            :selectParams="selectParams"
-            :treeParams="treeParams"
+            :select-params="selectParams"
+            :tree-params="treeParams"
             @searchFun="handleTreeSelectFilter"
-            ref="treeSelect"/>
+          />
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input type="textarea" :rows="5" v-model="addForm.remark"></el-input>
+        <el-form-item
+          label="备注"
+          prop="remark"
+        >
+          <el-input
+            v-model="addForm.remark"
+            type="textarea"
+            :rows="5"
+          />
         </el-form-item>
       </el-form>
-      <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="handleSave">保存</el-button>
-        <el-button @click="handleClose">关闭</el-button>
+      <div
+        slot="footer"
+        class="dialog-footer"
+      >
+        <el-button
+          type="primary"
+          @click="handleSave"
+        >
+          保存
+        </el-button>
+        <el-button @click="handleClose">
+          关闭
+        </el-button>
       </div>
     </el-dialog>
     <!-- 导入 -->
-    <import-dialog :importVisible="importVisible" templateNum="SYS_USER" @closeDialog="handleCloseImportDialog" :importTableData="importTableData"></import-dialog>
+    <import-dialog
+      :import-visible="importVisible"
+      template-num="SYS_USER"
+      :import-table-data="importTableData"
+      @closeDialog="handleCloseImportDialog"
+    />
   </div>
 </template>
 
 <script>
-import { getUserList, getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
+import { getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
 import { validName } from '@/utils/validate'
 import importDialog from '@/components/importDialog'
 import gwTable from '@/components/gwTable'
 export default {
-  name: 'SYS_USER',
+  name: 'SYSUSER',
   components: {
     importDialog,
     gwTable
@@ -95,7 +195,7 @@ export default {
         let data = {
           tableName: 'AD_USER',
           columnName: 'USERNAME',
-          value: value,
+          value,
           username: value
         }
         if (this.showStatus) data.oldval = value
@@ -194,8 +294,7 @@ export default {
         }
       })
       getDeptList({ deptId: 0 }).then(res => {
-        let { success, result } = res
-        // if (success === true) {}
+        let { result } = res
         this.$refs.treeSelect.treeDataUpdateFun(result)
       })
     },
@@ -306,7 +405,7 @@ export default {
         }
       })
       getDeptList({ deptId: 0 }).then(res => {
-        let { success, result } = res
+        let { result } = res
         // if (success === true) {}
         this.$refs.treeSelect.treeDataUpdateFun(result)
       })

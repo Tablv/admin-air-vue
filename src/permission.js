@@ -24,8 +24,7 @@ router.beforeEach(async(to, from, next) => {
     if (to.path === '/login') {
       next({ path: '/index' })
       NProgress.done()
-    } else {
-      if (store.state.user.routerList.length) {
+    } else if (store.state.user.routerList.length) {
         return next()
       } else {
         try {
@@ -46,7 +45,6 @@ router.beforeEach(async(to, from, next) => {
           NProgress.done()
         }
       }
-    }
   } else {
     /* 没有token */
     // 如果是登录页
