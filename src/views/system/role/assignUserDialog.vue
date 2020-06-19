@@ -206,7 +206,7 @@
           type="primary"
           @click="handleClose"
         >
-          关闭
+          <span>关闭</span>
         </el-button>
       </div>
     </el-dialog>

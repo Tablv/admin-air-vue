@@ -49,13 +49,13 @@
       </div>
       <div class="drawer-footer">
         <el-button @click="handleClose">
-          关闭
+          <span>关闭</span>
         </el-button>
         <el-button
           type="primary"
           @click="handleSave"
         >
-          保存
+          <span>保存</span>
         </el-button>
       </div>
     </el-drawer>

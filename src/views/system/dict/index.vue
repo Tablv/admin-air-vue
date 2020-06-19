@@ -26,19 +26,19 @@
             type="text"
             @click="handleAdd(operation.index, operation.row)"
           >
-            新增
+            <span>新增</span>
           </el-button>
           <el-button
             type="text"
             @click="handleEdit(operation.index, operation.row)"
           >
-            编辑
+            <span>编辑</span>
           </el-button>
           <el-button
             type="text"
             @click="handleDelete(operation.index, operation.row)"
           >
-            删除
+            <span>删除</span>
           </el-button>
         </template>
       </gw-table>
@@ -88,10 +88,10 @@
         >
           <el-radio-group v-model="addForm.type">
             <el-radio :label="0">
-              数据分组
+              <span>数据分组</span>
             </el-radio>
             <el-radio :label="1">
-              数据项
+              <span>数据项</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -128,10 +128,10 @@
         >
           <el-radio-group v-model="addForm.status">
             <el-radio :label="0">
-              启用
+              <span>启用</span>
             </el-radio>
             <el-radio :label="1">
-              禁用
+              <span>禁用</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -144,10 +144,10 @@
           type="primary"
           @click="handleSave"
         >
-          保存
+          <span>保存</span>
         </el-button>
         <el-button @click="handleClose">
-          关闭
+          <span>关闭</span>
         </el-button>
       </div>
     </el-dialog>
@@ -165,12 +165,12 @@
 import { getDataList, doDeleteData, getPreDataList, doAddData, getDataInfo, doUpdateData } from '@/api/system/dict'
 import { doCheckRepeat } from '@/api/system/user'
 import GwTable from '@/components/GwTable'
-import treeDialog from '@/components/treeDialog'
+import TreeDialog from '@/components/TreeDialog'
 export default {
   name: 'DICT',
   components: {
     GwTable,
-    treeDialog
+    TreeDialog
   },
   data() {
     var validCode = (rule, value, callback) => {

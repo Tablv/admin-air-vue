@@ -25,25 +25,25 @@
             type="text"
             @click="handleEdit(operation.index, operation.row)"
           >
-            编辑
+            <span>编辑</span>
           </el-button>
           <el-button
             type="text"
             @click="handleDelete(operation.index, operation.row)"
           >
-            删除
+            <span>删除</span>
           </el-button>
           <el-button
             type="text"
             @click="handleAssignUser(operation.index, operation.row)"
           >
-            分配用户
+            <span>分配用户</span>
           </el-button>
           <el-button
             type="text"
             @click="handleAssignMenu(operation.index, operation.row)"
           >
-            分配菜单
+            <span>分配菜单</span>
           </el-button>
         </template>
       </gw-table>
@@ -103,10 +103,10 @@
         >
           <el-radio-group v-model="addForm.status">
             <el-radio :label="0">
-              启用
+              <span>启用</span>
             </el-radio>
             <el-radio :label="1">
-              禁用
+              <span>禁用</span>
             </el-radio>
           </el-radio-group>
         </el-form-item>
@@ -126,10 +126,10 @@
           type="primary"
           @click="handleSave"
         >
-          保存
+          <span>保存</span>
         </el-button>
         <el-button @click="handleClose">
-          关闭
+          <span>关闭</span>
         </el-button>
       </div>
     </el-dialog>
@@ -160,14 +160,14 @@ import { doAddRole, getRoleInfo, doEditRole, doDeleteRole } from '@/api/system/r
 import { doCheckRepeat } from '@/api/system/user'
 import assignUser from './assignUserDialog'
 import assignMenu from './assignMenuDrawer'
-import importDialog from '@/components/importDialog'
+import ImportDialog from '@/components/ImportDialog'
 import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSROLE',
   components: {
     assignUser,
     assignMenu,
-    importDialog,
+    ImportDialog,
     GwTable
   },
   data() {
