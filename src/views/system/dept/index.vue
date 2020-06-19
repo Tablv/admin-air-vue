@@ -3,15 +3,13 @@
     <article>
       <gw-table
         ref="gwTable"
-        :query-params="queryParams"
-        :table-config="tableConfig"
-        :tree-load="loadData"
+        :queryParams="queryParams"
+        :tableConfig="tableConfig"
+        :treeLoad="loadData"
+        @add="handleOpenAdd"
       >
-        <template
-          slot="conver"
-          slot-scope="conver"
-        >
-          <span :style="{ color: (conver.row.type === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.type === 0 ? '组织' : '部门' }}</span>
+        <template slot="conver" slot-scope="conver">
+          <span>{{ conver.row.type === 0 ? '组织' : '部门' }}</span>
         </template>
         <template
           slot="operation"
@@ -228,22 +226,28 @@ export default {
       }
     }
     return {
+      // 表格初始化参数
+      queryParams: {
+        nodeid: '0'
+      },
       // 表格
       tableConfig: {
-        api: '/system/menu/findMenusAsync',
+        api: '/system/dept/findDeptAsync',
         // 表格列数据
         columns: [
           { prop: 'name', label: '名称' },
           { prop: 'code', label: '编码' },
-          { prop: 'path', label: '链接地址' },
+          { prop: 'type', label: '类型', conver: true },
+          { prop: 'fullPath', label: '全路径' },
           { prop: 'lvl', label: '层级' },
           { prop: 'sortNum', label: '排序号' },
-          { prop: 'status', label: '状态', conver: true },
+          { prop: 'status', label: '状态' },
+          { prop: 'remark', label: '备注' },
           { prop: 'operation', label: '操作', width: '180' }
         ],
-        title: '菜单管理',
+        title: '组织管理',
         // 按钮配置
-        buttons: ['slot'],
+        buttons: ['add'],
         hasTree: true,
         treeConfig: {
           key: 'id',
@@ -253,22 +257,6 @@ export default {
           }
         }
       },
-      // 表格列数据
-      tableColumn: [
-        { prop: 'name', label: '名称' },
-        { prop: 'code', label: '编码' },
-        { prop: 'type', label: '类型' },
-        { prop: 'fullPath', label: '全路径' },
-        { prop: 'lvl', label: '层级' },
-        { prop: 'sortNum', label: '排序号' },
-        { prop: 'status', label: '状态' },
-        { prop: 'remark', label: '备注' },
-        { prop: 'operation', label: '操作', width: '180' }
-      ],
-      // 表格树数据
-      tableTreeData: [],
-      // 表格loading
-      listLoading: false,
       // 新增弹窗
       addVisible: false,
       // 上级组织弹窗
@@ -313,26 +301,20 @@ export default {
     }
   },
   created() {
-    this.getInit()
     getDeptList({ deptId: 0 }).then(res => {
       let { result } = res
       this.treeData = result
     })
   },
+  mounted() {
+    this.$refs.gwTable.getInit()
+  },
   methods: {
-    // 初始化
-    getInit() {
-      this.listLoading = true
-      this.tableData.splice(0)
-      getDeptGroup({ nodeid: 0 }).then(res => {
-        this.listLoading = false
-        let { result } = res
-        this.tableData = result
-      })
-    },
     // 新增弹窗-打开
     handleOpenAdd() {
       this.isEdit = 1
+      this.preDept = {}
+      this.editPreDept = {}
       this.addVisible = true
     },
     // 弹窗-保存
@@ -374,7 +356,10 @@ export default {
                   message: '新增成功！',
                   type: 'success'
                 })
-                this.getInit()
+                if (addForm.parentId !== '') {
+                  this.handleUpdateTree(addForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           } else {
@@ -383,7 +368,7 @@ export default {
               id: this.addForm.id,
               lvl: this.addForm.lvl,
               terminalId: this.addForm.terminalId ? this.addForm.terminalId : '',
-              parentId: this.addForm.parentId ? this.addForm.parentId : '',
+              parentId: this.addForm.parentId ? this.addForm.parentId : '0',
               parentName: this.addForm.parentName ? this.addForm.parentName : '',
               name: this.addForm.name,
               code: this.addForm.code,
@@ -397,7 +382,10 @@ export default {
                   message: '操作成功！',
                   type: 'success'
                 })
-                this.getInit()
+                if (editForm.parentId !== '0') {
+                  this.handleUpdateTree(editForm.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
@@ -431,10 +419,11 @@ export default {
       this.addForm.parentName = data.name
     },
     // 表格-树数据
-    loadData(tree) {
+    loadData(tree, treeNode, resolve) {
       getDeptGroup({ nodeid: tree.id, parentid: tree.parentId }).then(res => {
-        let { result } = res
-        this.tableTreeData = result
+        let { success, result } = res
+        if (success === true) {}
+        resolve(result)
       })
     },
     // 表格操作-新增
@@ -497,13 +486,23 @@ export default {
                   message: '删除成功！',
                   type: 'success'
                 })
-                this.getInit()
-                this.$set(this.$refs.gwTable.$children[0].store.states.lazyTreeNodeMap, row.parentId, [])
+                if (row.parentId !== '0') {
+                  this.handleUpdateTree(row.parentId)
+                }
+                this.$refs.gwTable.getInit()
               }
             })
           }
         }).catch(() => {})
       }
+    },
+    // 表格树更新数据
+    handleUpdateTree(id) {
+      getDeptGroup({ nodeid: id }).then(res => {
+        let { success, result } = res
+        if (success === true) {}
+        this.$set(this.$refs.gwTable.$children[1].store.states.lazyTreeNodeMap, id, result)
+      })
     }
   }
 }
