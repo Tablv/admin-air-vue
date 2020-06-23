@@ -195,7 +195,6 @@ export default {
     },
     // 表格---远程筛选
     applyTableFilter(filterRet) {
-      debugger
       if (this.tableParams.filter) {
         Object.entries(filterRet).forEach(([ filterProp, filterValue ]) => {
           if (filterValue.trim() === "") {
