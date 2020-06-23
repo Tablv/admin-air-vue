@@ -225,19 +225,20 @@
       :modal-append-to-body="false"
       :destroy-on-close="true"
     >
-      <div
+      <el-col
         v-for="(icon, index) in iconData"
         :key="index"
         class="icon-container"
+        :span="6"
       >
-        <div
+        <el-button
           class="icon-item"
-          @dblclick="handleSelectIcon(icon)"
+          @dblclick.native="handleSelectIcon(icon)"
         >
           <font-awesome-icon :icon="icon" />
           <span class="icon-name">{{ icon }}</span>
-        </div>
-      </div>
+        </el-button>
+      </el-col>
     </el-dialog>
     <!-- 上级菜单弹窗 -->
     <tree-dialog
@@ -252,12 +253,10 @@
 <script>
 import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
-import GwTable from '@/components/GwTable'
 import TreeDialog from '@/components/TreeDialog'
 export default {
   name: 'SYSMENU',
   components: {
-    GwTable,
     TreeDialog
   },
   data() {
@@ -628,27 +627,23 @@ export default {
 .icon-dialog {
   /deep/ .el-dialog__body {
     height: 289px;
-    padding: 10px;
+    padding: 0 10px;
     overflow-y: auto;
+
     .icon-container {
-      width: 25%;
-      padding: 10px;
-      float: left;
-      font-size: 14px;
+      padding: 6px 8px;
+      font-size: 16px;
+
       .icon-item {
-        padding: 4px 12px;
-        line-height: 22px;
-        background-color: #f4f4f4;
-        color: #444;
-        border: 1px solid #ddd;
-        border-radius: 3px;
+        padding: 10px 12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
-        &:hover {
-          background-color: #e7e7e7;
-          border: 1px solid #adadad;
-          cursor: pointer;
+        width: 100%;
+        text-align: left;
+
+        .icon-name {
+          margin-left: 4px;
         }
       }
     }

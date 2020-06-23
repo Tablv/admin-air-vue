@@ -136,11 +136,9 @@
 
 <script>
 import { getTerminalList, getMenuList, doAddRes, getResInfo, doUpdateRes, doDeleteRes } from '@/api/system/resource'
-import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSTEMRESOURCE',
   components: {
-    GwTable
   },
   data() {
     return {
@@ -305,7 +303,7 @@ export default {
       this.$refs['addForm'].resetFields()
     },
     // 删除
-    handleDelete() {
+    handleDelete(rowData, confirm) {
       if (this.idRadio === '') {
         this.$message({
           message: '请选择一项数据',

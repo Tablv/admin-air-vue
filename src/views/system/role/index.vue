@@ -161,14 +161,12 @@ import { doCheckRepeat } from '@/api/system/user'
 import assignUser from './assignUserDialog'
 import assignMenu from './assignMenuDrawer'
 import ImportDialog from '@/components/ImportDialog'
-import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSROLE',
   components: {
     assignUser,
     assignMenu,
-    ImportDialog,
-    GwTable
+    ImportDialog
   },
   data() {
     var validName = (rule, value, callback) => {

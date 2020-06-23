@@ -44,7 +44,7 @@ export const constantRoutes = [
 export const asyncRoutes = [
   {
     path: '/system',
-    name: 'SYS',
+    name: 'SYSTEM',
     component: Layout,
     redirect: 'noRedirect',
     meta: { title: '系统管理', icon: 'desktop' },
@@ -52,43 +52,43 @@ export const asyncRoutes = [
     children: [
       {
         path: 'user',
-        name: 'SYS_USER',
+        name: 'SYSTEM_USER',
         component: () => import('@/views/system/user/index'),
         meta: { title: '用户管理', icon: 'user' }
       },
       {
         path: 'menu',
-        name: 'SYS_MENU',
+        name: 'SYSTEM_MENU',
         component: () => import('@/views/system/menu/index'),
         meta: { title: '菜单管理', icon: 'bars' }
       },
       {
         path: 'role',
-        name: 'SYS_ROLE',
+        name: 'SYSTEM_ROLE',
         component: () => import('@/views/system/role/index'),
         meta: { title: '角色管理', icon: 'address-card' }
       },
       {
         path: 'logger',
-        name: 'SYS_LOG',
+        name: 'SYSTEM_LOG',
         component: () => import('@/views/system/logger/index'),
         meta: { title: '日志管理', icon: 'book' }
       },
       {
         path: 'terminal',
-        name: 'SYS_TERMINAL',
+        name: 'SYSTEM_TERMINAL',
         component: () => import('@/views/system/terminal/index'),
         meta: { title: '终端管理', icon: 'sitemap' }
       },
       {
         path: 'dept',
-        name: 'SYS_DEPT',
+        name: 'SYSTEM_DEPT',
         component: () => import('@/views/system/dept/index'),
         meta: { title: '组织管理', icon: 'building' }
       },
       {
         path: 'resource',
-        name: 'SYSTEM_RESOURCE',
+        name: 'SYSTEMTEM_RESOURCE',
         component: () => import('@/views/system/resource/index'),
         meta: { title: '资源管理', icon: 'coins' }
       },

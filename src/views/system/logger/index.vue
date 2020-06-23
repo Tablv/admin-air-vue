@@ -25,11 +25,9 @@
 
 <script>
 import { doDeleteAll } from '@/api/system/logger'
-import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSLOG',
   components: {
-    GwTable
   },
   data() {
     return {

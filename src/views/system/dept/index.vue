@@ -179,12 +179,10 @@
 <script>
 import { getDeptGroup, doAddDept, doDeleteDept, getDeptInfo, doEditDept } from '@/api/system/dept'
 import { doCheckRepeat, getDeptList } from '@/api/system/user'
-import GwTable from '@/components/GwTable'
 import TreeDialog from '@/components/TreeDialog'
 export default {
   name: 'SYSDEPT',
   components: {
-    GwTable,
     TreeDialog
   },
   data() {

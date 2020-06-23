@@ -164,12 +164,10 @@
 <script>
 import { getDataList, doDeleteData, getPreDataList, doAddData, getDataInfo, doUpdateData } from '@/api/system/dict'
 import { doCheckRepeat } from '@/api/system/user'
-import GwTable from '@/components/GwTable'
 import TreeDialog from '@/components/TreeDialog'
 export default {
   name: 'DICT',
   components: {
-    GwTable,
     TreeDialog
   },
   data() {

@@ -14,36 +14,26 @@ export function removeToken() {
   return Cookies.remove(TokenKey)
 }
 
-export function handleRoute(routeList, asyncRoutes) {
-  const routeObj = handleRecursion(routeList)
-  return filterRoute(asyncRoutes, Object.keys(routeObj), routeObj)
+export function handleRoute(backendRoutes, asyncRoutes) {
+  const routeMap = backendRoutes.map(menu => menu.path);
+  return filterRoute(asyncRoutes, routeMap)
 }
 
-function filterRoute(asyncRoutes = [], codeArray = [], routeObj = {}) {
-  asyncRoutes.forEach((item, index, arr) => {
-    if (codeArray.includes(item.name)) {
-      item.meta.icon = routeObj[item.name].iconClass
-      if (item.children) {
-        filterRoute(item.children, codeArray, routeObj)
-        if (!item.children.length) {
-          arr.splice(index, 1)
-        }
-      }
-    } else {
-      arr.splice(index, 1)
+function filterRoute(sourceRoutes = [], routeMap = [], basePath = "") {
+  return sourceRoutes.filter(sourceRoute => {
+    // 路径匹配
+    const relativePath = sourceRoute.path;
+    const fullPath = relativePath.startsWith("/") ? relativePath : basePath + "/" + relativePath;
+    const matchPath = routeMap.includes(fullPath);
+    
+    // 过滤子路由
+    if (sourceRoute?.children?.length) {
+      sourceRoute.children = filterRoute(sourceRoute.children, routeMap, basePath + fullPath);
     }
-  })
-  return asyncRoutes
-}
 
-function handleRecursion(routeList = [], result = {}) {
-  routeList.forEach(item => {
-    const children = item.children
-    delete item.children
-    result[item.code] = item
-    if (children) {
-      handleRecursion(children, result)
-    }
-  })
-  return result
+    // 包含子路由
+    const hasChildRoutes = !!(sourceRoute?.children?.length);
+
+    return matchPath || hasChildRoutes;
+  });
 }

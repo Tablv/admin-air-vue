@@ -150,11 +150,9 @@
 <script>
 import { doAddTerminal, doEditTerminal, getTerminalInfo, doDeleteTerminal } from '@/api/system/terminal'
 import { doCheckRepeat } from '@/api/system/user'
-import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSTERMINAL',
   components: {
-    GwTable
   },
   data() {
     var validName = (rule, value, callback) => {

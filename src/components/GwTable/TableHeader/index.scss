@@ -1,0 +1,37 @@
+.gw-table-header {
+  margin-bottom: 10px;
+
+  .header-title {
+    line-height: 28px;
+    color: #606266;
+  }
+
+  .button-group {
+    text-align: right;
+
+    .custom-buttons {
+      float: left;
+    }
+
+    .el-button-group {
+      margin-left: 10px;
+
+      > .el-dropdown {
+        &:first-of-type > .el-button {
+          border-left-color: #DCDFE6;
+        }
+        
+        &:not(:last-of-type) > .el-button {
+          border-top-right-radius: 0;
+          border-bottom-right-radius: 0;
+        }
+      }
+    }
+  }
+}
+
+.gw-table-header-dropdown {
+  .not-checked {
+    opacity: 0;
+  }
+}

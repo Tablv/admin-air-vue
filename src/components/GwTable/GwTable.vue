@@ -1,167 +1,26 @@
 <template>
   <div class="gw-table">
-    <header
-      v-if="hasHeader"
-      class="header"
-    >
-      <el-row
-        type="flex"
-        justify="space-between"
-      >
-        <el-col :span="6">
-          <div class="header-title">
-            {{ tableConfig.title }}
-          </div>
-        </el-col>
-        <el-col :span="18">
-          <div class="button-group">
-            <div
-              v-if="tableConfig.buttons[0] === 'slot'"
-              class="custom-buttons"
-            >
-              <slot name="buttons" />
-            </div>
-            <div
-              v-else
-              class="custom-buttons"
-            >
-              <!-- 新增 -->
-              <el-button
-                v-if="tableConfig.buttons.includes('add')"
-                type="primary"
-                @click="handleAdd"
-              >
-                <font-awesome-icon
-                  icon="plus"
-                  pull="left"
-                />
-                <span>新增</span>
-              </el-button>
-              <!-- 修改 -->
-              <el-button
-                v-if="tableConfig.buttons.includes('update')"
-                type="primary"
-                @click="handleUpdate"
-              >
-                <font-awesome-icon
-                  icon="edit"
-                  pull="left"
-                />
-                <span>修改</span>
-              </el-button>
-              <!-- 删除 -->
-              <el-button
-                v-if="tableConfig.buttons.includes('delete')"
-                type="danger"
-                @click="handleDelete"
-              >
-                <font-awesome-icon
-                  icon="trash-alt"
-                  pull="left"
-                />
-                <span>删除</span>
-              </el-button>
-            </div>
-            <!-- 刷新 -->
-            <el-button
-              v-if="tableConfig.buttons.includes('refresh')"
-              class="first-button"
-              @click="getInit"
-            >
-              <font-awesome-icon icon="sync-alt" />
-            </el-button>
-            <!-- 导入 -->
-            <el-dropdown
-              v-if="tableConfig.buttons.includes('import')"
-              trigger="click"
-              class="center-button"
-              @command="handleImport"
-            >
-              <el-button>
-                <font-awesome-icon
-                  icon="download"
-                  pull="left"
-                />
-                <i class="el-icon-arrow-down el-icon--right" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="import">
-                  导入 Excel
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-            <!-- 导出 -->
-            <el-dropdown
-              v-if="tableConfig.buttons.includes('export')"
-              trigger="click"
-              class="center-button"
-              @command="handleExport"
-            >
-              <el-button>
-                <font-awesome-icon
-                  icon="upload"
-                  pull="left"
-                />
-                <i class="el-icon-arrow-down el-icon--right" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item command="import">
-                  导出 Excel
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-            <!-- 表格配置 -->
-            <el-dropdown
-              v-if="tableConfig.buttons.includes('columns')"
-              trigger="click"
-              :hide-on-click="false"
-              class="last-button"
-            >
-              <el-button>
-                <font-awesome-icon icon="th" />
-                <i class="el-icon-arrow-down el-icon--right" />
-              </el-button>
-              <el-dropdown-menu slot="dropdown">
-                <el-dropdown-item>
-                  <el-checkbox-group
-                    v-model="tableConfig.checkedColumns"
-                    :min="2"
-                    @change="changeColumns"
-                  >
-                    <el-checkbox
-                      v-for="item in tableConfig.columns"
-                      :key="item.prop"
-                      :label="item.prop"
-                      style="display:block;"
-                    >
-                      {{ item.label }}
-                    </el-checkbox>
-                  </el-checkbox-group>
-                </el-dropdown-item>
-              </el-dropdown-menu>
-            </el-dropdown>
-          </div>
-        </el-col>
-      </el-row>
-    </header>
+    <slot name="header" />
     <el-table
-      v-loading="listLoading"
+      v-loading="tableLoading"
       :data="tableData"
       border
       size="medium"
       :max-height="tableHeight"
       style="width: 100%"
       header-cell-class-name="header-cell"
-      :highlight-current-row="tableConfig.hasRadio ? true : false"
-      :row-key="tableConfig.hasTree ? tableConfig.treeConfig.key : null"
-      :lazy="tableConfig.hasTree ? true : false"
-      :load="tableConfig.hasTree ? treeLoad : null"
-      :tree-props="tableConfig.hasTree ? tableConfig.treeConfig.treeProps : {}"
+      :highlight-current-row="isRadio"
+
+      :lazy="isTree"
+      :load="treeLoad"
+      :row-key="isTree ? treeConfig.key : null"
+      :tree-props="isTree ? treeConfig.treeProps : {}"
+
       @sort-change="sortChange"
       @current-change="handleTableCurrentChange"
     >
       <el-table-column
-        v-if="tableConfig.hasRadio"
+        v-if="isRadio"
         width="35"
       >
         <template slot-scope="scope">
@@ -172,31 +31,28 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-for="item in tableColumns"
-        :key="item.prop"
-        :prop="item.prop"
-        :label="item.label"
-        :width="item.width ? item.width : null"
-        :sortable="item.sort ? item.sort : false"
+        v-for="column in checkedColumns"
+        :key="column.prop"
+        :prop="column.prop"
+        :label="column.label"
+        :width="column.width"
+        :sortable="column.sort ? 'custom' : false"
       >
-        <template
-          slot="header"
-        >
-          <span>{{ item.label }}</span>
+        <template slot="header">
+          <span>{{ column.label }}</span>
           <span
-            v-if="item.filter"
+            v-if="column.filter"
             @click.stop
           >
             <table-filter
-              :ref="item.prop + '-filter'"
-              :filter-init="filterInit[item.prop]"
-              :filter-item="item"
-              @close-popover="doClosePopover"
-              @table-filter="tableFilter"
+              :ref="column.prop + '-filter'"
+              :config="column.filter"
+              @table-filter="applyTableFilter"
+              @close="closeFilter"
             />
           </span>
         </template>
-        <template slot-scope="scope">
+        <!-- <template slot-scope="scope">
           <span v-if="item.conver">
             <slot
               name="conver"
@@ -216,12 +72,12 @@
             <span>{{ scope.row.name }}</span>
           </span>
           <span v-else>{{ scope.row[scope.column.property] === null ? '-' : scope.row[scope.column.property] }}</span>
-        </template>
+        </template> -->
       </el-table-column>
     </el-table>
     <!-- 分页 -->
     <div
-      v-if="tableConfig.pagination"
+      v-if="pagination"
       class="pagination"
     >
       <el-pagination
@@ -239,6 +95,7 @@
 </template>
 
 <script>
+import _ from "lodash";
 import request from '@/utils/request'
 import TableFilter from './TableFilter'
 
@@ -247,42 +104,80 @@ export default {
     TableFilter
   },
   props: {
-    // 表格初始化参数
+    // 接口
+    api: {
+      type: String,
+      required: true
+    },
+    // 表格标题
+    title: {
+      type: String,
+      default: ""
+    },
+    /**
+     * 表格类型
+     * 
+     *  - 默认：default
+     *  - 单选：radio
+     *  - 树：tree
+     */
+    type: {
+      type: String,
+      default: "default"
+    },
+    // 是否分页
+    pagination: {
+      type: Boolean,
+      default: true
+    },
+    // 列配置
+    columns: {
+      type: Array,
+      required: true
+    },
+    // 表格查询参数
     queryParams: {
       type: Object,
       default: () => {
         return {}
       }
     },
-    // 表格过滤
-    tableConfig: {
-      type: Object,
-      default: () => {
-        return {}
-      }
+    // 初始化时，加载数据
+    autoLoad: {
+      type: Boolean,
+      default: true
     },
+
+    // 类型为树时的加载方法
     treeLoad: {
       type: Function,
-      default: () => {}
+      default: null
     }
+
   },
   data() {
     return {
       // 表格数据
       tableData: [],
       // 表格loading
-      listLoading: false,
+      tableLoading: false,
       // 表格高度
-      tableHeight: this.tableConfig.pagination ? document.body.clientHeight - 255 : document.body.clientHeight - 223,
-      // 表格筛选初始参数
-      filterInit: {},
+      tableHeight: this.getTableHeight(),
       // 表格筛选最终参数
       filterParams: {},
-      // 初始化参数
-      initParams: {
+      /**
+       * 表格参数
+       *  - 分页 offset limit
+       *  - 排序字段 sort
+       *  - 顺序 order
+       *  - 过滤字段 filter
+       */
+      tableParams: {
         order: 'asc',
         offset: 0,
-        limit: 10
+        limit: 10,
+        // filter: { name: 'admin' }
+        // sort: "name", order: "desc"  
       },
       // 分页
       page: {
@@ -295,85 +190,89 @@ export default {
     }
   },
   computed: {
-    // 表格配置
-    tableColumns() {
-      if (!this.tableConfig.checkedColumns) return this.tableConfig.columns
-
-      return this.tableConfig.columns.filter(column =>
-        this.tableConfig.checkedColumns.includes(column.prop)
-      )
+    /**
+     * 类型
+     */
+    isRadio() {
+      return this.type === "radio";
     },
-    // 是否有头部区域
-    hasHeader() {
-      return this.tableConfig.hasHeader !== false;
+    isTree() {
+      return this.type === "tree";
+    },
+    
+
+
+    columnsConfig: {
+      get() {
+        return this.columns;
+      },
+      set(columns) {
+        this.$emit("update:columns", columns);
+      }
+    },
+    checkedColumns() {
+      return this.columnsConfig.filter(column => column.hidden !== false && column.checked !== false);
     }
   },
-  created() {
-    if (Object.keys(this.queryParams).length === 0) this.getInit()
-    this.getTableFilterInit()
+  watch: {
+    // 监听查询参数，实时刷新
+    queryParams: {
+      deep: true,
+      immediate: true,
+      handler() {
+        if (!this.autoLoad) return false;
+
+        this.getInit();
+      }
+    }
   },
   mounted() {
-    window.addEventListener('resize', this.getTableHeight)
+    window.addEventListener('resize', this.windowResizeHandle)
   },
   beforeDestroy() {
-    window.removeEventListener('resize', this.getTableHeight)
+    window.removeEventListener('resize', this.windowResizeHandle)
   },
   methods: {
+    // 窗口resize方法
+    windowResizeHandle() {
+      this.tableHeight = this.getTableHeight();
+    },
     // 获取表格高度
     getTableHeight() {
-      if (this.tableConfig.pagination) {
-        this.tableHeight = document.body.clientHeight - 255
-      } else {
-        this.tableHeight = document.body.clientHeight - 223
-      }
+      const offset = this.pagination ? 255 : 223;
+      return document.body.clientHeight - offset
     },
     // 初始化
     getInit() {
-      this.listLoading = true
-      if (Object.keys(this.queryParams).length > 0) {
-        Object.assign(this.initParams, this.queryParams)
-      }
-      request.get(this.tableConfig.api, this.initParams).then(res => {
-        this.listLoading = false
-        const { result } = res
-        if (this.tableConfig.pagination) {
-          this.tableData = result.list
+      this.tableLoading = true;
+      
+      const tableParams = _.merge(this.tableParams, this.queryParams);
+
+      request.get(this.api, tableParams).then(res => {
+        this.tableLoading = false;
+
+        const { result } = res;
+        // 分页处理
+        if (this.pagination) {
+          this.tableData = result.list;
           this.page = {
             pageSize: result.pageSize,
             pageNum: result.pageNum,
             total: result.total
-          }
+          };
         } else {
-          this.tableData = result
+          // 不分页处理
+          this.tableData = result;
         }
-        this.currentRadio = ''
+        
+        this.currentRadio = '';
       })
     },
-    // 新增按钮
-    handleAdd() {
-      this.$emit('add')
-    },
-    // 修改按钮
-    handleUpdate() {
-      this.$emit('update')
-    },
-    // 删除按钮
-    handleDelete() {
-      this.$emit('delete')
-    },
-    // 导入按钮
-    handleImport(command) {
-      this.$emit('import', command)
-    },
-    // 导出按钮
-    handleExport() {
-      this.$emit('export')
-    },
     // 表格单选
-    handleTableCurrentChange(val) {
-      if (this.tableConfig.hasRadio && val !== null) {
-        this.currentRadio = val.id
-        this.$emit('handleTableCurrentChange', val)
+    handleTableCurrentChange(rowData) {
+      if (this.isRadio && rowData !== null) {
+        this.currentRadio = rowData.id;
+        this.$emit('current-change', rowData);
       }
     },
     // 表格---配置
@@ -383,65 +282,53 @@ export default {
     // 表格---远程排序
     sortChange(column) {
       if (column.order) {
-        this.initParams.sort = column.prop
-        this.initParams.order = column.order === 'descending' ? 'desc' : 'asc'
+        this.tableParams.sort = column.prop
+        this.tableParams.order = column.order === 'descending' ? 'desc' : 'asc'
       } else {
-        delete this.initParams.sort
-        this.initParams.order = 'asc'
+        delete this.tableParams.sort
+        this.tableParams.order = 'asc'
       }
       this.getInit()
     },
-    // 获取表格筛选初始参数
-    getTableFilterInit() {
-      let filterInit = {}
-      this.tableConfig.columns.map(column => {
-        if (column.filter) {
-          let columnFilter = {}
-          if (column.filter.hasOwnProperty('data1')) {
-            columnFilter[column.filter.data1] = ''
-            columnFilter[column.filter.data2] = ''
-          } else {
-            columnFilter[column.filter.data] = ''
-          }
-          filterInit[column.prop] = columnFilter
-        }
-      })
-      this.filterInit = filterInit
-    },
     // 表格---远程筛选
-    tableFilter(data) {
-      Object.keys(data).map(key => {
-        this.filterParams[key] = data[key]
-      })
-      Object.keys(this.filterParams).map(key => {
-        if (this.filterParams[key] === '') delete this.filterParams[key]
-      })
-      Object.keys(this.filterParams).length !== 0 ? this.initParams.filter = this.filterParams : delete this.initParams.filter
-      this.getInit()
-      this.doClosePopover('close')
-    },
-    // 关闭popover
-    doClosePopover(propName) {
-      // 过滤组件的ref名
-      const filterRefName = propName + '-filter';
-      let filterRefs = Object.keys(this.$refs).filter(refKey => refKey !== filterRefName);
+    applyTableFilter(filterRet) {
+      if (this.tableParams.filter) {
+        Object.entries(filterRet).forEach(([ filterProp, filterValue ]) => {
+          if (filterValue.trim() === "") {
+            delete this.tableParams.filter[filterProp];
+          } else {
+            this.tableParams.filter[filterProp] = filterValue;
+          }
+        })
+      } else {
+        this.$set(this.tableParams, "filter", filterRet);
+      }
 
-      filterRefs.forEach(refName => {
+      this.getInit();
+      this.closeFilter();
+    },
+    // 关闭过滤
+    closeFilter(propName) {
+      // 所有弹出框
+      const allPopovers = Object.keys(this.$refs).filter(refKey => refKey.endsWith("-filter"));
+      const needClosePopovers = propName ? allPopovers.filter(refKey => refKey !== propName + "-filter") : allPopovers;
+
+      needClosePopovers.forEach(refName => {
         const filter = this.$refs[refName];
-        filter && filter[0].$children[0].doClose()
+        filter && filter[0].closePopover()
       })
     },
     // 分页---改变每页数量
-    handleSizeChange(val) {
-      this.page.pageSize = val
-      this.initParams.limit = val
-      this.getInit()
+    handleSizeChange(pageSize) {
+      this.page.pageSize = pageSize;
+      this.tableParams.limit = pageSize;
+      this.getInit();
     },
     // 分页---改变页码
-    handleCurrentChange(val) {
-      this.page.pageNum = val
-      this.initParams.offset = (val - 1) * this.initParams.limit
-      this.getInit()
+    handleCurrentChange(pageNum) {
+      this.page.pageNum = pageNum;
+      this.tableParams.offset = (pageNum - 1) * this.tableParams.limit;
+      this.getInit();
     }
   }
 }

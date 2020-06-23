@@ -1,15 +1,9 @@
-import "./TableFilter.scss";
-import { widgetsRenderer, filterBtnRenderer } from "./filterWidgets";
+import "./index.scss";
+import { widgetsRenderer, filterBtnRenderer } from "./filter-widgets";
 
 export default {
   props: {
-    filterInit: {
-      type: Object,
-      default: () => {
-        return {}
-      }
-    },
-    filterItem: {
+    config: {
       type: Object,
       default: () => {
         return {}
@@ -18,12 +12,15 @@ export default {
   },
   data() {
     return {
-      filterInits: {},
-      filterParams: {},
-
-      /**
-       * 渲染使用
-       */
+      filterStashMap: this.getInitStashMap()
+    }
+  },
+  computed: {
+    table() {
+      return this.$parent;
+    },
+    filterType() {
+      return this.config.type;
     }
   },
   render(h) {
@@ -33,6 +30,7 @@ export default {
           placement="bottom"
           width="160"
           trigger="click"
+          ref="popover"
         >
           { this.renderWidget(h) }
 
@@ -57,12 +55,7 @@ export default {
     );
   },
   created() {
-    this.filterInits = JSON.parse(JSON.stringify(this.filterInit))
-  },
-  computed: {
-    filterType() {
-      return this.filterItem.filter.type;
-    }
+    // this.tableFilterInit();
   },
   methods: {
     /**
@@ -74,27 +67,43 @@ export default {
     },
 
     /**
+     * 表格过滤 获取初始化
+     */
+    getInitStashMap() {
+      let columnFilter = {};
+      if (this.config.startDate && this.config.endDate) {
+        columnFilter[this.config.startDate] = ''
+        columnFilter[this.config.endDate] = ''
+      } else if (this.config.prop) {
+        columnFilter[this.config.prop] = ''
+      }
+      
+      return columnFilter;
+    },
+
+    /**
      * 表格远程筛选
      */
     doTableFilter() {
-      this.filterParams = this.filterInits
-      this.$emit('table-filter', this.filterParams)
+      this.$emit('table-filter', this.filterStashMap);
     },
     
     resetTableFilter() {
       if (this.filterType === 'dates') {
-        this.filterInits[this.filterItem.filter.startDate] = ''
-        this.filterInits[this.filterItem.filter.endDate] = ''
+        this.filterStashMap[this.config.startDate] = "";
+        this.filterStashMap[this.config.endDate] = "";
       } else {
-        this.filterInits[this.filterItem.filter.data] = ''
+        this.filterStashMap[this.config.prop] = "";
       }
+
+      this.doTableFilter();
     },
 
     /**
      * 点击筛选图标关闭popover
      */
-    doClosePopover(propName) {
-      this.$emit('close-popover', propName)
+    closePopover() {
+      this.$refs['popover'].doClose();
     }
   }
 }

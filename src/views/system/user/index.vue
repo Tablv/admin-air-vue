@@ -3,11 +3,18 @@
     <article>
       <gw-table
         ref="gwTable"
-        :table-config="tableConfig"
+        title="用户管理"
+        api="/system/user/list"
+        :pagination="true"
+        :columns.sync="columnsConfig"
         @changeColumns="changeColumns"
         @add="handleOpenAdd"
         @import="handleOpenImportDialog"
       >
+        <gw-table-header
+          slot="header"
+          layout="add, [refresh, import, export, columns]"
+        />
         <template
           slot="conver"
           slot-scope="conver"
@@ -16,29 +23,6 @@
             v-if="conver.column.property === 'status'"
             :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
           >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
-        </template>
-        <template
-          slot="operation"
-          slot-scope="operation"
-        >
-          <el-button
-            type="text"
-            @click="handleResetPassword(operation.index, operation.row)"
-          >
-            <span>重置密码</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleEdit(operation.index, operation.row)"
-          >
-            <span>编辑</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleDelete(operation.index, operation.row)"
-          >
-            <span>删除</span>
-          </el-button>
         </template>
       </gw-table>
     </article>
@@ -178,12 +162,10 @@
 import { getRoleList, getDeptList, doAddUser, doEditUser, doGetUserInfo, doResetPwd, doDeleteUser, doCheckRepeat } from '@/api/system/user'
 import { validName } from '@/utils/validate'
 import ImportDialog from '@/components/ImportDialog'
-import GwTable from '@/components/GwTable'
 export default {
   name: 'SYSUSER',
   components: {
-    ImportDialog,
-    GwTable
+    ImportDialog
   },
   data() {
     var validUserName = (rule, value, callback) => {
@@ -209,27 +191,46 @@ export default {
       }
     }
     return {
-      // 表格
-      tableConfig: {
-        api: '/system/user/list',
-        // 表格列数据
-        columns: [
-          { prop: 'name', label: '姓名', sort: 'custom', filter: { type: 'input', data: 'name' } },
-          { prop: 'username', label: '用户名', sort: 'custom', filter: { type: 'input', data: 'username' } },
-          // { prop: 'status', label: '状态', sort: 'custom', conver: true, filter: { type: 'select', data: 'status', option: '/modelling/base/category/CO215' } },
-          // { prop: 'remark', label: '备注', sort: 'custom', filter: { type: 'select', data: 'remark', option: '/modelling/base/category/CO063' } },
-          { prop: 'status', label: '状态', sort: 'custom', conver: true, filter: { type: 'select', data: 'status', option: { '0': '启用', '1': '禁用' } } },
-          { prop: 'remark', label: '备注', sort: 'custom' },
-          { prop: 'operation', label: '操作', width: '180' }
-        ],
-        // 表格配置选中
-        checkedColumns: ['name', 'username', 'status', 'remark', 'operation'],
-        title: '用户管理',
-        // 按钮配置
-        buttons: ['add', 'refresh', 'import', 'export', 'columns'],
-        // 是否分页
-        pagination: true
-      },
+      // 表格列数据
+      columnsConfig: [
+        { prop: 'name', label: '姓名', sort: true, filter: { type: 'input', prop: 'name' } },
+        { prop: 'username', label: '用户名', sort: true, filter: { type: 'input', prop: 'username' } },
+        // { prop: 'status', label: '状态', sort: 'custom', conver: true, filter: { type: 'select', prop: 'status', option: '/modelling/base/category/CO215' } },
+        // { prop: 'remark', label: '备注', sort: 'custom', filter: { type: 'select', prop: 'remark', option: '/modelling/base/category/CO063' } },
+        // { prop: 'status', label: '状态', sort: true,
+        //   filter: { type: 'select', prop: 'status', option: { '0': '启用', '1': '禁用' } },
+        //   render(h, scope) {
+        //     return <h1>{ scope.row.status }</h1>
+        //   }
+        // },
+        { prop: 'remark', label: '备注', sort: true },
+        // { prop: 'operation', label: '操作', width: '180',
+        //   render(h, operation) {
+        //     return (
+        //       <template>
+        //         <el-button
+        //           type="text"
+        //           onClick={ this.handleResetPassword(operation.index, operation.row) }
+        //         >
+        //           <span>重置密码</span>
+        //         </el-button>
+        //         <el-button
+        //           type="text"
+        //           onClick={ this.handleEdit(operation.index, operation.row) }
+        //         >
+        //           <span>编辑</span>
+        //         </el-button>
+        //         <el-button
+        //           type="text"
+        //           onClick={ this.handleDelete(operation.index, operation.row) }
+        //         >
+        //           <span>删除</span>
+        //         </el-button>
+        //       </template>
+        //     )
+        //   }
+        // }
+      ],
       // 新增弹窗
       addVisible: false,
       // 导入弹窗
