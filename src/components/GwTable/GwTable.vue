@@ -186,7 +186,8 @@ export default {
         total: 0
       },
       // 单选
-      currentRadio: ''
+      currentRadio: '',
+      currentSelection: null
     }
   },
   computed: {
@@ -266,18 +267,16 @@ export default {
         }
         
         this.currentRadio = '';
+        this.currentSelection = null;
       })
     },
     // 表格单选
     handleTableCurrentChange(rowData) {
       if (this.isRadio && rowData !== null) {
         this.currentRadio = rowData.id;
+        this.currentSelection = rowData;
         this.$emit('current-change', rowData);
       }
-    },
-    // 表格---配置
-    changeColumns(value) {
-      this.$emit('changeColumns', value)
     },
     // 表格---远程排序
     sortChange(column) {

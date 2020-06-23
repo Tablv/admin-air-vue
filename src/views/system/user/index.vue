@@ -13,7 +13,7 @@
       >
         <gw-table-header
           slot="header"
-          layout="add, [refresh, import, export, columns]"
+          layout="add, remove, [refresh, import, export, columns]"
         />
         <template
           slot="conver"

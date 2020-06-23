@@ -111,17 +111,6 @@
 .v-modal {
   position: absolute !important;
 }
-// 实例化弹窗
-.el-message-box__wrapper {
-  position: absolute;
-  .el-message-box__content {
-    padding: 30px;
-  }
-  .messageBoxCancelButton {
-    float: right;
-    margin-left: 10px;
-  }
-}
 // 选择框
 .el-select {
   width: 100%;

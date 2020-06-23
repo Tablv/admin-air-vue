@@ -43,11 +43,27 @@ export default {
     },
     // 修改按钮
     handleUpdate() {
-      this.$emit('update')
+      if (this.table.isRadio && this.table.currentRadio === "") {
+        this.$message.warning("请选择一项数据");
+        return;
+      }
+
+      this.$emit('update', this.table.currentSelection);
     },
     // 删除按钮
     handleDelete() {
-      this.$emit('delete')
+      if (this.table.isRadio && this.table.currentRadio === "") {
+        this.$message.warning("请选择一项数据");
+        return;
+      }
+      
+      this.$confirm('确认删除吗？', '信息', {
+        type: "warning",
+        closeOnClickModal: false,
+        closeOnPressEscape: false,
+      }).then(() => {
+        this.$emit('delete', this.table.currentSelection);
+      }).catch(() => {})
     },
     // 导入按钮
     handleImport(command) {

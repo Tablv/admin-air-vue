@@ -303,32 +303,13 @@ export default {
       this.$refs['addForm'].resetFields()
     },
     // 删除
-    handleDelete(rowData, confirm) {
-      if (this.idRadio === '') {
-        this.$message({
-          message: '请选择一项数据',
-          type: 'warning'
-        })
-      } else {
-        this.$confirm('确认删除吗？', '信息', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          closeOnClickModal: false,
-          closeOnPressEscape: false,
-          cancelButtonClass: 'messageBoxCancelButton'
-        }).then(action => {
-          if (action === 'confirm') {
-            doDeleteRes({ id: this.idRadio }).then(() => {
-              this.$message({
-                message: '操作成功！',
-                type: 'success'
-              })
-              this.$refs.gwTable.getInit()
-              this.idRadio = ''
-            })
-          }
-        }).catch(() => {})
-      }
+    handleDelete(rowData) {
+      if (!rowData) return;
+
+      doDeleteRes({ id: rowData.id }).then(() => {
+        this.$message.success('操作成功！');
+        this.$refs.gwTable.getInit();
+      })
     },
     // 表格-配置
     changeColumns(value) {
