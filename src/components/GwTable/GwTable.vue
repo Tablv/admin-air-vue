@@ -1,99 +1,3 @@
-<template>
-  <div class="gw-table">
-    <slot name="header" />
-    <el-table
-      v-loading="tableLoading"
-      :data="tableData"
-      border
-      size="medium"
-      :max-height="tableHeight"
-      style="width: 100%"
-      header-cell-class-name="header-cell"
-      :highlight-current-row="isRadio"
-
-      :lazy="isTree"
-      :load="treeLoad"
-      :row-key="isTree ? treeConfig.key : null"
-      :tree-props="isTree ? treeConfig.treeProps : {}"
-
-      @sort-change="sortChange"
-      @current-change="handleTableCurrentChange"
-    >
-      <el-table-column
-        v-if="isRadio"
-        width="35"
-      >
-        <template slot-scope="scope">
-          <el-radio
-            v-model="currentRadio"
-            :label="scope.row.id"
-          />
-        </template>
-      </el-table-column>
-      <el-table-column
-        v-for="column in checkedColumns"
-        :key="column.prop"
-        :prop="column.prop"
-        :label="column.label"
-        :width="column.width"
-        :sortable="column.sort ? 'custom' : false"
-      >
-        <template slot="header">
-          <span>{{ column.label }}</span>
-          <span
-            v-if="column.filter"
-            @click.stop
-          >
-            <table-filter
-              :ref="column.prop + '-filter'"
-              :config="column.filter"
-              @table-filter="applyTableFilter"
-              @close="closeFilter"
-            />
-          </span>
-        </template>
-        <!-- <template slot-scope="scope">
-          <span v-if="item.conver">
-            <slot
-              name="conver"
-              :row="scope.row"
-              :column="scope.column"
-            />
-          </span>
-          <span v-else-if="item.prop === 'operation'">
-            <slot
-              name="operation"
-              :index="scope.$index"
-              :row="scope.row"
-            />
-          </span>
-          <span v-else-if="item.prop === 'name' && scope.row.isParent === false && scope.row.iconClass">
-            <font-awesome-icon :icon="scope.row.iconClass" />
-            <span>{{ scope.row.name }}</span>
-          </span>
-          <span v-else>{{ scope.row[scope.column.property] === null ? '-' : scope.row[scope.column.property] }}</span>
-        </template> -->
-      </el-table-column>
-    </el-table>
-    <!-- 分页 -->
-    <div
-      v-if="pagination"
-      class="pagination"
-    >
-      <el-pagination
-        background
-        :page-sizes="[5, 10, 20, 50, 100]"
-        :page-size="page.pageSize"
-        :current-page="page.pageNum"
-        layout="sizes, total, ->, prev, pager, next"
-        :total="page.total"
-        @size-change="handleSizeChange"
-        @current-change="handleCurrentChange"
-      />
-    </div>
-  </div>
-</template>
-
 <script>
 import _ from "lodash";
 import request from '@/utils/request'
@@ -329,6 +233,135 @@ export default {
       this.tableParams.offset = (pageNum - 1) * this.tableParams.limit;
       this.getInit();
     }
+  },
+  render(h) {
+    return (
+      <section class="gw-table">
+        { this.$slots.header }
+        <el-table
+          v-loading={ this.tableLoading }
+          data={ this.tableData }
+          border
+          size="medium"
+          max-height={ this.tableHeight }
+          style="width: 100%"
+          header-cell-class-name="header-cell"
+          highlight-current-row={ this.isRadio }
+
+          lazy={ this.isTree }
+          load={ this.treeLoad }
+          row-key={ this.isTree ? this.treeConfig.key : null }
+          tree-props={ this.isTree ? this.treeConfig.treeProps : {} }
+
+          onSortChange={ this.sortChange }
+          onCurrentChange={ this.handleTableCurrentChange }
+        >
+          {
+            // 单选单元格
+            this.isRadio ?
+            (
+              <el-table-column
+                width="35"
+                scopedSlots={
+                  {
+                    default(scope) {
+                      return (
+                        <el-radio
+                          v-model={ this.currentRadio }
+                          label={ scope.row.id }
+                        />
+                      )
+                    }
+                  }
+                }
+              />
+            ) : null
+          }
+          
+          {
+            // 单元格遍历
+            this.checkedColumns.map((column, columnIndex) => {
+              const ctx = this;
+              
+              return (
+                <el-table-column
+                  key={ column.prop }
+                  prop={ column.prop }
+                  label={ column.label }
+                  width={ column.width }
+                  sortable={ column.sort ? 'custom' : false }
+                  scopedSlots={
+                    {
+                      // 表格头
+                      header() {
+                        return (
+                          <section>
+                            <span>{ column.label }</span>
+                            {
+                              // 过滤
+                              column.filter ?
+                              (
+                                <span onClick={ ($event) => { $event.stopPropagation() } }>
+                                  <table-filter
+                                    ref={ column.prop + '-filter' }
+                                    config={ column.filter }
+                                    onTableFilter={ ctx.applyTableFilter }
+                                    onClose={ ctx.closeFilter }
+                                  />
+                                </span>
+                              ) : null
+                            }
+                          </section>
+                        )
+                      },
+                      default(scope) {
+                        // 树
+                        if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
+                          return (
+                            <section>
+                              <font-awesome-icon icon={ scope.row.iconClass } />
+                              <span>{ scope.row[scope.column.property] }</span>
+                            </section>
+                          )
+                        }
+                        // 自定义渲染
+                        else if (column.render) {
+                          return column.render.call(ctx.$parent, h, scope.row);
+                        }
+                        // 一般
+                        else {
+                          return <span>{ scope.row[scope.column.property] === null ? '-' : scope.row[scope.column.property] }</span>
+                        }
+                      }
+                    }
+                  }
+                >
+                </el-table-column>
+              )
+            })
+          }
+        </el-table>
+
+        {
+          // 分页
+          this.pagination
+          ? (
+            <div class="pagination">
+              <el-pagination
+                background
+                page-sizes={[5, 10, 20, 50, 100]}
+                page-size={ this.page.pageSize }
+                current-page={ this.page.pageNum }
+                layout="sizes, total, ->, prev, pager, next"
+                total={ this.page.total }
+                onSizeChange={ this.handleSizeChange }
+                onCurrentChange={ this.handleCurrentChange }
+              />
+            </div>
+          ) : null
+        }
+      </section>
+    )
   }
 }
 </script>

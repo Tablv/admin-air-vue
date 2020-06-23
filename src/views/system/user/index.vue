@@ -204,32 +204,32 @@ export default {
         //   }
         // },
         { prop: 'remark', label: '备注', sort: true },
-        // { prop: 'operation', label: '操作', width: '180',
-        //   render(h, operation) {
-        //     return (
-        //       <template>
-        //         <el-button
-        //           type="text"
-        //           onClick={ this.handleResetPassword(operation.index, operation.row) }
-        //         >
-        //           <span>重置密码</span>
-        //         </el-button>
-        //         <el-button
-        //           type="text"
-        //           onClick={ this.handleEdit(operation.index, operation.row) }
-        //         >
-        //           <span>编辑</span>
-        //         </el-button>
-        //         <el-button
-        //           type="text"
-        //           onClick={ this.handleDelete(operation.index, operation.row) }
-        //         >
-        //           <span>删除</span>
-        //         </el-button>
-        //       </template>
-        //     )
-        //   }
-        // }
+        { prop: 'operation', label: '操作', width: '180',
+          render(h, row) {
+            return (
+              <section>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleResetPassword(row) }
+                >
+                  <span>重置密码</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleEdit(row) }
+                >
+                  <span>编辑</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleDelete(row) }
+                >
+                  <span>删除</span>
+                </el-button>
+              </section>
+            )
+          }
+        }
       ],
       // 新增弹窗
       addVisible: false,
@@ -396,7 +396,7 @@ export default {
       })
     },
     // 表格操作---编辑
-    handleEdit(index, row) {
+    handleEdit(row) {
       this.showStatus = true
       this.addVisible = true
       getRoleList().then(res => {
@@ -437,24 +437,21 @@ export default {
       this.importVisible = msg
     },
     // 表格操作---重置密码
-    handleResetPassword(index, row) {
+    handleResetPassword(row) {
       this.$confirm('确认重置吗？重置后将恢复到系统默认设置的密码！', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         closeOnClickModal: false,
-        closeOnPressEscape: false,
-        cancelButtonClass: 'messageBoxCancelButton'
-      }).then(action => {
-        if (action === 'confirm') {
-          doResetPwd({ userId: row.id }).then(res => {
-            if (res.success === true) {
-              this.$message({
-                message: '操作成功！',
-                type: 'success'
-              })
-            }
-          })
-        }
+        closeOnPressEscape: false
+      }).then(() => {
+        doResetPwd({ userId: row.id }).then(res => {
+          if (res.success === true) {
+            this.$message({
+              message: '操作成功！',
+              type: 'success'
+            })
+          }
+        })
       }).catch(() => {})
     },
     // 表格操作---删除
