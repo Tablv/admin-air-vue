@@ -195,6 +195,7 @@ export default {
     },
     // 表格---远程筛选
     applyTableFilter(filterRet) {
+      debugger
       if (this.tableParams.filter) {
         Object.entries(filterRet).forEach(([ filterProp, filterValue ]) => {
           if (filterValue.trim() === "") {
@@ -217,8 +218,10 @@ export default {
       const needClosePopovers = propName ? allPopovers.filter(refKey => refKey !== propName + "-filter") : allPopovers;
 
       needClosePopovers.forEach(refName => {
-        const filter = this.$refs[refName];
-        filter && filter[0].closePopover()
+        let filter = this.$refs[refName];
+        if (typeof filter === Array) filter = filter[0];
+
+        filter && filter.closePopover();
       })
     },
     // 分页---改变每页数量
@@ -253,8 +256,12 @@ export default {
           row-key={ this.isTree ? this.treeConfig.key : null }
           tree-props={ this.isTree ? this.treeConfig.treeProps : {} }
 
-          onSortChange={ this.sortChange }
-          onCurrentChange={ this.handleTableCurrentChange }
+          on={
+            {
+              "sort-change": this.sortChange,
+              "current-change": this.handleTableCurrentChange
+            }
+          }
         >
           {
             // 单选单元格
@@ -305,8 +312,12 @@ export default {
                                   <table-filter
                                     ref={ column.prop + '-filter' }
                                     config={ column.filter }
-                                    onTableFilter={ ctx.applyTableFilter }
-                                    onClose={ ctx.closeFilter }
+                                    on={
+                                      {
+                                        'table-filter': ctx.applyTableFilter,
+                                        'close': ctx.closeFilter
+                                      }
+                                    }
                                   />
                                 </span>
                               ) : null

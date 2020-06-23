@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container user-container">
     <article>
       <gw-table
         ref="gwTable"
@@ -14,15 +14,6 @@
           @add="handleOpenAdd"
           @import="handleOpenImportDialog"
         />
-        <template
-          slot="conver"
-          slot-scope="conver"
-        >
-          <span
-            v-if="conver.column.property === 'status'"
-            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
-          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
-        </template>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
@@ -196,12 +187,15 @@ export default {
         { prop: 'username', label: '用户名', sort: true, filter: { type: 'input', prop: 'username' } },
         // { prop: 'status', label: '状态', sort: 'custom', conver: true, filter: { type: 'select', prop: 'status', option: '/modelling/base/category/CO215' } },
         // { prop: 'remark', label: '备注', sort: 'custom', filter: { type: 'select', prop: 'remark', option: '/modelling/base/category/CO063' } },
-        // { prop: 'status', label: '状态', sort: true,
-        //   filter: { type: 'select', prop: 'status', option: { '0': '启用', '1': '禁用' } },
-        //   render(h, scope) {
-        //     return <h1>{ scope.row.status }</h1>
-        //   }
-        // },
+        { prop: 'status', label: '状态', sort: true,
+          filter: { type: 'select', prop: 'status', option: { '0': '启用', '1': '禁用' } },
+          render(h, row) {
+            const isActive = row.status === 0;
+            const statusClass = isActive ? "is-active" : "not-active";
+            const statusText = isActive ? "启用" : "禁用";
+            return <span class={`status-label ${statusClass}`}>{ statusText }</span>
+          }
+        },
         { prop: 'remark', label: '备注', sort: true },
         { prop: 'operation', label: '操作', width: '180',
           render(h, row) {
@@ -479,6 +473,16 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
-
+<style lang="scss">
+.user-container {
+  .status-label {
+    &.is-active {
+      color: #80B762;
+    }
+  
+    &.not-active {
+      color: #f00;
+    }
+  }
+}
 </style>
