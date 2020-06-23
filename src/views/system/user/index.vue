@@ -7,13 +7,12 @@
         api="/system/user/list"
         :pagination="true"
         :columns.sync="columnsConfig"
-        @changeColumns="changeColumns"
-        @add="handleOpenAdd"
-        @import="handleOpenImportDialog"
       >
         <gw-table-header
           slot="header"
-          layout="add, remove, [refresh, import, export, columns]"
+          layout="add, [refresh, import, export, columns]"
+          @add="handleOpenAdd"
+          @import="handleOpenImportDialog"
         />
         <template
           slot="conver"
@@ -475,10 +474,6 @@ export default {
           })
         }
       }).catch(() => {})
-    },
-    // 表格---配置
-    changeColumns(value) {
-      this.tableConfig.checkedColumns = value
     }
   }
 }
