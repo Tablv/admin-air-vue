@@ -56,6 +56,11 @@ export default {
     treeLoad: {
       type: Function,
       default: null
+    },
+    // 树配置
+    treeConfig: {
+      type: Object,
+      default: () => ({})
     }
 
   },
