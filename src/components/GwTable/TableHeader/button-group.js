@@ -75,7 +75,7 @@ const TEMPLATE_MAP = {
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="import">
+          <el-dropdown-item command="excel">
             <span>导入 Excel</span>
           </el-dropdown-item>
         </el-dropdown-menu>
@@ -98,7 +98,7 @@ const TEMPLATE_MAP = {
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item command="import">
+          <el-dropdown-item command="excel">
             <span>导出 Excel</span>
           </el-dropdown-item>
         </el-dropdown-menu>

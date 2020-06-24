@@ -67,11 +67,11 @@ export default {
     },
     // 导入按钮
     handleImport(command) {
-      this.$emit('import', command)
+      this.$emit('import', command);
     },
     // 导出按钮
-    handleExport() {
-      this.$emit('export')
+    handleExport(command) {
+      this.$emit('export', command);
     },
     changeColumns(propName) {
       const column = this.table.columnsConfig.filter(column => column.prop === propName)[0];
