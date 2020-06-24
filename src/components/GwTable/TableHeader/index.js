@@ -5,7 +5,7 @@ export default {
   props: {
     layout: {
       type: String,
-      default: "add, update, remove, refresh, import, export, columns"
+      default: "add, update, remove, [ refresh, import, export, columns ]"
     }
   },
   computed: {
