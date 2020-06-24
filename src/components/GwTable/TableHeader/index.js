@@ -62,7 +62,7 @@ export default {
         closeOnClickModal: false,
         closeOnPressEscape: false,
       }).then(() => {
-        this.$emit('delete', this.table.currentSelection);
+        this.$emit('remove', this.table.currentSelection);
       }).catch(() => {})
     },
     // 导入按钮
