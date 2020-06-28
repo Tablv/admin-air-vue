@@ -47,7 +47,9 @@ const TEMPLATE_MAP = {
   },
   // 插槽
   slot(h) {
-    return this.$slot['custom'];
+    debugger;
+
+    return this.$slots['custom'][0];
   },
   // 刷新
   refresh(h) {
@@ -64,7 +66,6 @@ const TEMPLATE_MAP = {
     return (
       <el-dropdown
         trigger="click"
-        class="center-button"
         onCommand={ this.handleImport }
       >
         <el-button>
@@ -87,7 +88,6 @@ const TEMPLATE_MAP = {
     return (
       <el-dropdown
         trigger="click"
-        class="center-button"
         onCommand={ this.handleExport }
       >
         <el-button>
@@ -111,7 +111,6 @@ const TEMPLATE_MAP = {
       <el-dropdown
         trigger="click"
         hide-on-click={ false }
-        class="last-button"
         onCommand={ this.changeColumns }
       >
         <el-button>

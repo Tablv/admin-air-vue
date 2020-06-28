@@ -5,83 +5,7 @@
   overflow-y: auto;
   height: 100%;
 }
-// 页面头部
-.header {
-  height: 40px;
-  .header-title {
-    font-size: 18px;
-    line-height: 29px;
-  }
-  .button-group {
-    float: right;
-    .el-button {
-      position: relative;
-      z-index: 1;
-      float: left;
-    }
-    .first-button {
-      float: left;
-      margin-right: -1px;
-      border-top-right-radius: 0;
-      border-bottom-right-radius: 0;
-      &:active{
-        z-index: 2;
-      }
-    }
-    .center-button {
-      float: left;
-      .el-button {
-        margin-right: -1px;
-        border-radius: 0;
-        &:active {
-          z-index: 2;
-        }
-      }
-    }
-    .last-button {
-      float: left;
-      .el-button {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
-      }
-    }
-  }
-}
 
-// 表格头部
-.el-table__header {
-  // 表格筛选图标
-  .el-icon-search {
-    position: absolute;
-    right: 28px;
-    top: 0;
-    padding: 5px 0;
-  }
-  // 表格排序图标
-  .caret-wrapper {
-    position: absolute !important;
-    top: -4px;
-    right: 3px;
-  }
-}
-// 表格筛选气泡
-.el-popper[x-placement^=bottom] {
-  margin-top: 9px !important;
-  // 表格筛选底部按钮
-  .table-filter-btn {
-    margin-top: 10px;
-  }
-}
-// 分页
-.pagination {
-  margin-top: 10px;
-  .el-pagination {
-    padding: 2px 0;
-    .el-select .el-input{
-      margin: 0 5px 0 0;
-    }
-  }
-}
 // 弹窗
 .el-dialog__wrapper{
   position: absolute !important;
@@ -115,6 +39,10 @@
 .el-select {
   width: 100%;
 }
+// 日期选择器
+.el-date-editor {
+  width: 100% !important;
+}
 // 输入搜索框
 .el-input-group__append {
   background-color: #409EFF !important;
@@ -127,10 +55,6 @@
   .el-icon-search {
     color: #fff;
   }
-}
-// 日期选择器
-.el-date-editor {
-  width: 100% !important;
 }
 // 拆分窗格
 .splitpanes__pane {

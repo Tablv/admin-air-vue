@@ -1,7 +1,9 @@
 .gw-table-header {
+  height: 40px;
   margin-bottom: 10px;
 
   .header-title {
+    font-size: 18px;
     line-height: 28px;
     color: #606266;
   }
@@ -9,21 +11,49 @@
   .button-group {
     text-align: right;
 
-    .custom-buttons {
-      float: left;
-    }
-
     .el-button-group {
+      // 间隙
       margin-left: 10px;
+      + .el-button {
+        margin-left: 10px;
+      }
 
-      > .el-dropdown {
-        &:first-of-type > .el-button {
+      > *:not(:first-child) {
+        .el-button,
+        &.el-button {
+          border-top-left-radius: 0;
+          border-bottom-left-radius: 0;
+        }
+        .el-button--default,
+        &.el-button--default {
           border-left-color: #DCDFE6;
         }
-        
-        &:not(:last-of-type) > .el-button {
+      }
+
+      > *:not(:last-child) {
+        .el-button,
+        &.el-button {
+          margin-right: -1px;
           border-top-right-radius: 0;
           border-bottom-right-radius: 0;
+        }
+      }
+      
+      .el-button {
+        position: relative;
+        z-index: 1;
+
+        &:active {
+          z-index: 2;
+          border-color: #3a8ee6;
+        }
+      }
+
+      > .el-dropdown {
+        float: left;
+
+        &:first-of-type > .el-button:active {
+          // border-left-color: #DCDFE6;
         }
       }
     }

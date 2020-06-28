@@ -30,6 +30,7 @@ export default {
           placement="bottom"
           width="160"
           trigger="click"
+          popper-class="gw-table-filter-popover"
           ref="popover"
         >
           { this.renderWidget(h) }

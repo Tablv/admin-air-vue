@@ -345,7 +345,8 @@ export default {
                         }
                         // 一般
                         else {
-                          return <span>{ scope.row[scope.column.property] === null ? '-' : scope.row[scope.column.property] }</span>
+                          const column = scope.row[scope.column.property];
+                          return <span>{ column || "-" }</span>
                         }
                       }
                     }
