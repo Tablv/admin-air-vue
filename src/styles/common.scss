@@ -4,6 +4,16 @@
   padding: 10px;
   overflow-y: auto;
   height: 100%;
+  // 表格字体颜色
+  .status-label {
+    &.is-active {
+      color: #80B762;
+    }
+
+    &.not-active {
+      color: #f00;
+    }
+  }
 }
 
 // 弹窗

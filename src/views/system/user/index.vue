@@ -1,5 +1,5 @@
 <template>
-  <div class="container user-container">
+  <div class="container">
     <article>
       <gw-table
         ref="gwTable"
@@ -474,15 +474,4 @@ export default {
 </script>
 
 <style lang="scss">
-.user-container {
-  .status-label {
-    &.is-active {
-      color: #80B762;
-    }
-  
-    &.not-active {
-      color: #f00;
-    }
-  }
-}
 </style>
