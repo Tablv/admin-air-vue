@@ -47,8 +47,6 @@ const TEMPLATE_MAP = {
   },
   // 插槽
   slot(h) {
-    debugger;
-
     return this.$slots['custom'][0];
   },
   // 刷新

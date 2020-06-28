@@ -3,44 +3,21 @@
     <article>
       <gw-table
         ref="gwTable"
+        title="数据维护"
+        api="/system/dict/findDictAsync"
+        type="tree"
+        :pagination="false"
         :query-params="queryParams"
-        :table-config="tableConfig"
+        :auto-load="false"
         :tree-load="loadData"
-        @add="handleOpenAdd"
+        :tree-config="treeConfig"
+        :columns.sync="columnsConfig"
       >
-        <template
-          slot="conver"
-          slot-scope="conver"
-        >
-          <span v-if="conver.column.property === 'type'">{{ conver.row.type === 0 ? '数据分组' : '数据项' }}</span>
-          <span
-            v-if="conver.column.property === 'status'"
-            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
-          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
-        </template>
-        <template
-          slot="operation"
-          slot-scope="operation"
-        >
-          <el-button
-            type="text"
-            @click="handleAdd(operation.index, operation.row)"
-          >
-            <span>新增</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleEdit(operation.index, operation.row)"
-          >
-            <span>编辑</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleDelete(operation.index, operation.row)"
-          >
-            <span>删除</span>
-          </el-button>
-        </template>
+        <gw-table-header
+          slot="header"
+          layout="add"
+          @add="handleOpenAdd"
+        />
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
@@ -196,29 +173,56 @@ export default {
       queryParams: {
         nodeid: '0'
       },
-      // 表格
-      tableConfig: {
-        api: '/system/dict/findDictAsync',
-        // 表格列数据
-        columns: [
-          { prop: 'name', label: '名称' },
-          { prop: 'code', label: '编码' },
-          { prop: 'type', label: '类型', conver: true },
-          { prop: 'lvl', label: '层级' },
-          { prop: 'sortnum', label: '排序号' },
-          { prop: 'status', label: '状态', conver: true },
-          { prop: 'operation', label: '操作', width: '180' }
-        ],
-        title: '数据维护',
-        // 按钮配置
-        buttons: ['add'],
-        hasTree: true,
-        treeConfig: {
-          key: 'id',
-          treeProps: {
-            children: 'children',
-            hasChildren: 'isParent'
-          }
+      // 表格列数据
+      columnsConfig: [
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
+        { prop: 'type', label: '类型', option: { '0': '数据分组', '1': '数据项' },
+          render(h, row) {
+            const isActive = row.type === 0;
+            const typeText = isActive ? "数据分组 " : "数据项";
+            return <span>{ typeText }</span>
+          } },
+        { prop: 'lvl', label: '层级' },
+        { prop: 'sortnum', label: '排序号' },
+        { prop: 'status', label: '状态', option: { '0': '启用', '1': '禁用' },
+          render(h, row) {
+            const isActive = row.status === 0;
+            const statusClass = isActive ? "is-active" : "not-active";
+            const statusText = isActive ? "启用" : "禁用";
+            return <span class={`status-label ${statusClass}`}>{ statusText }</span>
+          } },
+        { prop: 'operation', label: '操作', width: '180',
+          render(h, row) {
+            return (
+              <section>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleAdd(row) }
+                >
+                  <span>新增</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleEdit(row) }
+                >
+                  <span>编辑</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleDelete(row) }
+                >
+                  <span>删除</span>
+                </el-button>
+              </section>
+            )
+          } }
+      ],
+      treeConfig: {
+        key: 'id',
+        treeProps: {
+          children: 'children',
+          hasChildren: 'isParent'
         }
       },
       // 新增弹窗
@@ -400,7 +404,7 @@ export default {
       this.addForm.parentName = data.name
     },
     // 表格操作-新增
-    handleAdd(index, row) {
+    handleAdd(row) {
       if (row.type === 1) {
         this.$message({
           message: '数据项不可新增！',
@@ -414,7 +418,7 @@ export default {
       this.addForm.parentName = row.name
     },
     // 表格操作-编辑
-    handleEdit(index, row) {
+    handleEdit(row) {
       this.isEdit = 3
       this.addVisible = true
       getDataInfo({ id: row.id }).then(res => {
@@ -445,7 +449,7 @@ export default {
       })
     },
     // 表格操作-删除
-    handleDelete(index, row) {
+    handleDelete(row) {
       if (row.isParent) {
         this.$message({
           message: '存在子节点，请先删除子节点！',

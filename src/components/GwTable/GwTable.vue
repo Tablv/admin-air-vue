@@ -3,6 +3,130 @@ import _ from "lodash";
 import request from '@/utils/request'
 import TableFilter from './TableFilter'
 
+/**
+ * 单选按钮渲染
+ */
+/* eslint-disable-next-line */
+function radioRenderer(h) {
+  if (!this.isRadio) return null;
+
+  const ctx = this;
+  // 单选单元格
+  return (
+    <el-table-column
+      width="35"
+      scopedSlots={
+        {
+          default(scope) {
+            return (
+              <el-radio
+                v-model={ ctx.currentRadio }
+                label={ scope.row.id }
+              />
+            )
+          }
+        }
+      }
+    />
+  )
+}
+
+/**
+ * 单元格 遍历 渲染
+ */
+/* eslint-disable-next-line */
+function tableColRenderer(h) {
+  return this.checkedColumns.map((column, columnIndex) => {
+    const ctx = this;
+
+    return (
+      <el-table-column
+        key={ column.prop }
+        prop={ column.prop }
+        label={ column.label }
+        width={ column.width }
+        show-overflow-tooltip={ true }
+        sortable={ column.sort ? 'custom' : false }
+        scopedSlots={
+          {
+            // 表格头
+            header() {
+              return (
+                <section>
+                  <span>{ column.label }</span>
+                  {
+                    // 过滤
+                    column.filter ?
+                    (
+                      <span onClick={ ($event) => { $event.stopPropagation() } }>
+                        <table-filter
+                          ref={ column.prop + '-filter' }
+                          config={ column.filter }
+                          on={
+                            {
+                              'table-filter': ctx.applyTableFilter,
+                              'close': ctx.closeFilter
+                            }
+                          }
+                        />
+                      </span>
+                    ) : null
+                  }
+                </section>
+              )
+            },
+            default(scope) {
+              // 树
+              if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
+                return (
+                  <section style={{ display: 'inline' }}>
+                    <font-awesome-icon icon={ scope.row.iconClass } />
+                    <span>{ scope.row[scope.column.property] }</span>
+                  </section>
+                )
+              }
+              // 自定义渲染
+              else if (column.render) {
+                return column.render.call(ctx.$parent, h, scope.row);
+              }
+              // 一般
+              else {
+                const column = scope.row[scope.column.property];
+                const tdValue = typeof column === "number" ? column : column || "-";
+                return <span>{ tdValue }</span>
+              }
+            }
+          }
+        }
+      >
+      </el-table-column>
+    )
+  });
+}
+
+/**
+ * 分页 渲染
+ */
+/* eslint-disable-next-line */
+function paginationRenderer(h) {
+  if (!this.pagination) return null;
+
+  return (
+    <div class="pagination">
+      <el-pagination
+        background
+        page-sizes={[5, 10, 20, 50, 100]}
+        page-size={ this.page.pageSize }
+        current-page={ this.page.pageNum }
+        layout="sizes, total, ->, prev, pager, next"
+        total={ this.page.total }
+        onSizeChange={ this.handleSizeChange }
+        onCurrentChange={ this.handleCurrentChange }
+      />
+    </div>
+  )
+}
+
 export default {
   components: {
     TableFilter
@@ -245,6 +369,7 @@ export default {
     return (
       <section class="gw-table">
         { this.$slots.header }
+
         <el-table
           v-loading={ this.tableLoading }
           data={ this.tableData }
@@ -267,116 +392,18 @@ export default {
             }
           }
         >
-          {
-            // 单选单元格
-            this.isRadio ?
-            (
-              <el-table-column
-                width="35"
-                scopedSlots={
-                  {
-                    default(scope) {
-                      return (
-                        <el-radio
-                          v-model={ this.currentRadio }
-                          label={ scope.row.id }
-                        />
-                      )
-                    }
-                  }
-                }
-              />
-            ) : null
+
+          { // 单选 渲染
+            radioRenderer.call(this, h)
           }
 
-          {
-            // 单元格遍历
-            this.checkedColumns.map((column, columnIndex) => {
-              const ctx = this;
-
-              return (
-                <el-table-column
-                  key={ column.prop }
-                  prop={ column.prop }
-                  label={ column.label }
-                  width={ column.width }
-                  show-overflow-tooltip={ true }
-                  sortable={ column.sort ? 'custom' : false }
-                  scopedSlots={
-                    {
-                      // 表格头
-                      header() {
-                        return (
-                          <section>
-                            <span>{ column.label }</span>
-                            {
-                              // 过滤
-                              column.filter ?
-                              (
-                                <span onClick={ ($event) => { $event.stopPropagation() } }>
-                                  <table-filter
-                                    ref={ column.prop + '-filter' }
-                                    config={ column.filter }
-                                    on={
-                                      {
-                                        'table-filter': ctx.applyTableFilter,
-                                        'close': ctx.closeFilter
-                                      }
-                                    }
-                                  />
-                                </span>
-                              ) : null
-                            }
-                          </section>
-                        )
-                      },
-                      default(scope) {
-                        // 树
-                        if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
-                          return (
-                            <section style={{ display: 'inline' }}>
-                              <font-awesome-icon icon={ scope.row.iconClass } />
-                              <span>{ scope.row[scope.column.property] }</span>
-                            </section>
-                          )
-                        }
-                        // 自定义渲染
-                        else if (column.render) {
-                          return column.render.call(ctx.$parent, h, scope.row);
-                        }
-                        // 一般
-                        else {
-                          const column = scope.row[scope.column.property];
-                          const tdValue = typeof column === "number" ? column : column || "-";
-                          return <span>{ tdValue }</span>
-                        }
-                      }
-                    }
-                  }
-                >
-                </el-table-column>
-              )
-            })
+          { // 单元格遍历 渲染
+            tableColRenderer.call(this, h)
           }
         </el-table>
 
-        {
-          // 分页
-          this.pagination
-          ? (
-            <div class="pagination">
-              <el-pagination
-                background
-                page-sizes={[5, 10, 20, 50, 100]}
-                page-size={ this.page.pageSize }
-                current-page={ this.page.pageNum }
-                layout="sizes, total, ->, prev, pager, next"
-                total={ this.page.total }
-                onSizeChange={ this.handleSizeChange }
-                onCurrentChange={ this.handleCurrentChange }
-              />
-            </div>
-          ) : null
+        { // 分页
+          paginationRenderer.call(this, h)
         }
       </section>
     )

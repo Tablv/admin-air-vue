@@ -3,36 +3,16 @@
     <article>
       <gw-table
         ref="gwTable"
-        :table-config="tableConfig"
-        @changeColumns="changeColumns"
-        @add="handleOpenAdd"
+        title="终端管理"
+        api="/system/terminal/list"
+        :pagination="true"
+        :columns.sync="columnsConfig"
       >
-        <template
-          slot="conver"
-          slot-scope="conver"
-        >
-          <span
-            v-if="conver.column.property === 'status'"
-            :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}"
-          >{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
-        </template>
-        <template
-          slot="operation"
-          slot-scope="operation"
-        >
-          <el-button
-            type="text"
-            @click="handleEdit(operation.index, operation.row)"
-          >
-            <span>编辑</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleDelete(operation.index, operation.row)"
-          >
-            <span>删除</span>
-          </el-button>
-        </template>
+        <gw-table-header
+          slot="header"
+          layout="add, [refresh, columns]"
+          @add="handleOpenAdd"
+        />
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
@@ -196,25 +176,40 @@ export default {
       }
     }
     return {
-     // 表格
-      tableConfig: {
-        api: '/system/terminal/list',
-        // 表格列数据
-        columns: [
-          { prop: 'name', label: '名称', sort: 'custom', filter: { type: 'input', data: 'name' } },
-          { prop: 'code', label: '编码', sort: 'custom', filter: { type: 'input', data: 'code' } },
-          { prop: 'status', label: '状态', conver: true, sort: 'custom', filter: { type: 'select', data: 'status', option: { '0': '启用', '1': '禁用' } } },
-          { prop: 'remark', label: '备注', sort: 'custom' },
-          { prop: 'operation', label: '操作', width: '180' }
-        ],
-        // 表格配置选中
-        checkedColumns: ['name', 'code', 'status', 'remark', 'operation'],
-        title: '终端管理',
-        // 按钮配置
-        buttons: ['add', 'refresh', 'columns'],
-        // 是否分页
-        pagination: true
-      },
+      // 表格列数据
+      columnsConfig: [
+        { prop: 'name', label: '名称', sort: true, filter: { type: 'input', prop: 'name' } },
+        { prop: 'code', label: '编码', sort: true, filter: { type: 'input', prop: 'code' } },
+        { prop: 'status', label: '状态', conver: true, sort: true, filter: { type: 'select', prop: 'status', option: { '0': '启用', '1': '禁用' } },
+          render(h, row) {
+            const isActive = row.status === 0;
+            const statusClass = isActive ? "is-active" : "not-active";
+            const statusText = isActive ? "启用" : "禁用";
+            return <span class={`status-label ${statusClass}`}>{ statusText }</span>
+          }
+        },
+        { prop: 'remark', label: '备注', sort: true },
+        { prop: 'operation', label: '操作', width: '180',
+          render(h, row) {
+            return (
+              <section>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleEdit(row) }
+                >
+                  <span>编辑</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleDelete(row) }
+                >
+                  <span>删除</span>
+                </el-button>
+              </section>
+            )
+          }
+        }
+      ],
       // 新增弹窗
       addVisible: false,
       // 弹窗表单
@@ -298,7 +293,7 @@ export default {
       this.$refs['addForm'].resetFields()
     },
     // 表格操作-编辑
-    handleEdit(index, row) {
+    handleEdit(row) {
       this.showStatus = true
       this.addVisible = true
       getTerminalInfo({ id: row.id }).then(res => {
@@ -311,7 +306,7 @@ export default {
       })
     },
     // 表格操作-删除
-    handleDelete(index, row) {
+    handleDelete(row) {
       this.$confirm('删除后将不可恢复，确认删除吗？', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

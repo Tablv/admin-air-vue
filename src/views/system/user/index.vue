@@ -10,9 +10,8 @@
       >
         <gw-table-header
           slot="header"
-          layout="add, [refresh, import, export, columns]"
+          layout="add, [refresh, columns]"
           @add="handleOpenAdd"
-          @import="handleOpenImportDialog"
         />
       </gw-table>
     </article>
@@ -185,8 +184,6 @@ export default {
       columnsConfig: [
         { prop: 'name', label: '姓名', sort: true, filter: { type: 'input', prop: 'name' } },
         { prop: 'username', label: '用户名', sort: true, filter: { type: 'input', prop: 'username' } },
-        // { prop: 'status', label: '状态', sort: 'custom', conver: true, filter: { type: 'select', prop: 'status', option: '/modelling/base/category/CO215' } },
-        // { prop: 'remark', label: '备注', sort: 'custom', filter: { type: 'select', prop: 'remark', option: '/modelling/base/category/CO063' } },
         { prop: 'status', label: '状态', sort: true,
           filter: { type: 'select', prop: 'status', option: { '0': '启用', '1': '禁用' } },
           render(h, row) {
@@ -448,7 +445,7 @@ export default {
       }).catch(() => {})
     },
     // 表格操作---删除
-    handleDelete(index, row) {
+    handleDelete(row) {
       this.$confirm('删除后将不可恢复，确认删除吗？', '信息', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',

@@ -3,12 +3,23 @@
     <article>
       <gw-table
         ref="gwTable"
+        title="菜单管理"
+        api="/system/menu/findMenusAsync"
+        type="tree"
+        :pagination="false"
         :query-params="queryParams"
-        :table-config="tableConfig"
+        :auto-load="false"
         :tree-load="loadData"
+        :tree-config="treeConfig"
+        :columns.sync="columnsConfig"
       >
-        <template slot="buttons">
+        <gw-table-header
+          slot="header"
+          layout="slot, add"
+          @add="handleOpenAdd"
+        >
           <el-select
+            slot="custom"
             v-model="platform"
             filterable
             placeholder="请选择"
@@ -21,43 +32,7 @@
               :value="item.id"
             />
           </el-select>
-          <el-button
-            type="primary"
-            icon="el-icon-plus"
-            @click="handleOpenAdd"
-          >
-            <span>新增</span>
-          </el-button>
-        </template>
-        <template
-          slot="conver"
-          slot-scope="conver"
-        >
-          <span :style="{ color: (conver.row.status === 0 ? '#80B762' : '#ff0000')}">{{ conver.row.status === 0 ? '启用' : '禁用' }}</span>
-        </template>
-        <template
-          slot="operation"
-          slot-scope="operation"
-        >
-          <el-button
-            type="text"
-            @click="handleAdd(operation.index, operation.row)"
-          >
-            <span>新增</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleEdit(operation.index, operation.row)"
-          >
-            <span>编辑</span>
-          </el-button>
-          <el-button
-            type="text"
-            @click="handleDelete(operation.index, operation.row)"
-          >
-            <span>删除</span>
-          </el-button>
-        </template>
+        </gw-table-header>
       </gw-table>
     </article>
     <!-- 新增弹窗 -->
@@ -308,29 +283,53 @@ export default {
       queryParams: {
         nodeid: ''
       },
-      // 表格
-      tableConfig: {
-        api: '/system/menu/findMenusAsync',
-        // 表格列数据
-        columns: [
-          { prop: 'name', label: '名称' },
-          { prop: 'code', label: '编码' },
-          { prop: 'path', label: '链接地址' },
-          { prop: 'lvl', label: '层级' },
-          { prop: 'sortNum', label: '排序号' },
-          { prop: 'status', label: '状态', conver: true },
-          { prop: 'operation', label: '操作', width: '180' }
-        ],
-        title: '菜单管理',
-        // 按钮配置
-        buttons: ['slot'],
-        hasTree: true,
-        treeConfig: {
-          key: 'id',
-          treeProps: {
-            children: 'children',
-            hasChildren: 'isParent'
+      // 表格列数据
+      columnsConfig: [
+        { prop: 'name', label: '名称' },
+        { prop: 'code', label: '编码' },
+        { prop: 'path', label: '链接地址' },
+        { prop: 'lvl', label: '层级' },
+        { prop: 'sortNum', label: '排序号' },
+        { prop: 'status', label: '状态', option: { '0': '启用', '1': '禁用' },
+          render(h, row) {
+            const isActive = row.status === 0;
+            const statusClass = isActive ? "is-active" : "not-active";
+            const statusText = isActive ? "启用" : "禁用";
+            return <span class={`status-label ${statusClass}`}>{ statusText }</span>
           }
+        },
+        { prop: 'operation', label: '操作', width: '180',
+          render(h, row) {
+            return (
+              <section>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleAdd(row) }
+                >
+                  <span>新增</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleEdit(row) }
+                >
+                  <span>编辑</span>
+                </el-button>
+                <el-button
+                  type="text"
+                  onClick={ () => this.handleDelete(row) }
+                >
+                  <span>删除</span>
+                </el-button>
+              </section>
+            )
+          }
+        }
+      ],
+      treeConfig: {
+        key: 'id',
+        treeProps: {
+          children: 'children',
+          hasChildren: 'isParent'
         }
       },
       // 新增弹窗
@@ -536,14 +535,14 @@ export default {
       this.iconVisible = false
     },
     // 表格操作-新增
-    handleAdd(index, row) {
+    handleAdd(row) {
       this.isEdit = 2
       this.addVisible = true
       this.preMenu = row
       this.addForm.parentName = row.name
     },
     // 表格操作-编辑
-    handleEdit(index, row) {
+    handleEdit(row) {
       this.isEdit = 3
       this.addVisible = true
       getMenuInfo({ id: row.id }).then(res => {
@@ -575,7 +574,7 @@ export default {
       })
     },
     // 表格操作-删除
-    handleDelete(index, row) {
+    handleDelete(row) {
       if (row.isParent) {
         this.$message({
           message: '存在子节点，请先删除子节点！',
@@ -621,7 +620,6 @@ export default {
 <style lang="scss" scoped>
 .el-select {
   width: 120px;
-  float: left;
   margin-right: 10px;
 }
 .icon-dialog {

@@ -46,14 +46,22 @@
         <article>
           <gw-table
             ref="gwTable"
+            title="资源"
+            api="/system/resource/findOfPage"
+            type="radio"
+            :pagination="true"
             :query-params="queryParams"
-            :table-config="tableConfig"
-            @changeColumns="changeColumns"
-            @handleTableCurrentChange="handleTableCurrentChange"
-            @add="handleOpenAdd('add')"
-            @update="handleOpenAdd('edit')"
-            @delete="handleDelete"
-          />
+            :auto-load="false"
+            :columns.sync="columnsConfig"
+          >
+            <gw-table-header
+              slot="header"
+              layout="add, update, remove, [refresh, columns]"
+              @add="handleAdd"
+              @update="handleUpdate"
+              @remove="handleRemove"
+            />
+          </gw-table>
         </article>
       </pane>
     </splitpanes>
@@ -157,25 +165,12 @@ export default {
       queryParams: {
         menuId: ''
       },
-      // 表格
-      tableConfig: {
-        api: '/system/resource/findOfPage',
-        // 表格列数据
-        columns: [
-          { prop: 'name', label: '名称', sort: 'custom' },
-          { prop: 'permission', label: '许可', sort: 'custom' },
-          { prop: 'location', label: '地址', sort: 'custom' }
-        ],
-        // 表格配置选中
-        checkedColumns: ['name', 'permission', 'location'],
-        title: '资源',
-        // 按钮配置
-        buttons: ['add', 'update', 'delete', 'refresh', 'columns'],
-        // 是否单选
-        hasRadio: true,
-        // 是否分页
-        pagination: true
-      },
+      // 表格列数据
+      columnsConfig: [
+        { prop: 'name', label: '名称', sort: true },
+        { prop: 'permission', label: '许可', sort: true },
+        { prop: 'location', label: '地址', sort: true }
+      ],
       // 表格单选
       idRadio: '',
       // 新增弹窗
@@ -233,33 +228,27 @@ export default {
       this.idRadio = ''
     },
     // 新增弹窗-打开
-    handleOpenAdd(type) {
-      if (type === 'add') {
-        if (!this.queryParams.menuId) {
-          this.$message({
-            message: '请选择一个菜单',
-            type: 'warning'
-          })
-          return false
+    handleAdd() {
+      if (!this.queryParams.menuId) {
+        this.$message({
+          message: '请选择一个菜单',
+          type: 'warning'
+        })
+        return false
+      }
+      this.addVisible = true
+    },
+    handleUpdate(row) {
+      getResInfo({ id: row.id }).then(res => {
+        let { result } = res
+        this.addForm = {
+          name: result.name,
+          permission: result.permission,
+          location: result.location
         }
-        this.addVisible = true
-      } else if (this.idRadio === '') {
-          this.$message({
-            message: '请选择一项数据',
-            type: 'warning'
-          })
-        } else {
-          getResInfo({ id: this.idRadio }).then(res => {
-            let { result } = res
-            this.addForm = {
-              name: result.name,
-              permission: result.permission,
-              location: result.location
-            }
-          })
-          this.isEdit = true
-          this.addVisible = true
-        }
+      })
+      this.isEdit = true
+      this.addVisible = true
     },
     // 弹窗-保存
     handleSave() {
@@ -303,21 +292,12 @@ export default {
       this.$refs['addForm'].resetFields()
     },
     // 删除
-    handleDelete(rowData) {
-      if (!rowData) return;
-
-      doDeleteRes({ id: rowData.id }).then(() => {
+    handleRemove(row) {
+      if (!row) return;
+      doDeleteRes({ id: row.id }).then(() => {
         this.$message.success('操作成功！');
         this.$refs.gwTable.getInit();
       })
-    },
-    // 表格-配置
-    changeColumns(value) {
-      this.tableConfig.checkedColumns = value
-    },
-    // 表格单选
-    handleTableCurrentChange(val) {
-      if (Object.keys(val).length > 0) this.idRadio = val.id
     }
   }
 }
