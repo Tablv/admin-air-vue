@@ -20,7 +20,7 @@ export default {
     },
     /**
      * 表格类型
-     * 
+     *
      *  - 默认：default
      *  - 单选：radio
      *  - 树：tree
@@ -86,7 +86,7 @@ export default {
         offset: 0,
         limit: 10,
         // filter: { name: 'admin' }
-        // sort: "name", order: "desc"  
+        // sort: "name", order: "desc"
       },
       // 分页
       page: {
@@ -109,7 +109,7 @@ export default {
     isTree() {
       return this.type === "tree";
     },
-    
+
 
 
     columnsConfig: {
@@ -155,7 +155,7 @@ export default {
     // 初始化
     getInit() {
       this.tableLoading = true;
-      
+
       const tableParams = _.merge(this.tableParams, this.queryParams);
 
       request.get(this.api, tableParams).then(res => {
@@ -174,7 +174,7 @@ export default {
           // 不分页处理
           this.tableData = result;
         }
-        
+
         this.currentRadio = '';
         this.currentSelection = null;
       })
@@ -288,18 +288,19 @@ export default {
               />
             ) : null
           }
-          
+
           {
             // 单元格遍历
             this.checkedColumns.map((column, columnIndex) => {
               const ctx = this;
-              
+
               return (
                 <el-table-column
                   key={ column.prop }
                   prop={ column.prop }
                   label={ column.label }
                   width={ column.width }
+                  show-overflow-tooltip={ true }
                   sortable={ column.sort ? 'custom' : false }
                   scopedSlots={
                     {
@@ -333,7 +334,7 @@ export default {
                         // 树
                         if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
                           return (
-                            <section>
+                            <section style={{ display: 'inline' }}>
                               <font-awesome-icon icon={ scope.row.iconClass } />
                               <span>{ scope.row[scope.column.property] }</span>
                             </section>
@@ -346,7 +347,8 @@ export default {
                         // 一般
                         else {
                           const column = scope.row[scope.column.property];
-                          return <span>{ column || "-" }</span>
+                          const tdValue = typeof column === "number" ? column : column || "-";
+                          return <span>{ tdValue }</span>
                         }
                       }
                     }
