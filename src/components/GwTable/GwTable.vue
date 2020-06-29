@@ -80,7 +80,9 @@ function tableColRenderer(h) {
               if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
                 return (
                   <section style={{ display: 'inline' }}>
-                    <font-awesome-icon icon={ scope.row.iconClass } />
+                    <span class="icon-box">
+                      <font-awesome-icon icon={ scope.row.iconClass } fixed-width />
+                    </span>
                     <span>{ scope.row[scope.column.property] }</span>
                   </section>
                 )
@@ -120,8 +122,12 @@ function paginationRenderer(h) {
         current-page={ this.page.pageNum }
         layout="sizes, total, ->, prev, pager, next"
         total={ this.page.total }
-        onSizeChange={ this.handleSizeChange }
-        onCurrentChange={ this.handleCurrentChange }
+        on={
+          {
+            "size-change": this.handleSizeChange,
+            "current-change": this.handleCurrentChange
+          }
+        }
       />
     </div>
   )
@@ -273,7 +279,7 @@ export default {
     },
     // 获取表格高度
     getTableHeight() {
-      const offset = this.pagination ? 255 : 223;
+      const offset = this.pagination ? 186 : 154;
       return document.body.clientHeight - offset
     },
     // 初始化
@@ -382,6 +388,7 @@ export default {
 
           lazy={ this.isTree }
           load={ this.treeLoad }
+          indent={ 0 }
           row-key={ this.isTree ? this.treeConfig.key : null }
           tree-props={ this.isTree ? this.treeConfig.treeProps : {} }
 
