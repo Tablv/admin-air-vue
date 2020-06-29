@@ -80,7 +80,9 @@ function tableColRenderer(h) {
               if (ctx.isTree && columnIndex === 0 && scope.row.isParent === false && scope.row.iconClass) {
                 return (
                   <section style={{ display: 'inline' }}>
-                    <font-awesome-icon icon={ scope.row.iconClass } />
+                    <span class="icon-box">
+                      <font-awesome-icon icon={ scope.row.iconClass } fixed-width />
+                    </span>
                     <span>{ scope.row[scope.column.property] }</span>
                   </section>
                 )
