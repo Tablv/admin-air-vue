@@ -193,9 +193,10 @@
     </el-dialog>
     <!-- 菜单图标弹窗 -->
     <el-dialog
-      title="图标选择（双击选中）"
+      title="图标选择"
       :visible.sync="iconVisible"
       width="60%"
+      :gutter="10"
       class="icon-dialog"
       :modal-append-to-body="false"
       :destroy-on-close="true"
@@ -204,15 +205,22 @@
         v-for="(icon, index) in iconData"
         :key="index"
         class="icon-container"
-        :span="6"
+        :span="4"
       >
-        <el-button
-          class="icon-item"
-          @dblclick.native="handleSelectIcon(icon)"
-        >
-          <font-awesome-icon :icon="icon" />
-          <span class="icon-name">{{ icon }}</span>
-        </el-button>
+        <div class="icon-item">
+          <div class="icon-item-icon">
+            <i :class="`${fontFamily} ${fontPrefix}${icon.font_class}`" />
+          </div>
+          <span class="icon-item-name">{{ icon.name }}</span>
+          <div class="icon-item-button">
+            <el-button
+              type="success"
+              icon="el-icon-check"
+              circle
+              @click="handleSelectIcon(icon)"
+            />
+          </div>
+        </div>
       </el-col>
     </el-dialog>
     <!-- 上级菜单弹窗 -->
@@ -229,6 +237,7 @@
 import { getAllTerminal, getMenuList, getPreMenuList, getIconList, doAddMenu, doDeleteMenu, getMenuInfo, doEditMenu } from '@/api/system/menu'
 import { doCheckRepeat } from '@/api/system/user'
 import TreeDialog from '@/components/TreeDialog'
+import { Loading } from 'element-ui';
 export default {
   name: 'SYSMENU',
   components: {
@@ -346,6 +355,8 @@ export default {
       iconVisible: false,
       // 图标数据
       iconData: [],
+      fontFamily: "",
+      fontPrefix: "",
       // 弹窗表单
       addForm: {
         parentName: '',
@@ -525,13 +536,21 @@ export default {
     // 菜单图标弹窗-打开
     handleOpenIconDialog() {
       this.iconVisible = true
+      const loadingInstance = Loading.service({
+        target: ".icon-dialog .el-dialog"
+      })
       getIconList().then(res => {
-        this.iconData = res
+        this.iconData = res.glyphs
+        this.fontFamily = res.font_family
+        this.fontPrefix = res.css_prefix_text
+        this.$nextTick(() => {
+          loadingInstance.close();
+        })
       })
     },
-    // 双击选择图标
+    // 选择图标
     handleSelectIcon(val) {
-      this.addForm.iconClass = val
+      this.addForm.iconClass =this.fontFamily + " " + this.fontPrefix + val.font_class
       this.iconVisible = false
     },
     // 表格操作-新增
@@ -630,19 +649,43 @@ export default {
 
     .icon-container {
       padding: 6px 8px;
-      font-size: 16px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      font-size: 30px !important;
+      background: #ffffff;
+      &:hover {
+        background:rgba(201, 204, 206, 0.4);
+        .icon-item-button {
+          z-index: 1 !important;
+        }
+        .icon-item-name {
+          visibility: hidden;
+        }
+      }
 
       .icon-item {
+        position: relative;
+        text-align: center;
         padding: 10px 12px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
         width: 100%;
-        text-align: left;
-
-        .icon-name {
-          margin-left: 4px;
+        .icon-item-name {
+          cursor: default;
+          font-size: 12px;
         }
+        .icon-item-icon {
+          .glaway-admin-icons {
+            font-size: 30px;
+          }
+        }
+        .icon-item-button {
+          position: absolute;
+          transform: translate(113%, -100%);
+          z-index: -1;
+        }
+        
       }
     }
   }
