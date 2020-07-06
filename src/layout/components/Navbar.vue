@@ -15,10 +15,7 @@
       >
         <!-- 用户信息 -->
         <div class="avatar-wrapper">
-          <font-awesome-icon
-            icon="user-circle"
-            size="2x"
-          />
+          <i class="fa fa-user-circle fa-2x"></i>
           <i class="el-icon-caret-bottom" />
         <!-- 用户名 -->
         </div>

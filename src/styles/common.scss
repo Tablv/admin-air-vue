@@ -4,10 +4,16 @@
   padding: 10px;
   overflow-y: auto;
   height: 100%;
+
+  // 字体图标 + span 间隔
+  i + span {
+    margin-left: 4px;
+  }
+  
   // 表格字体颜色
   .status-label {
     &.is-active {
-      color: #80B762;
+      color: #80b762;
     }
 
     &.not-active {
@@ -17,16 +23,16 @@
 }
 
 // 弹窗
-.el-dialog__wrapper{
+.el-dialog__wrapper {
   position: absolute !important;
   .el-dialog {
     margin-top: 0 !important;
     margin: 0 auto;
-    position:absolute;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    .el-dialog__header{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    .el-dialog__header {
       // background-color: #f8f8f8;
       padding: 15px 20px;
       .el-dialog__headerbtn {
@@ -39,31 +45,6 @@
     .el-dialog__footer {
       padding: 10px 20px;
     }
-  }
-}
-// 弹窗遮罩
-.v-modal {
-  position: absolute !important;
-}
-// 选择框
-.el-select {
-  width: 100%;
-}
-// 日期选择器
-.el-date-editor {
-  width: 100% !important;
-}
-// 输入搜索框
-.el-input-group__append {
-  background-color: #409EFF !important;
-  .el-button.is-disabled {
-    background-color: #a0cfff !important;
-    &:hover {
-      border-color: #a0cfff !important;
-    }
-  }
-  .el-icon-search {
-    color: #fff;
   }
 }
 // 拆分窗格

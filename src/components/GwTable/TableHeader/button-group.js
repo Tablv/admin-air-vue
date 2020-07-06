@@ -5,12 +5,9 @@ const TEMPLATE_MAP = {
     return (
       <el-button
         type="primary"
+        icon="fa fa-plus"
         onClick={ this.handleAdd }
       >
-        <font-awesome-icon
-          icon="plus"
-          pull="left"
-        />
         <span>新增</span>
       </el-button>
     )
@@ -20,12 +17,9 @@ const TEMPLATE_MAP = {
     return (
       <el-button
         type="primary"
+        icon="fa fa-edit"
         onClick={ this.handleUpdate }
       >
-        <font-awesome-icon
-          icon="edit"
-          pull="left"
-        />
         <span>修改</span>
       </el-button>
     )
@@ -35,12 +29,9 @@ const TEMPLATE_MAP = {
     return (
       <el-button
         type="danger"
+        icon="fa fa-trash-alt"
         onClick={ this.handleDelete }
       >
-        <font-awesome-icon
-          icon="trash-alt"
-          pull="left"
-        />
         <span>删除</span>
       </el-button>
     )
@@ -53,9 +44,9 @@ const TEMPLATE_MAP = {
   refresh(h) {
     return (
       <el-button
+        icon="fa fa-sync-alt"
         onClick={ this.table.getInit }
       >
-        <font-awesome-icon icon="sync-alt" />
       </el-button>
     )
   },
@@ -66,11 +57,7 @@ const TEMPLATE_MAP = {
         trigger="click"
         onCommand={ this.handleImport }
       >
-        <el-button>
-          <font-awesome-icon
-            icon="download"
-            pull="left"
-          />
+        <el-button icon="fa fa-download">
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
         <el-dropdown-menu slot="dropdown">
@@ -88,11 +75,7 @@ const TEMPLATE_MAP = {
         trigger="click"
         onCommand={ this.handleExport }
       >
-        <el-button>
-          <font-awesome-icon
-            icon="upload"
-            pull="left"
-          />
+        <el-button icon="fa fa-upload">
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
         <el-dropdown-menu slot="dropdown">
@@ -111,8 +94,7 @@ const TEMPLATE_MAP = {
         hide-on-click={ false }
         onCommand={ this.changeColumns }
       >
-        <el-button>
-          <font-awesome-icon icon="th" />
+        <el-button icon="fa fa-th">
           <i class="el-icon-arrow-down el-icon--right" />
         </el-button>
 
@@ -121,8 +103,6 @@ const TEMPLATE_MAP = {
             this.checkableColumns.map(column => {
               return (
                 <el-dropdown-item key={ column.prop } command={ column.prop }>
-                  {/* <el-checkbox onNativeClick={ ($event) => { $event.stopPropagation() } } checked={ column.checked !== false }> */}
-                  {/* </el-checkbox> */}
                   <span>{ column.checked }</span>
                   <i class={ `el-icon-check${column.checked !== false ? '' : ' not-checked'}` }></i>
                   <span>{ column.label }</span>

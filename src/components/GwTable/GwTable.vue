@@ -81,7 +81,7 @@ function tableColRenderer(h) {
                 return (
                   <section style={{ display: 'inline' }}>
                     <span class="icon-box">
-                      <font-awesome-icon icon={ scope.row.iconClass } fixed-width />
+                      <i class={ scope.row.iconClass } />
                     </span>
                     <span>{ scope.row[scope.column.property] }</span>
                   </section>

@@ -14,13 +14,12 @@ import "@/dependencies/el-tree-select";
 // splitpanes
 import "@/dependencies/splitpanes";
 
-// splitpanes
-import "@/dependencies/font-awesome";
+// font-awesome
+import "@fortawesome/fontawesome-free/css/all.min.css";
 
 // global css
 import '@/styles/index.scss'
-// icon
-import '@/icons'
+
 import '@/permission'
 
 import GwTable from "@/components/GwTable/install";
