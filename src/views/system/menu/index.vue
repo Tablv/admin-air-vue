@@ -682,7 +682,10 @@ export default {
         }
         .icon-item-button {
           position: absolute;
-          transform: translate(113%, -100%);
+          left: 0;
+          right: 0;
+          bottom: 10px;
+          padding: 4px;
           z-index: -1;
         }
         
